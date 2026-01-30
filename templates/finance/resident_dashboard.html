@@ -11,14 +11,14 @@
                 <h1 class="h3 mb-0">
                     <i class="fas fa-home me-2"></i>Mon Tableau de Bord
                 </h1>
-                <div>
-                    <a href="{% url 'finance:report_create' %}" class="btn btn-warning">
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'finance:report_create' %}" class="btn btn-gradient-primary">
                         <i class="fas fa-plus-circle me-1"></i>Nouveau Rapport
                     </a>
-                    <a href="{% url 'finance:document_list' %}" class="btn btn-primary">
+                    <a href="{% url 'finance:document_list' %}" class="btn btn-gradient-success">
                         <i class="fas fa-file-alt me-1"></i>Mes Documents
                     </a>
-                    <a href="{% url 'finance:notification_list' %}" class="btn btn-success">
+                    <a href="{% url 'finance:notification_list' %}" class="btn btn-gradient-primary">
                         <i class="fas fa-bell me-1"></i>Mes Notifications
                     </a>
                 </div>
@@ -259,70 +259,96 @@
                     </div>
 
                     <!-- Recent Payments -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-credit-card me-2"></i>Paiements Récents
-                            </h5>
+                    <div class="modern-card mt-4">
+                        <div class="modern-card-header">
+                            <div class="card-header-content">
+                                <div class="card-title-section">
+                                    <i class="fas fa-credit-card card-icon"></i>
+                                    <h5 class="card-title">Paiements Récents</h5>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
+                        <div class="modern-card-body">
                             {% if recent_payments %}
-                                {% for payment in recent_payments %}
-                                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                                        <div>
-                                            <strong>{{ payment.document.title|truncatechars:20 }}</strong>
-                                            <br>
-                                            <small class="text-muted">{{ payment.payment_date|date:"d/m/Y" }}</small>
+                                <div class="notifications-list">
+                                    {% for payment in recent_payments %}
+                                        <div class="notification-item">
+                                            <div class="notification-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                                <i class="fas fa-credit-card"></i>
+                                            </div>
+                                            <div class="notification-content">
+                                                <h6 class="notification-title">{{ payment.document.title|truncatechars:30 }}</h6>
+                                                <div class="notification-meta">
+                                                    <span class="notification-time">{{ payment.payment_date|date:"d/m/Y" }}</span>
+                                                    <span class="notification-priority {% if payment.is_verified %}priority-low{% else %}priority-medium{% endif %}">
+                                                        {{ payment.amount|floatformat:2 }} DH
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="text-end">
-                                            <span class="badge bg-{% if payment.is_verified %}success{% else %}warning{% endif %}">
-                                                {{ payment.amount|floatformat:2 }} DH
-                                            </span>
-                                        </div>
-                                    </div>
-                                {% endfor %}
+                                    {% endfor %}
+                                </div>
                             {% else %}
-                                <div class="text-center text-muted py-3">
-                                    <i class="fas fa-credit-card fa-2x mb-2"></i>
-                                    <p>Aucun paiement récent</p>
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <h5 class="empty-state-title">Aucun paiement récent</h5>
+                                    <p class="empty-state-description">Vos paiements récents apparaîtront ici.</p>
                                 </div>
                             {% endif %}
                         </div>
                     </div>
 
                     <!-- Recent Reports -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">
-                                <i class="fas fa-clipboard-list me-2"></i>Mes Rapports Récents
-                            </h5>
+                    <div class="modern-card mt-4">
+                        <div class="modern-card-header">
+                            <div class="card-header-content">
+                                <div class="card-title-section">
+                                    <i class="fas fa-clipboard-list card-icon"></i>
+                                    <h5 class="card-title">Mes Rapports Récents</h5>
+                                </div>
+                                <div class="card-actions">
+                                    <a href="{% url 'finance:report_list' %}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-external-link-alt me-1"></i>Voir tout
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body">
+                        <div class="modern-card-body">
                             {% if recent_reports %}
-                                {% for report in recent_reports %}
-                                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                                        <div>
-                                            <strong>{{ report.title|truncatechars:25 }}</strong>
-                                            <br>
-                                            <small class="text-muted">{{ report.created_at|date:"d/m/Y" }} - {{ report.get_category_display }}</small>
+                                <div class="notifications-list">
+                                    {% for report in recent_reports %}
+                                        <div class="notification-item">
+                                            <div class="notification-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                                <i class="fas fa-clipboard-list"></i>
+                                            </div>
+                                            <div class="notification-content">
+                                                <h6 class="notification-title">{{ report.title|truncatechars:30 }}</h6>
+                                                <p class="notification-message">{{ report.get_category_display }}</p>
+                                                <div class="notification-meta">
+                                                    <span class="notification-time">{{ report.created_at|date:"d/m/Y" }}</span>
+                                                    <span class="notification-priority priority-{{ report.status|lower }}">
+                                                        {{ report.get_status_display }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="text-end">
-                                            <span class="badge bg-{{ report.get_status_display_color }}">
-                                                {{ report.get_status_display }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                                <div class="text-center mt-3">
+                                    {% endfor %}
+                                </div>
+                                <div class="card-footer text-center mt-3">
                                     <a href="{% url 'finance:report_list' %}" class="btn btn-outline-primary btn-sm">
                                         <i class="fas fa-eye me-1"></i>Voir tous mes rapports
                                     </a>
                                 </div>
                             {% else %}
-                                <div class="text-center text-muted py-3">
-                                    <i class="fas fa-clipboard-list fa-2x mb-2"></i>
-                                    <p>Aucun rapport récent</p>
-                                    <a href="{% url 'finance:report_create' %}" class="btn btn-primary btn-sm">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                    <h5 class="empty-state-title">Aucun rapport récent</h5>
+                                    <p class="empty-state-description">Créez votre premier rapport pour signaler un problème ou une suggestion.</p>
+                                    <a href="{% url 'finance:report_create' %}" class="btn btn-gradient-primary btn-sm mt-3">
                                         <i class="fas fa-plus me-1"></i>Créer un rapport
                                     </a>
                                 </div>
@@ -410,30 +436,28 @@
             {% if status.balance > 0 %}
                 <div class="row mt-4">
                     <div class="col-12">
-                        <div class="alert alert-{% if status.status_category == 'critical' %}danger{% elif status.status_category == 'overdue' %}warning{% else %}info{% endif %}">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-{% if status.status_category == 'critical' %}exclamation-circle{% elif status.status_category == 'overdue' %}exclamation-triangle{% else %}info-circle{% endif %} fa-2x me-3"></i>
-                                <div>
-                                    <h5 class="alert-heading mb-1">
-                                        {% if status.status_category == 'critical' %}
-                                            Situation critique
-                                        {% elif status.status_category == 'overdue' %}
-                                            Paiements en retard
-                                        {% else %}
-                                            Paiements en attente
-                                        {% endif %}
-                                    </h5>
-                                    <p class="mb-0">
-                                        Vous devez {{ status.balance|floatformat:2 }} DH. 
-                                        {% if status.status_category == 'critical' %}
-                                            Veuillez régulariser votre situation au plus vite.
-                                        {% elif status.status_category == 'overdue' %}
-                                            Merci de procéder au paiement.
-                                        {% else %}
-                                            Merci de procéder au paiement dans les délais.
-                                        {% endif %}
-                                    </p>
-                                </div>
+                        <div class="alert-modern alert-{% if status.status_category == 'critical' %}danger{% elif status.status_category == 'overdue' %}warning{% else %}info{% endif %}">
+                            <i class="fas fa-{% if status.status_category == 'critical' %}exclamation-circle{% elif status.status_category == 'overdue' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                            <div class="flex-grow-1">
+                                <h5 class="alert-heading mb-1">
+                                    {% if status.status_category == 'critical' %}
+                                        Situation critique
+                                    {% elif status.status_category == 'overdue' %}
+                                        Paiements en retard
+                                    {% else %}
+                                        Paiements en attente
+                                    {% endif %}
+                                </h5>
+                                <p class="mb-0">
+                                    Vous devez <strong>{{ status.balance|floatformat:2 }} DH</strong>. 
+                                    {% if status.status_category == 'critical' %}
+                                        Veuillez régulariser votre situation au plus vite.
+                                    {% elif status.status_category == 'overdue' %}
+                                        Merci de procéder au paiement.
+                                    {% else %}
+                                        Merci de procéder au paiement dans les délais.
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -997,7 +1021,6 @@
     margin: 0 0 8px 0;
     line-height: 1.4;
 }
-
 .event-meta {
     display: flex;
     gap: 12px;
@@ -1070,6 +1093,91 @@
         align-items: flex-start;
         gap: 8px;
     }
+    
+    .d-flex.gap-2 {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .d-flex.gap-2 .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    h1.h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem !important;
+    }
+}
+
+/* Améliorations supplémentaires */
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+/* Animation pour les cartes de stats */
+.stats-card-modern {
+    animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Amélioration des boutons d'action */
+.action-btn {
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Amélioration des badges de statut */
+.status-badge {
+    transition: all 0.3s ease;
+}
+
+.status-badge:hover {
+    transform: scale(1.05);
+}
+
+/* Amélioration de la section header */
+.d-flex.justify-content-between.align-items-center {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Amélioration des cartes modernes avec animation au survol */
+.modern-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.modern-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.modern-card:hover::before {
+    left: 100%;
 }
 </style>
 {% endblock %}

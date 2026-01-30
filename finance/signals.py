@@ -4,6 +4,7 @@ from .models import Document, Payment, Notification, OperationLog, Depense
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
+import os
 
 
 def send_email_to_resident(subject: str, message: str, recipient_email: str) -> int:
@@ -37,6 +38,14 @@ def send_document_email(sender, instance: Document, created: bool, **kwargs):
         link = None
 
     subject = f"Nouveau document: {instance.title}"
+    # Construire le lien vers le dashboard résident
+    try:
+        from django.urls import reverse
+        base_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+        dashboard_url = base_url + reverse('finance:resident_dashboard')
+    except Exception:
+        dashboard_url = 'http://127.0.0.1:8000/resident-dashboard/'
+    
     context = {
         'subject': subject,
         'resident_name': (instance.resident.get_full_name() or instance.resident.username),
@@ -45,6 +54,7 @@ def send_document_email(sender, instance: Document, created: bool, **kwargs):
         'date': instance.date,
         'message': getattr(instance, 'description', '') or '',
         'link': link,
+        'dashboard_url': dashboard_url,
         'intro_text': "Un nouveau document a été ajouté à votre espace.",
     }
     try:
@@ -94,8 +104,11 @@ def create_in_app_notification_for_document(sender, instance: Document, created:
             is_active=True,
         )
         notif.recipients.add(instance.resident)
-    except Exception:
-        # Fail-safe: do not crash on notification creation
+        # L'email est déjà envoyé via send_document_email, donc on marque cette notification
+        # pour éviter le double envoi via le signal send_notification_email_auto
+        notif._email_already_sent = True
+    except Exception as e:
+        print(f"Erreur création notification document: {e}")
         pass
 
 
@@ -195,6 +208,69 @@ def notify_residents_on_grosse_depense(sender, instance: Depense, created: bool,
         # Log l'erreur mais ne pas planter
         print(f"Erreur lors de l'envoi des notifications de dépense: {e}")
         pass
+
+
+@receiver(post_save, sender=Notification)
+def send_notification_email_auto(sender, instance: Notification, created: bool, **kwargs):
+    """Send email automatically when a notification is created (if not already sent via NotificationCreateView)."""
+    if not created:
+        return
+    
+    # Vérifier si SEND_REAL_EMAILS est activé
+    if os.getenv("SEND_REAL_EMAILS", "False") != "True":
+        print(f"[NOTIFICATION EMAIL] SEND_REAL_EMAILS désactivé, email non envoyé pour: {instance.title}")
+        return
+    
+    # Ne pas envoyer si l'email a déjà été envoyé via NotificationCreateView
+    # On utilise un flag pour éviter les doubles envois
+    if hasattr(instance, '_email_already_sent'):
+        print(f"[NOTIFICATION EMAIL] Email déjà envoyé pour: {instance.title}")
+        return
+    
+    # Envoyer un email à chaque destinataire résident
+    recipients_count = 0
+    for recipient in instance.recipients.all():
+        if not recipient.email:
+            print(f"[NOTIFICATION EMAIL] Résident {recipient.username} n'a pas d'email")
+            continue
+        
+        if recipient.role != 'RESIDENT':
+            print(f"[NOTIFICATION EMAIL] {recipient.username} n'est pas un résident (role: {recipient.role})")
+            continue
+        
+        try:
+            from .emails import send_templated_email
+            from django.urls import reverse
+            from django.conf import settings
+            
+            base_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+            dashboard_url = base_url + reverse('finance:resident_dashboard')
+            
+            context = {
+                'subject': instance.title,
+                'resident_name': (recipient.get_full_name() or recipient.username),
+                'message': instance.message,
+                'dashboard_url': dashboard_url,
+                'notification_type': instance.get_notification_type_display() if hasattr(instance, 'get_notification_type_display') else None,
+                'priority': instance.get_priority_display() if hasattr(instance, 'get_priority_display') else None,
+                'intro_text': "Vous avez reçu une nouvelle notification.",
+            }
+            
+            result = send_templated_email(
+                subject=instance.title,
+                to_email=recipient.email,
+                template_name='emails/notification_generic.html',
+                context=context,
+            )
+            recipients_count += 1
+            print(f"[NOTIFICATION EMAIL] Email envoyé à {recipient.email} pour notification: {instance.title}")
+        except Exception as e:
+            print(f"[NOTIFICATION EMAIL] Erreur envoi email à {recipient.email}: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    if recipients_count > 0:
+        print(f"[NOTIFICATION EMAIL] {recipients_count} email(s) envoyé(s) pour la notification: {instance.title}")
 
 
 

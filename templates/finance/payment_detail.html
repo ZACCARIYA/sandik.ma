@@ -39,12 +39,12 @@
                                 <div class="col-sm-8">
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                                            {{ payment.user.first_name|first|default:payment.user.username|first|upper }}
+                                            {{ payment.document.resident.first_name|first|default:payment.document.resident.username|first|upper }}
                                         </div>
                                         <div>
-                                            <div class="fw-bold">{{ payment.user.get_full_name|default:payment.user.username }}</div>
-                                            {% if payment.user.apartment %}
-                                                <small class="text-muted">{{ payment.user.apartment }}</small>
+                                            <div class="fw-bold">{{ payment.document.resident.get_full_name|default:payment.document.resident.username }}</div>
+                                            {% if payment.document.resident.apartment %}
+                                                <small class="text-muted">{{ payment.document.resident.apartment }}</small>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -104,17 +104,25 @@
                             
                             <div class="row mb-3">
                                 <div class="col-sm-4">
-                                    <strong>Statut :</strong>
+                                    <strong>Statut de vérification :</strong>
                                 </div>
                                 <div class="col-sm-8">
                                     {% if payment.is_verified %}
-                                        <span class="badge bg-success">
-                                            <i class="fas fa-check me-1"></i>Vérifié
+                                        <span class="badge bg-success fs-6 px-3 py-2">
+                                            <i class="fas fa-check-circle me-2"></i>Paiement vérifié
                                         </span>
+                                        {% if payment.verified_at %}
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="fas fa-calendar-check me-1"></i>Vérifié le {{ payment.verified_at|date:"d/m/Y à H:i" }}
+                                        </small>
+                                        {% endif %}
                                     {% else %}
-                                        <span class="badge bg-warning">
-                                            <i class="fas fa-clock me-1"></i>En attente
+                                        <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                            <i class="fas fa-clock me-2"></i>En attente de vérification
                                         </span>
+                                        <small class="text-muted d-block mt-1">
+                                            En attente de validation par le syndic
+                                        </small>
                                     {% endif %}
                                 </div>
                             </div>
@@ -199,13 +207,13 @@
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <div class="text-center">
-                                        <h4 class="text-primary">{{ payment.user.payments.count }}</h4>
+                                        <h4 class="text-primary">{{ total_payments }}</h4>
                                         <small class="text-muted">Paiements totaux</small>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="text-center">
-                                        <h4 class="text-success">{{ payment.user.payments.filter(is_verified=True).count }}</h4>
+                                        <h4 class="text-success">{{ verified_payments }}</h4>
                                         <small class="text-muted">Vérifiés</small>
                                     </div>
                                 </div>
@@ -214,13 +222,13 @@
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <div class="text-center">
-                                        <h4 class="text-info">{{ payment.user.contributions.count }}</h4>
+                                        <h4 class="text-info">{{ total_contributions }}</h4>
                                         <small class="text-muted">Cotisations</small>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="text-center">
-                                        <h4 class="text-warning">{{ payment.user.payments.filter(is_verified=False).count }}</h4>
+                                        <h4 class="text-warning">{{ pending_payments }}</h4>
                                         <small class="text-muted">En attente</small>
                                     </div>
                                 </div>
@@ -228,22 +236,44 @@
                         </div>
                     </div>
 
-                    {% if user.role in 'SUPERADMIN,SYNDIC' and not payment.is_verified %}
+                    {% if user.role in 'SUPERADMIN,SYNDIC' %}
                     <div class="card mt-3">
-                        <div class="card-header">
+                        <div class="card-header {% if payment.is_verified %}bg-success text-white{% else %}bg-warning{% endif %}">
                             <h5 class="card-title mb-0">
-                                <i class="fas fa-check-circle me-2"></i>Actions de Vérification
+                                <i class="fas fa-{% if payment.is_verified %}check-circle{% else %}clock{% endif %} me-2"></i>
+                                {% if payment.is_verified %}Paiement Vérifié{% else %}Actions de Vérification{% endif %}
                             </h5>
                         </div>
                         <div class="card-body">
-                            <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-success" onclick="verifyPayment({{ payment.pk }})">
-                                    <i class="fas fa-check me-1"></i>Valider le Paiement
-                                </button>
-                                <button type="button" class="btn btn-danger" onclick="rejectPayment({{ payment.pk }})">
-                                    <i class="fas fa-times me-1"></i>Rejeter le Paiement
-                                </button>
-                            </div>
+                            {% if payment.is_verified %}
+                                <div class="alert alert-success mb-0">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-check-circle fa-2x me-3"></i>
+                                        <div>
+                                            <strong>Paiement validé</strong>
+                                            <p class="mb-0">
+                                                Vérifié par <strong>{{ payment.verified_by.get_full_name|default:payment.verified_by.username }}</strong>
+                                                {% if payment.verified_at %}
+                                                    le {{ payment.verified_at|date:"d/m/Y à H:i" }}
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Ce paiement nécessite une vérification avant d'être validé.
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-success btn-lg" onclick="verifyPayment({{ payment.pk }})">
+                                        <i class="fas fa-check-circle me-2"></i>Valider le Paiement
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" onclick="rejectPayment({{ payment.pk }})">
+                                        <i class="fas fa-times-circle me-2"></i>Rejeter le Paiement
+                                    </button>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endif %}
@@ -297,17 +327,116 @@ code {
 
 <script>
 function verifyPayment(paymentId) {
-    if (confirm('Êtes-vous sûr de vouloir valider ce paiement ?')) {
-        // Ici vous pouvez ajouter une requête AJAX pour valider le paiement
-        alert('Fonctionnalité de validation à implémenter');
+    if (!confirm('Êtes-vous sûr de vouloir valider ce paiement ?')) {
+        return;
     }
+    
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Validation...';
+    
+    const formData = new FormData();
+    formData.append('action', 'verify');
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    fetch(`{% url 'finance:payment_verify_api' payment.pk %}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Afficher un message de succès
+            showNotification('success', data.message);
+            // Recharger la page après 1 seconde
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification('error', data.error || 'Erreur lors de la validation');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('error', 'Une erreur est survenue');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
 }
 
 function rejectPayment(paymentId) {
-    if (confirm('Êtes-vous sûr de vouloir rejeter ce paiement ?')) {
-        // Ici vous pouvez ajouter une requête AJAX pour rejeter le paiement
-        alert('Fonctionnalité de rejet à implémenter');
+    const reason = prompt('Raison du rejet (optionnel):', '');
+    if (reason === null) {
+        return; // L'utilisateur a annulé
     }
+    
+    if (!confirm('Êtes-vous sûr de vouloir rejeter ce paiement ?')) {
+        return;
+    }
+    
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Rejet...';
+    
+    const formData = new FormData();
+    formData.append('action', 'reject');
+    formData.append('reason', reason || 'Paiement rejeté par le syndic');
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    fetch(`{% url 'finance:payment_verify_api' payment.pk %}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('success', data.message);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showNotification('error', data.error || 'Erreur lors du rejet');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('error', 'Une erreur est survenue');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+function showNotification(type, message) {
+    // Créer une notification toast
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="fas ${icon} me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Supprimer automatiquement après 5 secondes
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
 }
 
 // Image zoom functionality

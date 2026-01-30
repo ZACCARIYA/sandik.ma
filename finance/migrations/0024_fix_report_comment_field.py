@@ -1,4 +1,5 @@
 # Generated manually to fix column name mismatch
+# This migration is a no-op since the field is already named 'comment' in migration 0022
 
 from django.db import migrations
 
@@ -10,8 +11,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL(
-            "ALTER TABLE finance_reportcomment RENAME COLUMN content TO comment;",
-            reverse_sql="ALTER TABLE finance_reportcomment RENAME COLUMN comment TO content;"
-        ),
+        # No operation needed - field is already named 'comment'
     ]

@@ -28,42 +28,250 @@
       .email-wrapper { width: 100%; background-color: #f8fafc; padding: 20px 0; }
       .email-container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); }
       
-      /* Header moderne */
-      .email-header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%); color: #ffffff; padding: 40px 30px; text-align: center; position: relative; }
-      .email-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>'); opacity: 0.3; }
+      /* Header ultra professionnel */
+      .email-header { 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%); 
+        color: #ffffff; 
+        padding: 50px 30px; 
+        text-align: center; 
+        position: relative; 
+        overflow: hidden;
+      }
+      .email-header::before { 
+        content: ''; 
+        position: absolute; 
+        top: -50%; 
+        left: -50%; 
+        width: 200%; 
+        height: 200%; 
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+      }
+      .email-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      }
       
-      .brand-section { position: relative; z-index: 1; }
-      .brand-logo { width: 60px; height: 60px; border-radius: 16px; background: rgba(255, 255, 255, 0.2); display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; backdrop-filter: blur(10px); }
-      .brand-name { font-weight: 700; font-size: 28px; letter-spacing: -0.5px; margin: 0; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-      .brand-subtitle { font-size: 16px; opacity: 0.9; margin: 8px 0 0 0; font-weight: 400; }
+      .brand-section { position: relative; z-index: 2; }
+      .brand-logo { 
+        width: 80px; 
+        height: 80px; 
+        border-radius: 20px; 
+        background: rgba(255, 255, 255, 0.25); 
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 36px; 
+        margin-bottom: 20px; 
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+      .brand-name { 
+        font-weight: 800; 
+        font-size: 32px; 
+        letter-spacing: -1px; 
+        margin: 0 0 8px 0; 
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      }
+      .brand-subtitle { 
+        font-size: 16px; 
+        opacity: 0.95; 
+        margin: 0; 
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
       
       /* Contenu principal */
-      .email-content { padding: 40px 30px; color: #333333; }
-      .greeting { font-size: 18px; margin: 0 0 24px 0; color: #333333; font-weight: 600; }
-      .intro-text { font-size: 16px; margin: 0 0 32px 0; color: #333333; line-height: 1.7; }
+      .email-content { 
+        padding: 50px 40px; 
+        color: #1f2937; 
+        background: #ffffff;
+      }
+      .greeting { 
+        font-size: 20px; 
+        margin: 0 0 28px 0; 
+        color: #1f2937; 
+        font-weight: 700;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      }
+      .intro-text { 
+        font-size: 16px; 
+        margin: 0 0 36px 0; 
+        color: #4b5563; 
+        line-height: 1.8;
+        font-weight: 400;
+      }
       
-      /* Section d'informations */
-      .info-section { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 32px; margin: 32px 0; position: relative; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
-      .info-section::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #3b82f6; border-radius: 12px 12px 0 0; }
+      /* Section d'informations ultra professionnelle */
+      .info-section { 
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); 
+        border: 2px solid #e5e7eb; 
+        border-radius: 16px; 
+        padding: 36px; 
+        margin: 36px 0; 
+        position: relative; 
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      }
+      .info-section::before { 
+        content: ''; 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        right: 0; 
+        height: 4px; 
+        background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+        background-size: 200% 100%;
+        animation: shimmer 3s linear infinite;
+        border-radius: 16px 16px 0 0; 
+      }
       
-      .info-item { display: flex; align-items: center; margin: 18px 0; font-size: 16px; line-height: 1.6; }
-      .info-icon { font-size: 20px; margin-right: 16px; min-width: 24px; text-align: center; }
-      .info-label { font-weight: 600; color: #333333; margin-right: 8px; }
-      .info-value { color: #333333; font-weight: 500; }
+      .info-item { 
+        display: flex; 
+        align-items: flex-start; 
+        margin: 20px 0; 
+        font-size: 16px; 
+        line-height: 1.7;
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .info-item:last-child {
+        border-bottom: none;
+      }
+      .info-icon { 
+        font-size: 24px; 
+        margin-right: 16px; 
+        min-width: 32px; 
+        text-align: center;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .info-label { 
+        font-weight: 700; 
+        color: #1f2937; 
+        margin-right: 12px;
+        min-width: 100px;
+        font-size: 15px;
+      }
+      .info-value { 
+        color: #4b5563; 
+        font-weight: 500;
+        flex: 1;
+        font-size: 15px;
+      }
       
-      /* Bouton CTA */
-      .cta-section { text-align: center; margin: 40px 0; }
-      .cta-button { display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; padding: 16px 32px; border-radius: 12px; font-weight: 600; text-decoration: none; font-size: 16px; box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3); transition: all 0.3s ease; }
-      .cta-button:hover { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
+      /* Section montant en évidence */
+      .amount-highlight {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+        padding: 24px;
+        border-radius: 16px;
+        text-align: center;
+        margin: 32px 0;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+      }
+      .amount-label {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+      .amount-value {
+        font-size: 36px;
+        font-weight: 800;
+        line-height: 1;
+        margin: 0;
+      }
+      .amount-currency {
+        font-size: 20px;
+        font-weight: 600;
+        margin-left: 8px;
+        opacity: 0.9;
+      }
       
-      /* Footer professionnel */
-      .email-footer { background: #f8fafc; border-top: 1px solid #e5e7eb; padding: 32px 30px; text-align: center; }
-      .footer-content { color: #333333; font-size: 14px; line-height: 1.6; }
-      .footer-company { font-weight: 700; color: #333333; font-size: 16px; margin-bottom: 8px; }
-      .footer-contact { margin: 8px 0; }
-      .footer-contact a { color: #3b82f6; text-decoration: none; font-weight: 500; }
-      .footer-divider { height: 1px; background: #e5e7eb; margin: 20px 0; }
-      .footer-legal { font-size: 12px; color: #666666; margin-top: 16px; }
+      /* Bouton CTA ultra professionnel */
+      .cta-section { 
+        text-align: center; 
+        margin: 48px 0; 
+      }
+      .cta-button { 
+        display: inline-block; 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+        color: #ffffff; 
+        padding: 18px 40px; 
+        border-radius: 12px; 
+        font-weight: 700; 
+        text-decoration: none; 
+        font-size: 16px; 
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-size: 14px;
+        border: none;
+        transition: all 0.3s ease;
+      }
+      .cta-button:hover { 
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); 
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5); 
+        transform: translateY(-3px);
+      }
+      
+      /* Footer ultra professionnel */
+      .email-footer { 
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); 
+        border-top: 2px solid #e5e7eb; 
+        padding: 40px 30px; 
+        text-align: center; 
+      }
+      .footer-content { 
+        color: #4b5563; 
+        font-size: 14px; 
+        line-height: 1.8; 
+      }
+      .footer-company { 
+        font-weight: 800; 
+        color: #1f2937; 
+        font-size: 18px; 
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+      }
+      .footer-contact { 
+        margin: 12px 0; 
+        font-size: 15px;
+      }
+      .footer-contact a { 
+        color: #667eea; 
+        text-decoration: none; 
+        font-weight: 600;
+        transition: color 0.3s ease;
+      }
+      .footer-contact a:hover {
+        color: #764ba2;
+      }
+      .footer-divider { 
+        height: 2px; 
+        background: linear-gradient(90deg, transparent, #e5e7eb, transparent); 
+        margin: 24px auto; 
+        max-width: 200px;
+      }
+      .footer-legal { 
+        font-size: 12px; 
+        color: #9ca3af; 
+        margin-top: 20px;
+        line-height: 1.6;
+      }
       
       /* Responsive design */
       @media only screen and (max-width: 600px) {
@@ -85,6 +293,17 @@
       @media screen and (-webkit-min-device-pixel-ratio: 0) {
         .email-container { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important; }
       }
+      
+      /* Animation pour le shimmer */
+      @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+      
+      @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
     </style>
   </head>
   <body>
@@ -98,7 +317,7 @@
             {% else %}
             <div class="brand-logo" style="display: inline-block;">🏢</div>
             {% endif %}
-            <h1 class="brand-name">{{ app_name }}</h1>
+            <h1 class="brand-name">{{ app_name|default:"SyndicPro" }}</h1>
             <p class="brand-subtitle">Gestion de copropriété professionnelle</p>
           </div>
         </div>
@@ -111,10 +330,12 @@
         <!-- Footer avec informations du syndic -->
         <div class="email-footer">
           <div class="footer-content">
-            <div class="footer-company">{{ syndic_name }}</div>
+            <div class="footer-company">{{ syndic_name|default:"SyndicPro" }}</div>
+            {% if syndic_contact_email %}
             <div class="footer-contact">
               📧 <a href="mailto:{{ syndic_contact_email }}">{{ syndic_contact_email }}</a>
             </div>
+            {% endif %}
             <div class="footer-divider"></div>
             <div class="footer-legal">
               Cet email a été envoyé automatiquement par {{ app_name }}.<br>

@@ -140,6 +140,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Custom user
 AUTH_USER_MODEL = 'accounts.User'
 
+# Crispy Forms configuration
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
+
 # Email settings (configure via .env)
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', '')
@@ -148,3 +151,6 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'true').lower() == 'true'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@syndic.local')
+
+# Site URL for email links
+SITE_URL = os.getenv('SITE_URL', 'http://127.0.0.1:8000')

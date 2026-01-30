@@ -21,6 +21,7 @@
             <div class="row">
                 <div class="col-md-8">
                     <!-- ===== DOCUMENT À PAYER ===== -->
+                    {% if document %}
                     <div class="card-modern payment-document-card">
                         <div class="modern-card-header">
                             <div class="card-header-content">
@@ -76,6 +77,69 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% elif payment and payment.document %}
+                    <div class="card-modern payment-document-card">
+                        <div class="modern-card-header">
+                            <div class="card-header-content">
+                                <div class="card-title-section">
+                                    <i class="fas fa-file-alt card-icon"></i>
+                                    <h5 class="card-title">Document Associé</h5>
+                                </div>
+                                <div class="document-status">
+                                    {% if payment.is_verified %}
+                                    <span class="badge-modern badge-success">
+                                        <i class="fas fa-check me-1"></i>Vérifié
+                                    </span>
+                                    {% else %}
+                                    <span class="badge-modern badge-warning">
+                                        <i class="fas fa-clock me-1"></i>En attente
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modern-card-body">
+                            <div class="document-info-grid">
+                                <div class="document-info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-tag me-1"></i>Titre
+                                    </div>
+                                    <div class="info-value">{{ payment.document.title }}</div>
+                                </div>
+                                
+                                <div class="document-info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-calendar me-1"></i>Date
+                                    </div>
+                                    <div class="info-value">{{ payment.document.date|date:"d/m/Y" }}</div>
+                                </div>
+                                
+                                <div class="document-info-item amount-highlight">
+                                    <div class="info-label">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Montant
+                                    </div>
+                                    <div class="info-value amount-value">{{ payment.document.amount|floatformat:2 }} DH</div>
+                                </div>
+                                
+                                <div class="document-info-item">
+                                    <div class="info-label">
+                                        <i class="fas fa-file me-1"></i>Type
+                                    </div>
+                                    <div class="info-value">{{ payment.document.get_document_type_display }}</div>
+                                </div>
+                            </div>
+                            
+                            {% if payment.document.description %}
+                                <div class="document-description">
+                                    <div class="info-label">
+                                        <i class="fas fa-align-left me-1"></i>Description
+                                    </div>
+                                    <div class="info-value description-text">{{ payment.document.description }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <!-- ===== FORMULAIRE DE PAIEMENT ===== -->
                     <div class="card-modern payment-form-card">
@@ -104,7 +168,15 @@
                                     </h6>
                                 <div class="row">
                                     <div class="col-md-6">
-                                            {% include 'components/form_field.html' with field=form.amount label="Montant Payé (DH)" icon="fas fa-money-bill-wave" help_text="Montant du document : "|add:document.amount|floatformat:2|add:" DH" %}
+                                            {% if help_text_amount %}
+                                                {% include 'components/form_field.html' with field=form.amount label="Montant Payé (DH)" icon="fas fa-money-bill-wave" help_text=help_text_amount %}
+                                            {% elif document %}
+                                                {% include 'components/form_field.html' with field=form.amount label="Montant Payé (DH)" icon="fas fa-money-bill-wave" help_text="Montant du document : "|add:document.amount|stringformat:"s"|add:" DH" %}
+                                            {% elif payment and payment.document %}
+                                                {% include 'components/form_field.html' with field=form.amount label="Montant Payé (DH)" icon="fas fa-money-bill-wave" help_text="Montant du document : "|add:payment.document.amount|stringformat:"s"|add:" DH" %}
+                                            {% else %}
+                                                {% include 'components/form_field.html' with field=form.amount label="Montant Payé (DH)" icon="fas fa-money-bill-wave" %}
+                                            {% endif %}
                                     </div>
                                     <div class="col-md-6">
                                             {% include 'components/form_field.html' with field=form.payment_method label="Méthode de Paiement" icon="fas fa-credit-card" %}
@@ -744,7 +816,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set default amount to document amount
     const amountField = document.getElementById('id_amount');
     if (amountField && !amountField.value) {
+        {% if document %}
         amountField.value = '{{ document.amount }}';
+        {% elif payment and payment.document %}
+        amountField.value = '{{ payment.document.amount }}';
+        {% endif %}
     }
     
         // Initialize file upload

@@ -37,7 +37,13 @@ urlpatterns = [
     path('documents/<int:pk>/', views.DocumentDetailView.as_view(), name='document_detail'),
     
     # Payment management
+    path('payments/', views.PaymentListView.as_view(), name='payment_list'),
+    path('payments/<int:pk>/', views.PaymentDetailView.as_view(), name='payment_detail'),
+    path('payments/<int:pk>/edit/', views.PaymentUpdateView.as_view(), name='payment_update'),
+    path('payments/<int:pk>/proof/', views.PaymentProofView.as_view(), name='payment_proof'),
     path('payments/create/<int:document_id>/', views.PaymentCreateView.as_view(), name='payment_create'),
+    path('api/payments/upload/', views.PaymentUploadAPI.as_view(), name='payment_upload_api'),
+    path('api/payments/<int:pk>/verify/', views.PaymentVerificationAPI.as_view(), name='payment_verify_api'),
     
     # Notifications
     path('notifications/', views.NotificationListView.as_view(), name='notification_list'),

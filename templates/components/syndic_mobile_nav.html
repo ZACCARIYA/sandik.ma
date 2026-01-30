@@ -1,33 +1,176 @@
-<!-- ===== NAVIGATION MOBILE SYNDIC ORGANISÉE ===== -->
-<div class="syndic-mobile-nav">
-    <!-- ===== NAVIGATION PRINCIPALE MOBILE ===== -->
+<!-- ===== NAVIGATION MOBILE SYNDIC MODERNE ===== -->
+<div class="syndic-mobile-nav d-lg-none">
     <div class="mobile-nav-grid">
-        <!-- 🏠 Tableau de Bord (PRIORITÉ 1) -->
-        <a href="{% url 'finance:syndic_dashboard' %}" class="mobile-nav-item mobile-nav-primary">
+        <!-- 🏠 Tableau de Bord -->
+        <a href="{% url 'finance:syndic_dashboard' %}" 
+           class="mobile-nav-item mobile-nav-primary {% if request.resolver_match.url_name == 'syndic_dashboard' %}active{% endif %}">
             <div class="mobile-nav-icon">
                 <i class="fas fa-tachometer-alt"></i>
             </div>
             <span class="mobile-nav-label">Tableau de Bord</span>
         </a>
         
+        <!-- 📄 Documents -->
+        <a href="{% url 'finance:document_list' %}" 
+           class="mobile-nav-item {% if 'document' in request.resolver_match.url_name %}active{% endif %}">
+            <div class="mobile-nav-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <span class="mobile-nav-label">Documents</span>
+        </a>
         
+        <!-- 💰 Paiements -->
+        <a href="{% url 'finance:payment_list' %}" 
+           class="mobile-nav-item {% if 'payment' in request.resolver_match.url_name %}active{% endif %}">
+            <div class="mobile-nav-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <span class="mobile-nav-label">Paiements</span>
+        </a>
         
-        <!-- 📅 Planning (PRIORITÉ 5) -->
-        <a href="{% url 'finance:calendar' %}" class="mobile-nav-item">
+        <!-- 👥 Résidents -->
+        <a href="{% url 'finance:resident_management' %}" 
+           class="mobile-nav-item {% if 'resident' in request.resolver_match.url_name %}active{% endif %}">
+            <div class="mobile-nav-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <span class="mobile-nav-label">Résidents</span>
+        </a>
+        
+        <!-- 📅 Calendrier -->
+        <a href="{% url 'finance:calendar' %}" 
+           class="mobile-nav-item {% if 'calendar' in request.resolver_match.url_name %}active{% endif %}">
             <div class="mobile-nav-icon">
                 <i class="fas fa-calendar"></i>
             </div>
-            <span class="mobile-nav-label">Planning</span>
+            <span class="mobile-nav-label">Calendrier</span>
         </a>
         
-        <!-- 📊 Rapports (PRIORITÉ 6) -->
-        <a href="{% url 'finance:report_list' %}" class="mobile-nav-item">
+        <!-- 📊 Rapports -->
+        <a href="{% url 'finance:report_list' %}" 
+           class="mobile-nav-item {% if 'report' in request.resolver_match.url_name %}active{% endif %}">
             <div class="mobile-nav-icon">
                 <i class="fas fa-chart-bar"></i>
             </div>
             <span class="mobile-nav-label">Rapports</span>
         </a>
         
+        <!-- 🔔 Notifications -->
+        <a href="{% url 'finance:notification_list' %}" 
+           class="mobile-nav-item {% if 'notification' in request.resolver_match.url_name %}active{% endif %}">
+            <div class="mobile-nav-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <span class="mobile-nav-label">Notifications</span>
+        </a>
+        
+        <!-- ⚙️ Plus -->
+        <a href="#" 
+           class="mobile-nav-item mobile-nav-more" 
+           data-bs-toggle="dropdown">
+            <div class="mobile-nav-icon">
+                <i class="fas fa-ellipsis-h"></i>
+            </div>
+            <span class="mobile-nav-label">Plus</span>
+        </a>
     </div>
-    
 </div>
+
+<style>
+/* ===== NAVIGATION MOBILE SYNDIC MODERNE ===== */
+.syndic-mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: var(--border-width) solid var(--border-color);
+    padding: var(--spacing-3) var(--spacing-2);
+    z-index: 1000;
+    box-shadow: 0 -4px 20px var(--shadow-color);
+}
+
+.syndic-mobile-nav .mobile-nav-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-2);
+    max-width: 100%;
+}
+
+.syndic-mobile-nav .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2) var(--spacing-1);
+    text-decoration: none;
+    color: var(--text-secondary);
+    border-radius: var(--radius-lg);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 64px;
+    position: relative;
+}
+
+.syndic-mobile-nav .mobile-nav-item:hover,
+.syndic-mobile-nav .mobile-nav-item.active {
+    background: var(--primary-bg);
+    color: var(--primary);
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.syndic-mobile-nav .mobile-nav-item.mobile-nav-primary {
+    color: var(--primary);
+    background: linear-gradient(135deg, var(--primary-bg) 0%, rgba(102, 126, 234, 0.05) 100%);
+    border: var(--border-width-thin) solid var(--primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.syndic-mobile-nav .mobile-nav-item.mobile-nav-primary:hover,
+.syndic-mobile-nav .mobile-nav-item.mobile-nav-primary.active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+.syndic-mobile-nav .mobile-nav-item.active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 0 0 var(--radius-full) var(--radius-full);
+}
+
+.syndic-mobile-nav .mobile-nav-icon {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-1);
+    transition: transform 0.3s ease;
+}
+
+.syndic-mobile-nav .mobile-nav-item:hover .mobile-nav-icon,
+.syndic-mobile-nav .mobile-nav-item.active .mobile-nav-icon {
+    transform: scale(1.15);
+}
+
+.syndic-mobile-nav .mobile-nav-label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+    line-height: var(--line-height-tight);
+    white-space: nowrap;
+}
+
+@media (min-width: 992px) {
+    .syndic-mobile-nav {
+        display: none !important;
+    }
+}
+</style>

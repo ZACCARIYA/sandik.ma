@@ -1,0 +1,32 @@
+<!-- ===== COMPOSANT CARTE DE STATUT RÉSIDENT ===== -->
+<div class="col-md-3 mb-4">
+    <div class="card-modern {% if border_class %}{{ border_class }}{% endif %}">
+        <div class="card-header-modern">
+            {% if icon %}<i class="{{ icon }} me-2"></i>{% endif %}
+            <h5 class="mb-0">{{ title }}</h5>
+            {% if badge %}<span class="badge-modern badge-light ms-auto">{{ badge }}</span>{% endif %}
+        </div>
+        <div class="card-body-modern">
+            {% for resident in residents|slice:":5" %}
+            <div class="resident-item">
+                <div class="resident-avatar {{ avatar_class }}">
+                    {{ resident.get_full_name.0|default:resident.username.0|upper }}
+                </div>
+                <div class="resident-info">
+                    <div class="fw-semibold">{{ resident.get_full_name|default:resident.username }}</div>
+                    {% if show_balance %}
+                    <small class="{{ balance_class }}">{{ resident.status.balance|floatformat:0 }} DH</small>
+                    {% else %}
+                    <small class="text-muted">{{ resident.apartment|default:"N/A" }}</small>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-muted py-4">
+                <i class="{{ empty_icon }}"></i>
+                <p class="mt-2 mb-0">{{ empty_message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

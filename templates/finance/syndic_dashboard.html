@@ -7,7 +7,7 @@
 <!-- ===== EN-TÊTE DE PAGE ===== -->
 {% include 'components/page_header.html' with title="Tableau de Bord Syndic" subtitle="Gestion complète de votre copropriété" icon="fas fa-tachometer-alt" %}
 
-        <div class="container">
+    <div class="container">
     <!-- ===== MÉTRIQUES PRINCIPALES ===== -->
     <section class="metrics-section mb-5">
         <div class="row">
@@ -28,62 +28,13 @@
 
     <!-- ===== ACTIONS RAPIDES ===== -->
     <section class="quick-actions-section mb-5">
-
         <div class="row">
-            <div class="col-md-2 mb-3">
-                <a href="{% url 'finance:document_create' %}" class="quick-action-card">
-                    <div class="action-icon bg-primary">
-                        <i class="fas fa-file-plus"></i>
-                    </div>
-                    <h6>Document</h6>
-                    <small class="text-muted">Créer facture</small>
-                </a>
-                </div>
-            <div class="col-md-2 mb-3">
-                <a href="{% url 'finance:depense_create' %}" class="quick-action-card">
-                    <div class="action-icon bg-success">
-                        <i class="fas fa-receipt"></i>
-                    </div>
-                    <h6>Dépense</h6>
-                    <small class="text-muted">Nouvelle dépense</small>
-                </a>
-                </div>
-            <div class="col-md-2 mb-3">
-                <a href="{% url 'finance:notification_create' %}" class="quick-action-card">
-                    <div class="action-icon bg-warning">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <h6>Notification</h6>
-                    <small class="text-muted">Informer</small>
-                </a>
-                </div>
-            <div class="col-md-2 mb-3">
-                <a href="{% url 'finance:resident_create' %}" class="quick-action-card">
-                    <div class="action-icon bg-info">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <h6>Résident</h6>
-                    <small class="text-muted">Ajouter</small>
-                </a>
-            </div>
-            <div class="col-md-2 mb-3">
-                <a href="{% url 'finance:overdue_dashboard' %}" class="quick-action-card">
-                    <div class="action-icon bg-danger">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <h6>Impayés</h6>
-                    <small class="text-muted">Gérer</small>
-                </a>
-                                    </div>
-            <div class="col-md-2 mb-3">
-                <a href="{% url 'finance:event_create' %}" class="quick-action-card">
-                    <div class="action-icon" style="background: var(--info);">
-                        <i class="fas fa-calendar-plus"></i>
-                    </div>
-                    <h6>Événement</h6>
-                    <small class="text-muted">Planifier</small>
-                </a>
-            </div>
+            {% include 'components/quick_action.html' with url='finance:document_create' icon='fas fa-file-plus' icon_class='bg-primary' title='Document' description='Créer facture' %}
+            {% include 'components/quick_action.html' with url='finance:depense_create' icon='fas fa-receipt' icon_class='bg-success' title='Dépense' description='Nouvelle dépense' %}
+            {% include 'components/quick_action.html' with url='finance:notification_create' icon='fas fa-bell' icon_class='bg-warning' title='Notification' description='Informer' %}
+            {% include 'components/quick_action.html' with url='finance:resident_create' icon='fas fa-user-plus' icon_class='bg-info' title='Résident' description='Ajouter' %}
+            {% include 'components/quick_action.html' with url='finance:overdue_dashboard' icon='fas fa-exclamation-triangle' icon_class='bg-danger' title='Impayés' description='Gérer' %}
+            {% include 'components/quick_action.html' with url='finance:event_create' icon='fas fa-calendar-plus' icon_class='bg-info' title='Événement' description='Planifier' %}
         </div>
     </section>
 
@@ -140,191 +91,17 @@
 
     <!-- ===== RÉSIDENTS PAR STATUT ===== -->
     <section class="residents-section">
-        <h4 class="text-primary mb-4">
+        <h4 class="text-primary">
             <i class="fas fa-users me-2"></i>Résidents par Statut
         </h4>
-        
         <div class="row">
-            <!-- À jour -->
-            <div class="col-md-3 mb-4">
-                {% include 'components/card.html' with title="À Jour" header_gradient=True icon="fas fa-check-circle" badge=up_to_date|length class="border-success" %}
-                <div class="card-body-modern">
-                    {% for resident in up_to_date|slice:":5" %}
-                    <div class="resident-item">
-                        <div class="resident-avatar bg-success">
-                            {{ resident.get_full_name.0|default:resident.username.0|upper }}
-                    </div>
-                                    <div class="resident-info">
-                            <div class="fw-semibold">{{ resident.get_full_name|default:resident.username }}</div>
-                            <small class="text-muted">{{ resident.apartment|default:"N/A" }}</small>
-                                    </div>
-                                </div>
-                    {% empty %}
-                    <div class="text-center text-muted py-3">
-                        <i class="fas fa-users fa-2x mb-2"></i>
-                        <p>Aucun résident à jour</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- En attente -->
-            <div class="col-md-3 mb-4">
-                {% include 'components/card.html' with title="En Attente" header_gradient=True icon="fas fa-clock" badge=pending|length class="border-warning" %}
-                <div class="card-body-modern">
-                    {% for resident in pending|slice:":5" %}
-                    <div class="resident-item">
-                        <div class="resident-avatar bg-warning">
-                            {{ resident.get_full_name.0|default:resident.username.0|upper }}
-                        </div>
-                        <div class="resident-info">
-                            <div class="fw-semibold">{{ resident.get_full_name|default:resident.username }}</div>
-                            <small class="text-warning">{{ resident.status.balance|floatformat:0 }} DH</small>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="text-center text-muted py-3">
-                        <i class="fas fa-smile fa-2x mb-2"></i>
-                        <p>Aucun en attente</p>
-                    </div>
-                    {% endfor %}
-                </div>
-                    </div>
-
-            <!-- En retard -->
-            <div class="col-md-3 mb-4">
-                {% include 'components/card.html' with title="En Retard" header_gradient=True icon="fas fa-exclamation-triangle" badge=overdue|length class="border-danger" %}
-                <div class="card-body-modern">
-                    {% for resident in overdue|slice:":5" %}
-                    <div class="resident-item">
-                        <div class="resident-avatar" style="background: #f97316;">
-                            {{ resident.get_full_name.0|default:resident.username.0|upper }}
-                                    </div>
-                        <div class="resident-info">
-                            <div class="fw-semibold">{{ resident.get_full_name|default:resident.username }}</div>
-                            <small class="text-danger">{{ resident.status.balance|floatformat:0 }} DH</small>
-                                    </div>
-                                </div>
-                    {% empty %}
-                    <div class="text-center text-muted py-3">
-                        <i class="fas fa-thumbs-up fa-2x mb-2"></i>
-                        <p>Aucun retard</p>
-                    </div>
-                    {% endfor %}
-                </div>
-                    </div>
-
-            <!-- Critiques -->
-            <div class="col-md-3 mb-4">
-                {% include 'components/card.html' with title="Critiques" header_gradient=True icon="fas fa-skull-crossbones" badge=critical|length class="border-danger" %}
-                <div class="card-body-modern">
-                    {% for resident in critical|slice:":5" %}
-                    <div class="resident-item">
-                        <div class="resident-avatar bg-danger">
-                            {{ resident.get_full_name.0|default:resident.username.0|upper }}
-                                    </div>
-                        <div class="resident-info">
-                            <div class="fw-semibold">{{ resident.get_full_name|default:resident.username }}</div>
-                            <small class="text-danger fw-bold">{{ resident.status.balance|floatformat:0 }} DH</small>
-                                    </div>
-                                </div>
-                    {% empty %}
-                    <div class="text-center text-muted py-3">
-                        <i class="fas fa-heart fa-2x mb-2"></i>
-                        <p>Aucune situation critique</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
+            {% include 'components/resident_status_card.html' with title="À Jour" icon="fas fa-check-circle" badge=up_to_date|length border_class="border-success" residents=up_to_date avatar_class="bg-success" show_balance=False empty_icon="fas fa-users" empty_message="Aucun résident à jour" %}
+            {% include 'components/resident_status_card.html' with title="En Attente" icon="fas fa-clock" badge=pending|length border_class="border-warning" residents=pending avatar_class="bg-warning" show_balance=True balance_class="text-warning" empty_icon="fas fa-smile" empty_message="Aucun en attente" %}
+            {% include 'components/resident_status_card.html' with title="En Retard" icon="fas fa-exclamation-triangle" badge=overdue|length border_class="border-danger" residents=overdue avatar_class="bg-orange" show_balance=True balance_class="text-danger" empty_icon="fas fa-thumbs-up" empty_message="Aucun retard" %}
+            {% include 'components/resident_status_card.html' with title="Critiques" icon="fas fa-skull-crossbones" badge=critical|length border_class="border-danger" residents=critical avatar_class="bg-danger" show_balance=True balance_class="text-danger fw-bold" empty_icon="fas fa-heart" empty_message="Aucune situation critique" %}
         </div>
     </section>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-/* ===== STYLES SPÉCIFIQUES AU TABLEAU DE BORD ===== */
-.quick-action-card {
-    display: block;
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-4);
-    text-align: center;
-    text-decoration: none;
-    color: inherit;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-200);
-    transition: var(--transition);
-}
-
-.quick-action-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    text-decoration: none;
-    color: inherit;
-}
-
-.action-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: var(--radius-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: var(--font-size-xl);
-    color: var(--white);
-    margin: 0 auto var(--spacing-3);
-}
-
-.resident-item {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-3) 0;
-    border-bottom: 1px solid var(--gray-200);
-    transition: var(--transition);
-}
-
-.resident-item:last-child {
-    border-bottom: none;
-}
-
-.resident-item:hover {
-    background: var(--gray-50);
-    border-radius: var(--radius);
-    padding-left: var(--spacing-2);
-    padding-right: var(--spacing-2);
-}
-
-.resident-avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: var(--radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    font-weight: 600;
-    font-size: var(--font-size-sm);
-    margin-right: var(--spacing-3);
-}
-
-.resident-info {
-    flex-grow: 1;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .quick-action-card {
-        margin-bottom: var(--spacing-3);
-    }
-    
-    .action-icon {
-        width: 50px;
-        height: 50px;
-        font-size: var(--font-size-lg);
-    }
-}
-</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -333,9 +110,9 @@
      data-up-to-date="{{ up_to_date|length|default:0 }}"
      data-pending="{{ pending|length|default:0 }}"
      data-overdue="{{ overdue|length|default:0 }}"
-     data-critical="{{ critical|length|default:0 }}"
-     data-monthly-payments="{{ monthly_payments_json|safe }}">
+     data-critical="{{ critical|length|default:0 }}">
 </div>
+<script id="monthly-payments-data" type="application/json">{{ monthly_payments_json|safe }}</script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -353,13 +130,20 @@ function showPlaceholder(containerEl, iconClass, titleText, subtitleText) {
 
 // ===== RÉCUPÉRATION DES DONNÉES DJANGO =====
 const dataElement = document.getElementById('django-data');
+const monthlyPaymentsScript = document.getElementById('monthly-payments-data');
 const djangoData = (function() {
     if (!dataElement) {
         return { upToDate: 0, pending: 0, overdue: 0, critical: 0, monthlyPayments: [] };
     }
     let monthly = [];
     try {
-        monthly = JSON.parse(dataElement.dataset.monthlyPayments || '[]');
+        // Utiliser json_script filter de Django pour un parsing sûr
+        if (monthlyPaymentsScript) {
+            monthly = JSON.parse(monthlyPaymentsScript.textContent || '[]');
+        } else {
+            // Fallback si le script n'existe pas
+            monthly = [];
+        }
     } catch (e) {
         console.warn('monthly_payments JSON invalid:', e);
         monthly = [];

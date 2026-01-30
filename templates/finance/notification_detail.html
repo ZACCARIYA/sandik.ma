@@ -1,35 +1,167 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Notification - Syndic{% endblock %}
+{% block title %}Notification - {{ notification.title }}{% endblock %}
 
 {% block content %}
 <div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-bell me-2"></i>{{ notification.title }}
-                </h1>
-                <a href="{% url 'finance:notification_list' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Retour aux notifications
-                </a>
-            </div>
-
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-2">
-                        <span class="badge bg-{{ notification.priority|lower }}">{{ notification.get_priority_display }}</span>
-                        <span class="badge bg-info ms-2">{{ notification.get_notification_type_display }}</span>
+    {% include 'components/page_header.html' with title=notification.title icon="fas fa-bell" %}
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card-modern notification-detail-card">
+                <div class="card-body-modern">
+                    <!-- En-tête de la notification -->
+                    <div class="notification-detail-header mb-4">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                            <div>
+                                <div class="notification-badges mb-2">
+                                    <span class="badge priority-{{ notification.priority|lower }}">
+                                        <i class="fas fa-flag me-1"></i>{{ notification.get_priority_display }}
+                                    </span>
+                                    <span class="badge badge-type">
+                                        <i class="fas fa-tag me-1"></i>{{ notification.get_notification_type_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="notification-date-large">{{ notification.created_at|date:"d/m/Y" }}</div>
+                                <div class="notification-time-small">{{ notification.created_at|date:"H:i" }}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-muted mb-3">
-                        <i class="fas fa-user me-1"></i>{{ notification.sender.get_full_name|default:notification.sender.username }}
-                        <i class="fas fa-clock me-1 ms-3"></i>{{ notification.created_at|date:"d/m/Y H:i" }}
+                    
+                    <!-- Informations de l'expéditeur -->
+                    <div class="notification-sender-info mb-4 pb-3 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-user text-primary"></i>
+                            <span class="fw-semibold">Expéditeur :</span>
+                            <span>{{ notification.sender.get_full_name|default:notification.sender.username }}</span>
+                        </div>
                     </div>
-                    <p class="mb-0">{{ notification.message }}</p>
+                    
+                    <!-- Message de la notification -->
+                    <div class="notification-message-content">
+                        <p class="notification-text">{{ notification.message|linebreaks }}</p>
+                    </div>
+                    
+                    <!-- Destinataires (si syndic) -->
+                    {% if request.user.role in 'SYNDIC,SUPERADMIN' %}
+                    <div class="notification-recipients mt-4 pt-3 border-top">
+                        <div class="mb-2">
+                            <i class="fas fa-users text-primary me-2"></i>
+                            <span class="fw-semibold">Destinataires :</span>
+                        </div>
+                        <div class="recipients-list">
+                            {% for recipient in notification.recipients.all %}
+                            <span class="badge bg-light text-dark me-2 mb-2">
+                                {{ recipient.get_full_name|default:recipient.username }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Actions -->
+                <div class="card-footer-modern">
+                    <a href="{% url 'finance:notification_list' %}" class="btn-modern btn-outline-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour aux notifications
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.notification-detail-card {
+    border: 1px solid var(--gray-200);
+}
+
+.notification-detail-header {
+    padding-bottom: var(--spacing-3);
+}
+
+.notification-badges .badge {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius);
+    margin-right: var(--spacing-2);
+}
+
+.priority-urgent {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.priority-high {
+    background: var(--warning-bg);
+    color: var(--warning);
+}
+
+.priority-medium {
+    background: var(--info-bg);
+    color: var(--info);
+}
+
+.priority-low {
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+.badge-type {
+    background: var(--primary-bg);
+    color: var(--primary);
+}
+
+.notification-date-large {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+}
+
+.notification-time-small {
+    font-size: var(--font-size-sm);
+    color: var(--gray-500);
+}
+
+.notification-sender-info {
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+}
+
+.notification-message-content {
+    background: var(--gray-50);
+    padding: var(--spacing-5);
+    border-radius: var(--radius-lg);
+    border-left: 4px solid var(--primary);
+}
+
+.notification-text {
+    font-size: var(--font-size-base);
+    line-height: 1.8;
+    color: var(--gray-700);
+    margin: 0;
+}
+
+.notification-recipients {
+    font-size: var(--font-size-sm);
+}
+
+.recipients-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+}
+
+.card-footer-modern {
+    padding: var(--spacing-4);
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+}
+</style>
 {% endblock %}

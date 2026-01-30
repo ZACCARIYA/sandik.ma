@@ -1,0 +1,17 @@
+{
+  "name": "syndic-pro",
+  "version": "1.0.0",
+  "description": "Application web Django pour la gestion des copropriétés au Maroc, conforme à la loi 18-00.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18"
+  }
+}

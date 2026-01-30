@@ -13,26 +13,34 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='ResidentReport',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200, verbose_name='Titre du rapport')),
-                ('description', models.TextField(default='Description non fournie', verbose_name='Description détaillée')),
-                ('category', models.CharField(choices=[('MAINTENANCE', 'Entretien / Réparation'), ('SECURITY', 'Sécurité / Surveillance'), ('COMMUNITY', 'Communauté / Voisinage'), ('CLEANLINESS', 'Propreté / Nettoyage'), ('NOISE', 'Bruit / Troubles'), ('UTILITIES', 'Services / Équipements'), ('OTHER', 'Autre')], default='OTHER', max_length=20, verbose_name='Catégorie')),
-                ('photo', models.ImageField(blank=True, null=True, upload_to='reports/%Y/%m/', verbose_name='Photo (optionnelle)')),
-                ('location', models.CharField(blank=True, max_length=200, null=True, verbose_name='Localisation (optionnelle)')),
-                ('status', models.CharField(choices=[('NEW', 'Nouveau'), ('IN_PROGRESS', 'En cours'), ('RESOLVED', 'Résolu'), ('ARCHIVED', 'Archivé')], default='NEW', max_length=20, verbose_name='Statut')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Date de création')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Dernière modification')),
-                ('reviewed_at', models.DateTimeField(blank=True, null=True)),
-                ('resident', models.ForeignKey(limit_choices_to={'role': 'RESIDENT'}, on_delete=django.db.models.deletion.CASCADE, related_name='resident_reports', to=settings.AUTH_USER_MODEL)),
-                ('reviewed_by', models.ForeignKey(blank=True, limit_choices_to={'role__in': ['SUPERADMIN', 'SYNDIC']}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reviewed_reports', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'Rapport de résident',
-                'verbose_name_plural': 'Rapports de résidents',
-                'ordering': ['-created_at'],
-            },
+        # ResidentReport already exists from migration 0009, so we only need to alter it
+        migrations.RenameField(
+            model_name='residentreport',
+            old_name='message',
+            new_name='description',
+        ),
+        migrations.AlterField(
+            model_name='residentreport',
+            name='description',
+            field=models.TextField(default='Description non fournie', verbose_name='Description détaillée'),
+        ),
+        migrations.AddField(
+            model_name='residentreport',
+            name='updated_at',
+            field=models.DateTimeField(auto_now=True, verbose_name='Dernière modification'),
+        ),
+        migrations.AlterField(
+            model_name='residentreport',
+            name='category',
+            field=models.CharField(choices=[('MAINTENANCE', 'Entretien / Réparation'), ('SECURITY', 'Sécurité / Surveillance'), ('COMMUNITY', 'Communauté / Voisinage'), ('CLEANLINESS', 'Propreté / Nettoyage'), ('NOISE', 'Bruit / Troubles'), ('UTILITIES', 'Services / Équipements'), ('OTHER', 'Autre')], default='OTHER', max_length=20, verbose_name='Catégorie'),
+        ),
+        migrations.AlterField(
+            model_name='residentreport',
+            name='status',
+            field=models.CharField(choices=[('NEW', 'Nouveau'), ('IN_PROGRESS', 'En cours'), ('RESOLVED', 'Résolu'), ('ARCHIVED', 'Archivé')], default='NEW', max_length=20, verbose_name='Statut'),
+        ),
+        migrations.AlterModelOptions(
+            name='residentreport',
+            options={'ordering': ['-created_at'], 'verbose_name': 'Rapport de résident', 'verbose_name_plural': 'Rapports de résidents'},
         ),
     ]

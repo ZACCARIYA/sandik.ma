@@ -5,96 +5,97 @@
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>
-        <i class="fas fa-bell me-2"></i>
-        {% if is_resident_view %}Mes Notifications{% else %}Gestion des Notifications{% endif %}
-    </h1>
-    {% if not is_resident_view %}
-        <a href="{% url 'finance:notification_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i>Nouvelle Notification
-        </a>
-    {% endif %}
-</div>
+<div class="container-fluid">
+    <!-- ===== EN-TÊTE DE PAGE ===== -->
+    {% include 'components/page_header.html' with title=title|default:"Notifications" icon="fas fa-bell" subtitle=subtitle|default:"Gérez vos notifications" actions=page_actions|default:None %}
 
-<!-- Filter Options -->
-<div class="card mb-4">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-3">
-                <label class="form-label">Type de notification</label>
-                <select class="form-select" id="typeFilter">
-                    <option value="">Tous les types</option>
-                    <option value="PAYMENT_REMINDER">Rappel de paiement</option>
-                    <option value="PAYMENT_CONFIRMATION">Confirmation de paiement</option>
-                    <option value="OVERDUE_NOTICE">Avis de retard</option>
-                    <option value="LEGAL_NOTICE">Avis légal</option>
-                    <option value="GENERAL_ANNOUNCEMENT">Annonce générale</option>
-                    <option value="MEETING_NOTICE">Convocation réunion</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Priorité</label>
-                <select class="form-select" id="priorityFilter">
-                    <option value="">Toutes les priorités</option>
-                    <option value="LOW">Faible</option>
-                    <option value="MEDIUM">Moyenne</option>
-                    <option value="HIGH">Élevée</option>
-                    <option value="URGENT">Urgente</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Statut</label>
-                <select class="form-select" id="statusFilter">
-                    <option value="">Tous les statuts</option>
-                    <option value="read">Lues</option>
-                    <option value="unread">Non lues</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">&nbsp;</label>
-                <div>
-                    <button class="btn btn-outline-secondary" onclick="clearFilters()">
-                        <i class="fas fa-times me-1"></i>Effacer
+    <!-- Filter Options -->
+    <div class="card-modern mb-4">
+        <div class="card-body-modern">
+            <div class="row g-3">
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label fw-semibold">Type</label>
+                    <select class="form-select form-select-sm" id="typeFilter">
+                        <option value="">Tous les types</option>
+                        <option value="PAYMENT_REMINDER">Rappel de paiement</option>
+                        <option value="DOCUMENT_UPLOADED">Document ajouté</option>
+                        <option value="GENERAL_ANNOUNCEMENT">Annonce générale</option>
+                        <option value="MEETING_NOTICE">Convocation réunion</option>
+                        <option value="LEGAL_NOTICE">Avis légal</option>
+                        <option value="OTHER">Autre</option>
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label fw-semibold">Priorité</label>
+                    <select class="form-select form-select-sm" id="priorityFilter">
+                        <option value="">Toutes</option>
+                        <option value="LOW">Faible</option>
+                        <option value="MEDIUM">Moyenne</option>
+                        <option value="HIGH">Élevée</option>
+                        <option value="URGENT">Urgente</option>
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label fw-semibold">Statut</label>
+                    <select class="form-select form-select-sm" id="statusFilter">
+                        <option value="">Tous</option>
+                        <option value="read">Lues</option>
+                        <option value="unread">Non lues</option>
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-6 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary btn-sm w-100" onclick="clearFilters()">
+                        <i class="fas fa-redo me-1"></i>Réinitialiser
                     </button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="card">
-    <div class="card-body">
-        {% if notifications %}
-            <div class="list-group" id="notificationsList">
+    <div class="card-modern">
+        <div class="card-body-modern p-0">
+            {% if notifications %}
+                <div class="notification-list" id="notificationsList">
                 {% for notification in notifications %}
-                    <div class="list-group-item notification-item" 
+                    <div class="notification-item-simple" 
                          data-type="{{ notification.notification_type }}"
                          data-priority="{{ notification.priority }}"
                          data-read="{{ notification.is_read|yesno:'read,unread' }}">
-                        <div class="d-flex w-100 justify-content-between">
-                            <div class="mb-1">
-                                <div class="d-flex align-items-center mb-2">
-                                    <h6 class="mb-0 me-2">{{ notification.title }}</h6>
-                                    <span class="badge bg-{% if notification.priority == 'URGENT' %}danger{% elif notification.priority == 'HIGH' %}warning{% elif notification.priority == 'MEDIUM' %}info{% else %}secondary{% endif %} me-2">
-                                        {{ notification.get_priority_display }}
-                                    </span>
-                                    <span class="badge bg-primary me-2">
-                                        {{ notification.get_notification_type_display }}
-                                    </span>
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <div class="notification-title-section">
+                                    <h5 class="notification-title">{{ notification.title }}</h5>
                                     {% if not notification.is_read %}
-                                        <span class="badge bg-success">Nouveau</span>
+                                    <span class="notification-badge-new">Nouveau</span>
                                     {% endif %}
                                 </div>
-                                <p class="mb-1">{{ notification.message|truncatechars:150 }}</p>
-                                <small class="text-muted">
-                                    <i class="fas fa-user me-1"></i>{{ notification.sender.get_full_name|default:notification.sender.username }}
-                                    <i class="fas fa-clock me-1 ms-2"></i>{{ notification.created_at|date:"d/m/Y H:i" }}
-                                </small>
+                                <div class="notification-meta">
+                                    <span class="notification-date">{{ notification.created_at|date:"d/m/Y" }}</span>
+                                    <span class="notification-time">{{ notification.created_at|date:"H:i" }}</span>
+                                </div>
                             </div>
-                            <div class="text-end">
-                                <a href="{% url 'finance:notification_detail' notification.pk %}" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye me-1"></i>Voir
+                            
+                            <div class="notification-body">
+                                <p class="notification-message">{{ notification.message|truncatechars:200 }}</p>
+                            </div>
+                            
+                            <div class="notification-footer">
+                                <div class="notification-info">
+                                    <span class="notification-type">
+                                        <i class="fas fa-tag"></i>
+                                        {{ notification.get_notification_type_display }}
+                                    </span>
+                                    <span class="notification-priority priority-{{ notification.priority|lower }}">
+                                        <i class="fas fa-flag"></i>
+                                        {{ notification.get_priority_display }}
+                                    </span>
+                                    <span class="notification-sender">
+                                        <i class="fas fa-user"></i>
+                                        {{ notification.sender.get_full_name|default:notification.sender.username }}
+                                    </span>
+                                </div>
+                                <a href="{% url 'finance:notification_detail' notification.pk %}" class="btn-notification-view">
+                                    <i class="fas fa-arrow-right"></i>
                                 </a>
                             </div>
                         </div>
@@ -132,32 +133,264 @@
                     </ul>
                 </nav>
             {% endif %}
-        {% else %}
-            <div class="empty-state">
-                <i class="fas fa-bell"></i>
-                <h5>
-                    {% if is_resident_view %}
-                        Aucune notification
-                    {% else %}
-                        Aucune notification créée
+            {% else %}
+                <div class="empty-state text-center py-5">
+                    <i class="fas fa-bell fa-4x text-muted mb-4" style="opacity: 0.5;"></i>
+                    <h4 class="text-muted mb-2">
+                        {% if is_resident_view %}
+                            Aucune notification
+                        {% else %}
+                            Aucune notification créée
+                        {% endif %}
+                    </h4>
+                    <p class="text-muted mb-4">
+                        {% if is_resident_view %}
+                            Vous recevrez des notifications du syndic ici.
+                        {% else %}
+                            Commencez par créer des notifications pour les résidents.
+                        {% endif %}
+                    </p>
+                    {% if not is_resident_view %}
+                        <a href="{% url 'finance:notification_create' %}" class="btn btn-primary btn-modern">
+                            <i class="fas fa-plus me-1"></i>Créer la première notification
+                        </a>
                     {% endif %}
-                </h5>
-                <p>
-                    {% if is_resident_view %}
-                        Vous recevrez des notifications du syndic ici.
-                    {% else %}
-                        Commencez par créer des notifications pour les résidents.
-                    {% endif %}
-                </p>
-                {% if not is_resident_view %}
-                    <a href="{% url 'finance:notification_create' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i>Créer la première notification
-                    </a>
-                {% endif %}
-            </div>
-        {% endif %}
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== STYLES NOTIFICATIONS SIMPLES ET CLAIRS ===== */
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.notification-item-simple {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.notification-item-simple:hover {
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.notification-item-simple[data-read="unread"] {
+    border-left: 4px solid var(--primary);
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, var(--white) 3%);
+}
+
+.notification-content {
+    padding: var(--spacing-4);
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-3);
+    gap: var(--spacing-3);
+}
+
+.notification-title-section {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    flex: 1;
+}
+
+.notification-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-900);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.notification-badge-new {
+    background: var(--success);
+    color: var(--white);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.notification-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.notification-date {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-700);
+}
+
+.notification-time {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+}
+
+.notification-body {
+    margin-bottom: var(--spacing-3);
+}
+
+.notification-message {
+    font-size: var(--font-size-base);
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.notification-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-3);
+    border-top: 1px solid var(--gray-100);
+}
+
+.notification-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    flex-wrap: wrap;
+}
+
+.notification-info span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--font-size-xs);
+    color: var(--gray-600);
+}
+
+.notification-info i {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.notification-type {
+    color: var(--gray-600);
+}
+
+.notification-priority {
+    font-weight: var(--font-weight-medium);
+}
+
+.priority-urgent {
+    color: var(--danger);
+}
+
+.priority-high {
+    color: var(--warning);
+}
+
+.priority-medium {
+    color: var(--info);
+}
+
+.priority-low {
+    color: var(--gray-500);
+}
+
+.notification-sender {
+    color: var(--gray-600);
+}
+
+.btn-notification-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: var(--gray-100);
+    color: var(--gray-600);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-notification-view:hover {
+    background: var(--primary);
+    color: var(--white);
+    transform: scale(1.1);
+}
+
+.empty-state {
+    padding: var(--spacing-16) var(--spacing-4);
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 64px;
+    color: var(--gray-300);
+    margin-bottom: var(--spacing-4);
+    display: block;
+}
+
+.empty-state h4 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-700);
+    margin-bottom: var(--spacing-2);
+}
+
+.empty-state p {
+    font-size: var(--font-size-base);
+    color: var(--gray-500);
+    margin-bottom: var(--spacing-6);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .notification-content {
+        padding: var(--spacing-3);
+    }
+    
+    .notification-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .notification-meta {
+        align-items: flex-start;
+    }
+    
+    .notification-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-2);
+    }
+    
+    .notification-info {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-2);
+    }
+    
+    .btn-notification-view {
+        align-self: flex-end;
+    }
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}

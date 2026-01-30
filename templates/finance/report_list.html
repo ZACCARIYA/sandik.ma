@@ -56,8 +56,8 @@
                 <div class="row">
                     {% for report in reports %}
                     <div class="col-lg-6 col-xl-4 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="card-modern h-100">
+                            <div class="card-header-modern d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="mb-0">{{ report.title }}</h6>
                                     <small class="text-muted">{{ report.get_category_display }}</small>
@@ -67,32 +67,32 @@
                                 </span>
                             </div>
                             
-                            <div class="card-body">
-                                <p class="card-text">{{ report.description|truncatewords:20 }}</p>
+                            <div class="card-body-modern">
+                                <p class="text-base text-secondary mb-3">{{ report.description|truncatewords:20 }}</p>
                                 
                                 {% if report.photo %}
                                 <div class="mb-3">
-                                    <img src="{{ report.photo.url }}" alt="Photo du rapport" class="img-fluid rounded" style="max-height: 150px;">
+                                    <img src="{{ report.photo.url }}" alt="Photo du rapport" class="img-fluid rounded-lg" style="max-height: 150px; width: 100%; object-fit: cover;">
                                 </div>
                                 {% endif %}
                                 
                                 {% if report.location %}
-                                <p class="text-muted mb-2">
+                                <p class="text-sm text-muted mb-2">
                                     <i class="fas fa-map-marker-alt me-1"></i>{{ report.location }}
                                 </p>
                                 {% endif %}
                                 
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <small class="text-muted">
+                                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                    <small class="text-sm text-muted">
                                         <i class="fas fa-user me-1"></i>{{ report.resident.get_full_name|default:report.resident.username }}
                                     </small>
-                                    <small class="text-muted">
+                                    <small class="text-sm text-muted">
                                         <i class="fas fa-calendar me-1"></i>{{ report.created_at|date:"d/m/Y" }}
                                     </small>
                                 </div>
                             </div>
                             
-                            <div class="card-footer">
+                            <div class="card-footer bg-light border-0 p-3">
                                 <div class="d-flex justify-content-between">
                                     <a href="{% url 'finance:report_detail' report.pk %}" class="btn btn-outline-primary btn-sm">
                                         <i class="fas fa-eye me-1"></i>Voir
@@ -144,14 +144,12 @@
                 </div>
                 {% endif %}
             {% else %}
-                <div class="text-center py-5">
-                    <div class="mb-4">
-                        <i class="fas fa-clipboard-list fa-4x text-muted"></i>
-                    </div>
-                    <h4 class="text-muted">Aucun rapport trouvé</h4>
-                    <p class="text-muted">Vous n'avez pas encore créé de rapport.</p>
+                <div class="empty-state text-center py-5">
+                    <i class="fas fa-clipboard-list fa-4x text-muted mb-4" style="opacity: 0.5;"></i>
+                    <h4 class="text-muted mb-2">Aucun rapport trouvé</h4>
+                    <p class="text-muted mb-4">Vous n'avez pas encore créé de rapport.</p>
                     {% if user.role == 'RESIDENT' %}
-                    <a href="{% url 'finance:report_create' %}" class="btn btn-primary">
+                    <a href="{% url 'finance:report_create' %}" class="btn btn-primary btn-modern">
                         <i class="fas fa-plus me-2"></i>Créer votre premier rapport
                     </a>
                     {% endif %}
@@ -160,4 +158,61 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== STYLES RAPPORTS MODERNES ===== */
+.card-modern {
+    transition: all 0.3s ease;
+}
+
+.card-modern:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card-header-modern {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: var(--spacing-4) var(--spacing-5);
+    border-bottom: none;
+}
+
+.card-header-modern h6 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+}
+
+.card-header-modern .badge {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--radius-full);
+}
+
+.empty-state {
+    padding: var(--spacing-16) var(--spacing-4);
+}
+
+.empty-state i {
+    font-size: var(--font-size-5xl);
+    color: var(--text-muted);
+    opacity: 0.5;
+    margin-bottom: var(--spacing-4);
+}
+
+.empty-state h4 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-2);
+}
+
+.empty-state p {
+    font-size: var(--font-size-base);
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-6);
+}
+</style>
 {% endblock %}

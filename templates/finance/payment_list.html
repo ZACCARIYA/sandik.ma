@@ -5,28 +5,15 @@
 
 {% block content %}
 <div class="container-fluid">
+    <!-- ===== EN-TÊTE DE PAGE ===== -->
+    {% include 'components/page_header.html' with title="Paiements" icon="fas fa-credit-card" subtitle="Gérez tous les paiements" actions=page_actions|default:None %}
+    
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-credit-card me-2"></i>Paiements
-                </h1>
-                <div>
-                    {% if user.role == 'RESIDENT' %}
-                        <a href="{% url 'finance:payment_upload' %}" class="btn btn-primary">
-                            <i class="fas fa-upload me-1"></i>Nouveau Paiement avec Justificatif
-                        </a>
-                    {% else %}
-                        <a href="{% url 'finance:payment_create' %}" class="btn btn-primary">
-                            <i class="fas fa-plus me-1"></i>Nouveau Paiement
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
 
             <!-- Filtres -->
-            <div class="card mb-4">
-                <div class="card-body">
+            <div class="card-modern mb-4">
+                <div class="card-body-modern">
                     <form method="get" class="row g-3">
                         <div class="col-md-3">
                             <label for="search" class="form-label">Rechercher</label>
@@ -71,12 +58,12 @@
             </div>
 
             <!-- Liste des paiements -->
-            <div class="card">
-                <div class="card-body">
+            <div class="card-modern">
+                <div class="card-body-modern">
                     {% if object_list %}
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-dark">
+                            <table class="table-modern">
+                                <thead>
                                     <tr>
                                         <th>Résident</th>
                                         <th>Date</th>
@@ -94,12 +81,12 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
-                                                    {{ payment.user.first_name|first|default:payment.user.username|first|upper }}
+                                                    {{ payment.document.resident.first_name|first|default:payment.document.resident.username|first|upper }}
                                                 </div>
                                                 <div>
-                                                    <div class="fw-bold">{{ payment.user.get_full_name|default:payment.user.username }}</div>
-                                                    {% if payment.user.apartment %}
-                                                        <small class="text-muted">{{ payment.user.apartment }}</small>
+                                                    <div class="fw-bold">{{ payment.document.resident.get_full_name|default:payment.document.resident.username }}</div>
+                                                    {% if payment.document.resident.apartment %}
+                                                        <small class="text-muted">{{ payment.document.resident.apartment }}</small>
                                                     {% endif %}
                                                 </div>
                                             </div>
@@ -210,7 +197,7 @@
                                 {% endif %}
                             </p>
                             {% if user.role == 'RESIDENT' %}
-                                <a href="{% url 'finance:payment_upload' %}" class="btn btn-primary">
+                                <a href="{% url 'finance:document_list' %}" class="btn btn-primary btn-modern">
                                     <i class="fas fa-upload me-1"></i>Effectuer un paiement
                                 </a>
                             {% endif %}
@@ -254,35 +241,107 @@
 </div>
 
 <style>
+/* ===== STYLES PAIEMENTS MODERNES ===== */
 .avatar-sm {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
 }
 
-.table th {
-    border-top: none;
-    font-weight: 600;
+.table-modern {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-modern thead th {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: var(--spacing-4) var(--spacing-5);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+}
+
+.table-modern tbody td {
+    padding: var(--spacing-4) var(--spacing-5);
+    border-bottom: var(--border-width-thin) solid var(--border-color);
+    vertical-align: middle;
+}
+
+.table-modern tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table-modern tbody tr:hover {
+    background: var(--primary-bg);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-group-sm .btn {
-    padding: 0.25rem 0.5rem;
-}
-
-.card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius);
 }
 
 .badge {
-    font-size: 0.75em;
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--radius-full);
+    font-weight: var(--font-weight-semibold);
 }
 
 code {
-    background-color: #f8f9fa;
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
+    background-color: var(--bg-tertiary);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius);
+    font-size: var(--font-size-sm);
+    color: var(--primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.empty-state {
+    padding: var(--spacing-16) var(--spacing-4);
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: var(--font-size-5xl);
+    color: var(--text-muted);
+    opacity: 0.5;
+    margin-bottom: var(--spacing-4);
+}
+
+.empty-state h4 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-2);
+}
+
+.empty-state p {
+    font-size: var(--font-size-base);
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-6);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-modern thead th,
+    .table-modern tbody td {
+        padding: var(--spacing-3) var(--spacing-2);
+        font-size: var(--font-size-xs);
+    }
+    
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-size: var(--font-size-xs);
+    }
 }
 </style>
 

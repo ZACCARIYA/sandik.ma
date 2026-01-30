@@ -1012,6 +1012,14 @@ class NotificationCreateView(CreateView):
                 date_str = date_obj.strftime('%d/%m/%Y') if hasattr(date_obj, 'strftime') else (date_obj or None)
                 link = getattr(self.object, 'link', None)
 
+                # Construire le lien vers le dashboard résident
+                try:
+                    from django.conf import settings
+                    base_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+                    dashboard_url = base_url + reverse('finance:resident_dashboard')
+                except Exception:
+                    dashboard_url = 'http://127.0.0.1:8000/resident-dashboard/'
+                
                 context = {
                     'subject': subject,
                     'resident_name': (user.get_full_name() or user.username),
@@ -1022,13 +1030,26 @@ class NotificationCreateView(CreateView):
                     'message': (self.object.message or ''),
                     'intro_text': "Vous avez reçu une nouvelle notification.",
                     'link': link,
+                    'dashboard_url': dashboard_url,
                 }
-                send_templated_email(
-                    subject=subject,
-                    to_email=user.email,
-                    template_name='emails/notification_generic.html',
-                    context=context,
-                )
+                # Marquer que l'email a été envoyé pour éviter le double envoi via le signal
+                self.object._email_already_sent = True
+                
+                # Marquer que l'email a été envoyé pour éviter le double envoi via le signal
+                self.object._email_already_sent = True
+                
+                try:
+                    result = send_templated_email(
+                        subject=subject,
+                        to_email=user.email,
+                        template_name='emails/notification_generic.html',
+                        context=context,
+                    )
+                    print(f"[NOTIFICATION CREATE] Email envoyé à {user.email} pour notification: {subject}")
+                except Exception as e:
+                    print(f"[NOTIFICATION CREATE] Erreur envoi email à {user.email}: {e}")
+                    import traceback
+                    traceback.print_exc()
         except Exception:
             # Ne pas bloquer l'application si l'email échoue
             pass
@@ -1052,6 +1073,269 @@ class NotificationDetailView(DetailView):
             messages.error(request, "Accès non autorisé.")
             return redirect('finance:notification_list')
         return super().dispatch(request, *args, **kwargs)
+
+class PaymentListView(ListView):
+    """List payments - filtered by role"""
+    model = Payment
+    template_name = 'finance/payment_list.html'
+    context_object_name = 'object_list'
+    paginate_by = 20
+    
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('finance:login')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        qs = Payment.objects.select_related('document__resident', 'verified_by').order_by('-payment_date')
+        
+        # Filtre pour les résidents - seulement leurs paiements
+        if self.request.user.role == 'RESIDENT':
+            qs = qs.filter(document__resident=self.request.user)
+        
+        # Filtres pour les syndics
+        if self.request.user.role in ['SUPERADMIN', 'SYNDIC']:
+            # Recherche
+            search = self.request.GET.get('search')
+            if search:
+                qs = qs.filter(
+                    Q(document__resident__username__icontains=search) |
+                    Q(document__resident__first_name__icontains=search) |
+                    Q(document__resident__last_name__icontains=search) |
+                    Q(reference__icontains=search) |
+                    Q(document__title__icontains=search)
+                )
+            
+            # Filtre par méthode de paiement
+            payment_method = self.request.GET.get('payment_method')
+            if payment_method:
+                qs = qs.filter(payment_method=payment_method)
+            
+            # Filtre par statut
+            status = self.request.GET.get('status')
+            if status == 'verified':
+                qs = qs.filter(is_verified=True)
+            elif status == 'pending':
+                qs = qs.filter(is_verified=False)
+            
+            # Filtre par dates
+            date_from = self.request.GET.get('date_from')
+            if date_from:
+                qs = qs.filter(payment_date__gte=date_from)
+            
+            date_to = self.request.GET.get('date_to')
+            if date_to:
+                qs = qs.filter(payment_date__lte=date_to)
+        
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        return context
+
+
+class PaymentDetailView(DetailView):
+    """View payment details"""
+    model = Payment
+    template_name = 'finance/payment_detail.html'
+    context_object_name = 'payment'
+    
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('finance:login')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        qs = Payment.objects.select_related('document__resident', 'verified_by')
+        if self.request.user.role == 'RESIDENT':
+            qs = qs.filter(document__resident=self.request.user)
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        payment = self.object
+        resident = payment.document.resident
+        
+        # Calculer les statistiques du résident
+        all_payments = Payment.objects.filter(document__resident=resident)
+        context['total_payments'] = all_payments.count()
+        context['verified_payments'] = all_payments.filter(is_verified=True).count()
+        context['pending_payments'] = all_payments.filter(is_verified=False).count()
+        context['total_contributions'] = Document.objects.filter(resident=resident).count()
+        
+        return context
+
+
+class PaymentProofView(View):
+    """View payment proof image"""
+    def get(self, request, pk):
+        payment = get_object_or_404(Payment, pk=pk)
+        
+        # Vérifier les permissions
+        if request.user.role == 'RESIDENT' and payment.document.resident != request.user:
+            messages.error(request, "Accès non autorisé.")
+            return redirect('finance:payment_list')
+        
+        if not payment.payment_proof:
+            messages.error(request, "Aucun justificatif disponible.")
+            return redirect('finance:payment_detail', pk=pk)
+        
+        from django.http import FileResponse
+        return FileResponse(payment.payment_proof.open(), content_type='image/jpeg')
+
+
+class PaymentUpdateView(UpdateView):
+    """Update payment - syndic and superadmin only"""
+    model = Payment
+    template_name = 'finance/payment_form.html'
+    fields = ['amount', 'payment_method', 'payment_date', 'reference', 'notes', 'is_verified']
+    success_url = reverse_lazy('finance:payment_list')
+    
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('finance:login')
+        if request.user.role not in ['SUPERADMIN', 'SYNDIC']:
+            messages.error(request, "Accès non autorisé.")
+            return redirect('finance:home')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        payment = self.object
+        # Ajouter le document au contexte pour le template
+        if payment and payment.document:
+            context['document'] = payment.document
+            # Préparer le help_text pour le montant
+            context['help_text_amount'] = f"Montant du document : {payment.document.amount} DH"
+        return context
+    
+    def form_valid(self, form):
+        if form.cleaned_data.get('is_verified') and not self.object.is_verified:
+            form.instance.verified_by = self.request.user
+            form.instance.verified_at = timezone.now()
+        messages.success(self.request, "Paiement modifié avec succès.")
+        return super().form_valid(form)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PaymentUploadAPI(View):
+    """API endpoint to upload payment proof"""
+    def post(self, request):
+        try:
+            payment_id = request.POST.get('payment_id')
+            payment_proof = request.FILES.get('payment_proof')
+            
+            if not payment_id or not payment_proof:
+                return JsonResponse({'success': False, 'error': 'Données manquantes'}, status=400)
+            
+            payment = get_object_or_404(Payment, pk=payment_id)
+            
+            # Vérifier les permissions
+            if request.user.role == 'RESIDENT' and payment.document.resident != request.user:
+                return JsonResponse({'success': False, 'error': 'Accès non autorisé'}, status=403)
+            
+            # Valider le type de fichier
+            if not payment_proof.content_type.startswith('image/'):
+                return JsonResponse({'success': False, 'error': 'Le fichier doit être une image'}, status=400)
+            
+            # Valider la taille (5MB max)
+            if payment_proof.size > 5 * 1024 * 1024:
+                return JsonResponse({'success': False, 'error': 'Fichier trop volumineux (max 5MB)'}, status=400)
+            
+            payment.payment_proof = payment_proof
+            payment.save()
+            
+            return JsonResponse({'success': True, 'message': 'Justificatif uploadé avec succès'})
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PaymentVerificationAPI(View):
+    """API endpoint to verify or reject a payment"""
+    def post(self, request, pk):
+        try:
+            # Vérifier l'authentification
+            if not request.user.is_authenticated:
+                return JsonResponse({'success': False, 'error': 'Authentification requise'}, status=401)
+            
+            # Vérifier les permissions (seulement SYNDIC et SUPERADMIN)
+            if request.user.role not in ['SYNDIC', 'SUPERADMIN']:
+                return JsonResponse({'success': False, 'error': 'Accès non autorisé'}, status=403)
+            
+            payment = get_object_or_404(Payment, pk=pk)
+            
+            # Vérifier si le paiement est déjà vérifié
+            if payment.is_verified:
+                return JsonResponse({'success': False, 'error': 'Ce paiement est déjà vérifié'}, status=400)
+            
+            action = request.POST.get('action')  # 'verify' ou 'reject'
+            
+            if action == 'verify':
+                # Valider le paiement
+                payment.is_verified = True
+                payment.verified_by = request.user
+                payment.verified_at = timezone.now()
+                payment.save()
+                
+                # Mettre à jour le statut du document
+                total_paid = payment.document.payments.filter(is_verified=True).aggregate(
+                    total=Sum('amount')
+                )['total'] or Decimal('0')
+                payment.document.is_paid = total_paid >= payment.document.amount
+                payment.document.save()
+                
+                # Envoyer une notification au résident
+                try:
+                    Notification.objects.create(
+                        title=f"Paiement validé - {payment.document.title}",
+                        message=f"Votre paiement de {payment.amount} DH pour le document '{payment.document.title}' a été validé avec succès.",
+                        notification_type="PAYMENT_CONFIRMATION",
+                        priority="MEDIUM",
+                        sender=request.user,
+                    ).recipients.add(payment.document.resident)
+                except Exception as e:
+                    # Ne pas bloquer si la notification échoue
+                    pass
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Paiement validé avec succès',
+                    'is_verified': True,
+                    'verified_by': request.user.get_full_name() or request.user.username,
+                    'verified_at': payment.verified_at.strftime('%d/%m/%Y %H:%M')
+                })
+                
+            elif action == 'reject':
+                # Rejeter le paiement (on peut ajouter un champ rejection_reason si nécessaire)
+                rejection_reason = request.POST.get('reason', 'Paiement rejeté par le syndic')
+                
+                # Envoyer une notification au résident
+                try:
+                    Notification.objects.create(
+                        title=f"Paiement rejeté - {payment.document.title}",
+                        message=f"Votre paiement de {payment.amount} DH pour le document '{payment.document.title}' a été rejeté. Raison: {rejection_reason}",
+                        notification_type="PAYMENT_REMINDER",
+                        priority="HIGH",
+                        sender=request.user,
+                    ).recipients.add(payment.document.resident)
+                except Exception as e:
+                    # Ne pas bloquer si la notification échoue
+                    pass
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Paiement rejeté',
+                    'is_verified': False
+                })
+            else:
+                return JsonResponse({'success': False, 'error': 'Action invalide'}, status=400)
+                
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 class PaymentCreateView(CreateView):
     """Create payment for a document - residents only"""
@@ -1148,7 +1432,33 @@ class SendNotificationAPI(View):
                         results['sms_sent'] += 1
                     
                     if send_email_enabled and recipient.email:
-                        send_email(recipient.email, notification.title, notification.message)
+                        # Utiliser le template HTML pour un email professionnel
+                        try:
+                            from .emails import send_templated_email
+                            from django.urls import reverse
+                            from django.conf import settings
+                            base_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+                            dashboard_url = base_url + reverse('finance:resident_dashboard')
+                            
+                            context = {
+                                'resident_name': recipient.get_full_name() or recipient.username,
+                                'message': notification.message,
+                                'dashboard_url': dashboard_url,
+                                'notification_type': notification.get_notification_type_display() if hasattr(notification, 'get_notification_type_display') else None,
+                                'priority': notification.get_priority_display() if hasattr(notification, 'get_priority_display') else None,
+                                'amount': getattr(notification, 'amount', None),
+                                'date': getattr(notification, 'date', None),
+                                'intro_text': "Vous avez reçu une nouvelle notification.",
+                            }
+                            send_templated_email(
+                                subject=notification.title,
+                                to_email=recipient.email,
+                                template_name='emails/notification_generic.html',
+                                context=context,
+                            )
+                        except Exception:
+                            # Fallback vers send_email simple si le template échoue
+                            send_email(recipient.email, notification.title, notification.message)
                         results['email_sent'] += 1
                         
                 except Exception as e:

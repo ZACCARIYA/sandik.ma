@@ -239,6 +239,15 @@
 
             // ===== MODE SOMBRE =====
             initializeTheme();
+            
+            // ===== NAVBAR SCROLL EFFECT =====
+            initializeNavbarScroll();
+            
+            // ===== NAVIGATION ACTIVE STATE =====
+            updateActiveNavigation();
+            
+            // ===== MOBILE NAVIGATION ENHANCEMENTS =====
+            enhanceMobileNavigation();
         });
 
         // ===== FONCTIONS NAVIGATION SYNDIC =====
@@ -343,6 +352,76 @@
             }, 100);
         }
 
+        // ===== NAVBAR SCROLL EFFECT =====
+        function initializeNavbarScroll() {
+            const navbar = document.querySelector('.navbar');
+            if (!navbar) return;
+            
+            let lastScroll = 0;
+            window.addEventListener('scroll', function() {
+                const currentScroll = window.pageYOffset;
+                
+                // Ajouter classe scrolled après un certain scroll
+                if (currentScroll > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                
+                lastScroll = currentScroll;
+            });
+        }
+        
+        // ===== MISE À JOUR ÉTAT ACTIF NAVIGATION =====
+        function updateActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link-modern, .nav-link');
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && currentPath.includes(href.split('/').filter(Boolean)[0])) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+        
+        // ===== AMÉLIORATION NAVIGATION MOBILE =====
+        function enhanceMobileNavigation() {
+            const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+            
+            mobileNavItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Animation de clic
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+                
+                // Effet ripple au clic
+                item.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        }
+        
         // ===== FONCTIONS MODE SOMBRE =====
         function initializeTheme() {
             const themeToggle = document.getElementById('themeToggle');
@@ -495,6 +574,11 @@
     <!-- ===== NAVIGATION MOBILE RÉSIDENT ===== -->
     {% if user.is_authenticated and user.role == 'RESIDENT' %}
         {% include 'components/resident_mobile_nav.html' %}
+    {% endif %}
+    
+    <!-- ===== NAVIGATION MOBILE SYNDIC ===== -->
+    {% if user.is_authenticated and user.role in 'SYNDIC,SUPERADMIN' %}
+        {% include 'components/syndic_mobile_nav.html' %}
     {% endif %}
     
     <!-- ===== JAVASCRIPT ADDITIONNEL ===== -->
