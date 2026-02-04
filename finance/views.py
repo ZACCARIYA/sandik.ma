@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, View, TemplateView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout, authenticate, login
 from django.db.models import Sum, Q, Count
@@ -181,6 +181,7 @@ class SyndicDashboardView(TemplateView):
         import json
         context['monthly_payments_json'] = json.dumps(monthly_payments)
         
+        # URLs pour les actions rapides (utiliser reverse pour obtenir les URLs réelles)
         context.update({
             'up_to_date': up_to_date,
             'pending': pending,
@@ -200,6 +201,13 @@ class SyndicDashboardView(TemplateView):
             'recent_reports': recent_reports,
             'recent_payments': recent_payments,
             'monthly_payments': monthly_payments,
+            # URLs pour les actions rapides
+            'document_create_url': reverse('finance:document_create'),
+            'depense_create_url': reverse('finance:depense_create'),
+            'notification_create_url': reverse('finance:notification_create'),
+            'resident_create_url': reverse('finance:resident_create'),
+            'overdue_dashboard_url': reverse('finance:overdue_dashboard'),
+            'event_create_url': reverse('finance:event_create'),
         })
         return context
 

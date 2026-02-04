@@ -29,12 +29,12 @@
     <!-- ===== ACTIONS RAPIDES ===== -->
     <section class="quick-actions-section mb-5">
         <div class="row">
-            {% include 'components/quick_action.html' with url='finance:document_create' icon='fas fa-file-plus' icon_class='bg-primary' title='Document' description='Créer facture' %}
-            {% include 'components/quick_action.html' with url='finance:depense_create' icon='fas fa-receipt' icon_class='bg-success' title='Dépense' description='Nouvelle dépense' %}
-            {% include 'components/quick_action.html' with url='finance:notification_create' icon='fas fa-bell' icon_class='bg-warning' title='Notification' description='Informer' %}
-            {% include 'components/quick_action.html' with url='finance:resident_create' icon='fas fa-user-plus' icon_class='bg-info' title='Résident' description='Ajouter' %}
-            {% include 'components/quick_action.html' with url='finance:overdue_dashboard' icon='fas fa-exclamation-triangle' icon_class='bg-danger' title='Impayés' description='Gérer' %}
-            {% include 'components/quick_action.html' with url='finance:event_create' icon='fas fa-calendar-plus' icon_class='bg-info' title='Événement' description='Planifier' %}
+            {% include 'components/quick_action.html' with url=document_create_url icon='fas fa-file-plus' icon_class='bg-primary' title='Document' description='Créer facture' %}
+            {% include 'components/quick_action.html' with url=depense_create_url icon='fas fa-receipt' icon_class='bg-success' title='Dépense' description='Nouvelle dépense' %}
+            {% include 'components/quick_action.html' with url=notification_create_url icon='fas fa-bell' icon_class='bg-warning' title='Notification' description='Informer' %}
+            {% include 'components/quick_action.html' with url=resident_create_url icon='fas fa-user-plus' icon_class='bg-info' title='Résident' description='Ajouter' %}
+            {% include 'components/quick_action.html' with url=overdue_dashboard_url icon='fas fa-exclamation-triangle' icon_class='bg-danger' title='Impayés' description='Gérer' %}
+            {% include 'components/quick_action.html' with url=event_create_url icon='fas fa-calendar-plus' icon_class='bg-info' title='Événement' description='Planifier' %}
         </div>
     </section>
 
