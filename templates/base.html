@@ -125,14 +125,14 @@
         <!-- ===== MESSAGES SYSTÈME ===== -->
         {% if messages %}
         <div class="container mt-3">
-                {% for message in messages %}
-            <div class="alert-modern alert-{{ message.tags }} alert-dismissible fade show">
-                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
-                            {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            </div>
+            {% for message in messages %}
+                <div class="alert-modern alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                    <strong>{{ message.tags|title }}:</strong> {{ message|safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
         {% endif %}
 
         <!-- ===== CONTENU DE LA PAGE ===== -->
