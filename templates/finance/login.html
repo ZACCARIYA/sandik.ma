@@ -10,12 +10,23 @@
             <div class="col-md-6 col-lg-4">
                 <div class="login-card">
                     <div class="login-header">
-                        <div class="login-logo">
+                        <div class="login-logo animate-pulse">
                             <img src="{% static 'images/logos/logo.svg' %}" alt="SyndicPro" class="logo-main">
                         </div>
-                        <h2>Connexion</h2>
-                        <p>Accédez à votre espace</p>
+                        <h2 class="text-gradient">Connexion</h2>
+                        <p>Accédez à votre espace de gestion</p>
                     </div>
+                    
+                    <!-- Messages d'erreur/succès -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert-modern alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-4" role="alert">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                     
                     <form method="post" class="login-form">
                         {% csrf_token %}
@@ -43,6 +54,13 @@
                         <button type="submit" class="btn btn-primary w-100">
                             Se connecter
                         </button>
+                        
+                        <div class="text-center mt-4">
+                            <p class="text-muted">
+                                Vous n'avez pas de compte ? 
+                                <a href="{% url 'finance:register' %}" class="text-primary fw-bold">S'inscrire</a>
+                            </p>
+                        </div>
                     </form>
                     
                 </div>
@@ -58,7 +76,9 @@
 
 .login-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 400% 400%;
+    animation: gradient-shift 15s ease infinite;
     padding: 2rem 0;
     display: flex;
     align-items: center;
@@ -80,24 +100,43 @@
 
 .login-card {
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255, 255, 255, 0.3);
     padding: 3rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     position: relative;
     z-index: 1;
     animation: slideInUp 0.8s ease-out;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 @keyframes slideInUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(30px) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes gradient-shift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
     }
 }
 
@@ -106,12 +145,40 @@
     margin-bottom: 2.5rem;
 }
 
+.login-logo {
+    margin-bottom: 1.5rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.login-logo img {
+    width: 80px;
+    height: 80px;
+    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.login-logo:hover img {
+    transform: scale(1.1) rotate(5deg);
+}
+
 .login-header h2 {
     color: #2d3748;
     font-size: 2.2rem;
-    font-weight: 700;
+    font-weight: 800;
     margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+}
+
+.login-header .text-gradient {
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -155,9 +222,9 @@
 .login-form .form-control:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 4px 12px rgba(102, 126, 234, 0.1);
     background: white;
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.01);
 }
 
 .login-form .form-control::placeholder {
@@ -169,16 +236,17 @@
     padding: 1rem 2rem;
     font-size: 1.1rem;
     font-weight: 700;
-    border-radius: 12px;
+    border-radius: 16px;
     margin-top: 1.5rem;
     background: linear-gradient(135deg, #667eea, #764ba2);
     border: none;
     color: white;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
 .login-form .btn::before {
@@ -197,8 +265,9 @@
 }
 
 .login-form .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.5);
+    background: linear-gradient(135deg, #764ba2, #667eea);
 }
 
 .login-form .btn:active {

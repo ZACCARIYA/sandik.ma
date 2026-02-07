@@ -14,6 +14,7 @@ from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django import forms
 from decimal import Decimal
 import json
 
@@ -253,6 +254,29 @@ class ResidentDashboardView(TemplateView):
             Q(audience='ALL_RESIDENTS') | Q(participants=user)
         ).filter(start_at__gte=timezone.now()).order_by('start_at')[:5]
         
+        # Actions de page pour l'en-tête
+        from django.urls import reverse_lazy
+        page_actions = [
+            {
+                'label': 'Nouveau Rapport',
+                'url': reverse_lazy('finance:report_create'),
+                'icon': 'fas fa-plus-circle',
+                'type': 'primary'
+            },
+            {
+                'label': 'Mes Documents',
+                'url': reverse_lazy('finance:document_list'),
+                'icon': 'fas fa-file-alt',
+                'type': 'outline'
+            },
+            {
+                'label': 'Mes Notifications',
+                'url': reverse_lazy('finance:notification_list'),
+                'icon': 'fas fa-bell',
+                'type': 'outline'
+            }
+        ]
+        
         context.update({
             'status': status,
             'documents': documents,
@@ -260,6 +284,7 @@ class ResidentDashboardView(TemplateView):
             'recent_payments': recent_payments,
             'recent_reports': recent_reports,
             'upcoming_events': upcoming_events,
+            'page_actions': page_actions,
         })
         return context
 
@@ -477,6 +502,21 @@ class SyndicCreateView(CreateView):
         
         messages.success(self.request, f"Syndic {user.username} créé avec succès. Mot de passe: syndic123")
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Actions de page pour l'en-tête
+        context['page_actions'] = [
+            {
+                'label': 'Retour à la liste',
+                'url': reverse_lazy('finance:syndic_management'),
+                'icon': 'fas fa-arrow-left',
+                'type': 'outline'
+            }
+        ]
+        
+        return context
 
 
 class SyndicUpdateView(UpdateView):
@@ -496,6 +536,21 @@ class SyndicUpdateView(UpdateView):
     
     def get_queryset(self):
         return User.objects.filter(role='SYNDIC')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Actions de page pour l'en-tête
+        context['page_actions'] = [
+            {
+                'label': 'Retour à la liste',
+                'url': reverse_lazy('finance:syndic_management'),
+                'icon': 'fas fa-arrow-left',
+                'type': 'outline'
+            }
+        ]
+        
+        return context
 
 
 class SyndicDetailView(DetailView):
@@ -873,6 +928,17 @@ class DocumentCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['residents'] = User.objects.filter(role='RESIDENT')
+        
+        # Actions de page pour l'en-tête
+        context['page_actions'] = [
+            {
+                'label': 'Retour à la liste',
+                'url': reverse_lazy('finance:document_list'),
+                'icon': 'fas fa-arrow-left',
+                'type': 'outline'
+            }
+        ]
+        
         return context
     
     def form_valid(self, form):
@@ -1399,6 +1465,124 @@ class CustomLoginView(TemplateView):
             messages.error(request, "Veuillez remplir tous les champs.")
         
         return self.get(request, *args, **kwargs)
+
+
+class RegisterView(TemplateView):
+    """User registration view for residents"""
+    template_name = 'finance/register.html'
+    
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('finance:home')
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        # Create a custom form for User model
+        class UserRegistrationForm(forms.ModelForm):
+            password1 = forms.CharField(
+                label="Mot de passe",
+                widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+                min_length=8,
+                help_text="Minimum 8 caractères"
+            )
+            password2 = forms.CharField(
+                label="Confirmer le mot de passe",
+                widget=forms.PasswordInput(attrs={'class': 'form-control'})
+            )
+            
+            class Meta:
+                model = User
+                fields = ['username', 'email', 'first_name', 'last_name', 'apartment', 'phone']
+                widgets = {
+                    'username': forms.TextInput(attrs={'class': 'form-control'}),
+                    'email': forms.EmailInput(attrs={'class': 'form-control'}),
+                    'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+                    'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+                    'apartment': forms.TextInput(attrs={'class': 'form-control'}),
+                    'phone': forms.TextInput(attrs={'class': 'form-control'}),
+                }
+            
+            def clean_password2(self):
+                password1 = self.cleaned_data.get("password1")
+                password2 = self.cleaned_data.get("password2")
+                if password1 and password2 and password1 != password2:
+                    raise forms.ValidationError("Les mots de passe ne correspondent pas.")
+                return password2
+            
+            def clean_apartment(self):
+                apartment = self.cleaned_data.get('apartment')
+                if apartment:
+                    # Check if apartment already exists for a resident
+                    existing = User.objects.filter(
+                        role='RESIDENT',
+                        apartment=apartment
+                    )
+                    if existing.exists():
+                        raise forms.ValidationError("Un résident existe déjà pour cet appartement.")
+                return apartment
+        
+        form = UserRegistrationForm(request.POST)
+        
+        if form.is_valid():
+            try:
+                user = form.save(commit=False)
+                user.role = 'RESIDENT'
+                user.is_active = True
+                user.set_password(form.cleaned_data['password1'])
+                
+                # Validate before saving
+                user.clean()
+                user.save()
+                
+                # Create resident status
+                ResidentStatus.objects.create(resident=user)
+                
+                messages.success(request, f"Compte créé avec succès ! Vous pouvez maintenant vous connecter.")
+                return redirect('finance:login')
+                
+            except ValidationError as e:
+                for field, errors in e.message_dict.items():
+                    for error in errors:
+                        form.add_error(field, error)
+            except IntegrityError:
+                form.add_error('apartment', "Un résident existe déjà pour cet appartement.")
+        
+        # If form is invalid, render with errors
+        context = self.get_context_data(**kwargs)
+        context['form'] = form
+        return self.render_to_response(context)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Create form instance for GET request
+        if 'form' not in context:
+            class UserRegistrationForm(forms.ModelForm):
+                password1 = forms.CharField(
+                    label="Mot de passe",
+                    widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+                    min_length=8
+                )
+                password2 = forms.CharField(
+                    label="Confirmer le mot de passe",
+                    widget=forms.PasswordInput(attrs={'class': 'form-control'})
+                )
+                
+                class Meta:
+                    model = User
+                    fields = ['username', 'email', 'first_name', 'last_name', 'apartment', 'phone']
+                    widgets = {
+                        'username': forms.TextInput(attrs={'class': 'form-control'}),
+                        'email': forms.EmailInput(attrs={'class': 'form-control'}),
+                        'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+                        'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+                        'apartment': forms.TextInput(attrs={'class': 'form-control'}),
+                        'phone': forms.TextInput(attrs={'class': 'form-control'}),
+                    }
+            
+            context['form'] = UserRegistrationForm()
+        
+        return context
 
 
 class CustomLogoutView(TemplateView):
