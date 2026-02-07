@@ -1,231 +1,224 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {% if object %}Modifier le Syndic{% else %}Ajouter un Syndic{% endif %} - Syndic
+    {% if object %}Modifier le Syndic{% else %}Ajouter un Syndic{% endif %} - SyndicPro
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="page-header-content">
-        <div class="page-header-icon">
-            <i class="fas fa-{% if object %}edit{% else %}user-tie{% endif %}"></i>
-        </div>
-        <div class="page-header-text">
-            <h1>{% if object %}Modifier le Syndic{% else %}Ajouter un Syndic{% endif %}</h1>
-            <p>{% if object %}Modifiez les informations du syndic{% else %}Créez un nouveau compte syndic{% endif %}</p>
-        </div>
-    </div>
-    <div class="page-header-actions">
-        <a href="{% url 'finance:syndic_management' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
-        </a>
-    </div>
-</div>
+<!-- ===== EN-TÊTE DE PAGE ===== -->
+{% include 'components/page_header.html' with title=object|yesno:"Modifier le Syndic,Ajouter un Syndic" subtitle="Gérer les informations du syndic" icon=object|yesno:"fas fa-edit,fas fa-user-tie" actions=page_actions|default:None %}
 
-<div class="grid grid-cols-2 gap-6">
-    <div class="modern-form">
-        <div class="form-header">
-            <h3>
-                <i class="fas fa-user-tie me-2"></i>
-                Informations du Syndic
-            </h3>
-            <p>Renseignez les informations du compte syndic</p>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- ===== FORMULAIRE PRINCIPAL ===== -->
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-tie me-2"></i>Informations du Syndic
+                    </h5>
+                </div>
+                <div class="card-body-modern">
+                    <form method="post" class="modern-form">
+                        {% csrf_token %}
+                        
+                        <!-- ===== NOM D'UTILISATEUR ET EMAIL ===== -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                {% include 'components/form_field.html' with field=form.username label="Nom d'utilisateur" icon="fas fa-user" required=True %}
+                            </div>
+                            <div class="col-md-6">
+                                {% include 'components/form_field.html' with field=form.email label="Email" icon="fas fa-envelope" %}
+                            </div>
+                        </div>
+                        
+                        <!-- ===== PRÉNOM ET NOM ===== -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                {% include 'components/form_field.html' with field=form.first_name label="Prénom" icon="fas fa-user" %}
+                            </div>
+                            <div class="col-md-6">
+                                {% include 'components/form_field.html' with field=form.last_name label="Nom de famille" icon="fas fa-user" %}
+                            </div>
+                        </div>
+                        
+                        <!-- ===== TÉLÉPHONE ET ADRESSE ===== -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                {% include 'components/form_field.html' with field=form.phone label="Téléphone" icon="fas fa-phone" %}
+                            </div>
+                            <div class="col-md-6">
+                                {% include 'components/form_field.html' with field=form.address label="Adresse" icon="fas fa-map-marker-alt" %}
+                            </div>
+                        </div>
+                        
+                        <!-- ===== STATUT ACTIF ===== -->
+                        {% if form.is_active %}
+                        <div class="form-check form-switch modern-switch mb-4">
+                            {{ form.is_active }}
+                            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                <i class="fas fa-toggle-on me-2"></i>Compte actif
+                            </label>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- ===== ACTIONS DU FORMULAIRE ===== -->
+                        <div class="form-actions">
+                            <a href="{% url 'finance:syndic_management' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if object %}Mettre à jour{% else %}Créer le syndic{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
         
-        <form method="post" class="form-content">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="{{ form.username.id_for_label }}" class="form-label">
-                    <i class="fas fa-user me-2"></i>Nom d'utilisateur
-                    <span class="text-danger">*</span>
-                </label>
-                {{ form.username }}
-                {% if form.username.errors %}
-                    <div class="form-error">
-                        {% for error in form.username.errors %}
-                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                        {% endfor %}
+        <div class="col-lg-4">
+            <!-- ===== INFORMATIONS ===== -->
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations
+                    </h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="info-section">
+                        <h6 class="info-title">
+                            <i class="fas fa-shield-alt me-2"></i>Rôle du syndic
+                        </h6>
+                        <p class="info-text">
+                            Le syndic aura accès à toutes les fonctionnalités de gestion : résidents, documents, notifications, paiements et tableau de bord complet.
+                        </p>
                     </div>
-                {% endif %}
-                <div class="form-help">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Nom d'utilisateur unique pour la connexion
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="{{ form.email.id_for_label }}" class="form-label">
-                    <i class="fas fa-envelope me-2"></i>Adresse email
-                </label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                    <div class="form-error">
-                        {% for error in form.email.errors %}
-                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                        {% endfor %}
+                    
+                    <div class="info-section">
+                        <h6 class="info-title">
+                            <i class="fas fa-key me-2"></i>Mot de passe
+                        </h6>
+                        <p class="info-text">
+                            {% if object %}
+                                Le mot de passe ne peut pas être modifié ici. Utilisez la fonction de réinitialisation.
+                            {% else %}
+                                Un mot de passe par défaut sera généré : <code class="password-code">syndic123</code>
+                            {% endif %}
+                        </p>
                     </div>
-                {% endif %}
-                <div class="form-help">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Email pour les notifications et communications
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
-                        <i class="fas fa-user me-2"></i>Prénom
-                    </label>
-                    {{ form.first_name }}
-                    {% if form.first_name.errors %}
-                        <div class="form-error">
-                            {% for error in form.first_name.errors %}
-                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
-                        <i class="fas fa-user me-2"></i>Nom de famille
-                    </label>
-                    {{ form.last_name }}
-                    {% if form.last_name.errors %}
-                        <div class="form-error">
-                            {% for error in form.last_name.errors %}
-                                <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="{{ form.phone.id_for_label }}" class="form-label">
-                    <i class="fas fa-phone me-2"></i>Numéro de téléphone
-                </label>
-                {{ form.phone }}
-                {% if form.phone.errors %}
-                    <div class="form-error">
-                        {% for error in form.phone.errors %}
-                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                        {% endfor %}
+                    
+                    <div class="info-section">
+                        <h6 class="info-title">
+                            <i class="fas fa-user-shield me-2"></i>Permissions
+                        </h6>
+                        <p class="info-text">
+                            Le syndic pourra :
+                            <ul class="info-list">
+                                <li>Créer et gérer des résidents</li>
+                                <li>Envoyer des notifications</li>
+                                <li>Gérer les documents</li>
+                                <li>Consulter les statistiques</li>
+                            </ul>
+                        </p>
                     </div>
-                {% endif %}
-                <div class="form-help">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Numéro de contact du syndic
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="{{ form.address.id_for_label }}" class="form-label">
-                    <i class="fas fa-map-marker-alt me-2"></i>Adresse
-                </label>
-                {{ form.address }}
-                {% if form.address.errors %}
-                    <div class="form-error">
-                        {% for error in form.address.errors %}
-                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <div class="form-help">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Adresse complète du syndic
-                </div>
-            </div>
-            
-            {% if form.is_active %}
-            <div class="form-group">
-                <div class="form-check">
-                    {{ form.is_active }}
-                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                        <i class="fas fa-check-circle me-2"></i>Compte actif
-                    </label>
-                </div>
-                {% if form.is_active.errors %}
-                    <div class="form-error">
-                        {% for error in form.is_active.errors %}
-                            <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <div class="form-help">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Désactivez pour bloquer l'accès au compte
-                </div>
-            </div>
-            {% endif %}
-            
-            <div class="form-actions">
-                <a href="{% url 'finance:syndic_management' %}" class="btn btn-secondary">
-                    <i class="fas fa-times me-2"></i>Annuler
-                </a>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save me-2"></i>
-                    {% if object %}Mettre à jour{% else %}Créer le syndic{% endif %}
-                </button>
-            </div>
-        </form>
-    </div>
-    
-    <div class="info-section">
-        <div class="info-header">
-            <h3>
-                <i class="fas fa-info-circle me-2"></i>
-                Informations importantes
-            </h3>
-        </div>
-        
-        <div class="info-content">
-            <div class="info-item">
-                <h4>
-                    <i class="fas fa-shield-alt me-2"></i>
-                    Rôle du syndic
-                </h4>
-                <p>Le syndic aura accès à toutes les fonctionnalités de gestion :</p>
-                <ul class="info-list">
-                    <li><i class="fas fa-check me-2"></i>Gestion des résidents</li>
-                    <li><i class="fas fa-check me-2"></i>Création de documents</li>
-                    <li><i class="fas fa-check me-2"></i>Envoi de notifications</li>
-                    <li><i class="fas fa-check me-2"></i>Suivi des paiements</li>
-                    <li><i class="fas fa-check me-2"></i>Tableau de bord complet</li>
-                </ul>
-            </div>
-            
-            <div class="info-item">
-                <h4>
-                    <i class="fas fa-key me-2"></i>
-                    Mot de passe
-                </h4>
-                <p>
-                    {% if object %}
-                        Le mot de passe ne peut pas être modifié ici. Utilisez la fonction de réinitialisation.
-                    {% else %}
-                        Un mot de passe par défaut sera généré : <code>syndic123</code>
-                    {% endif %}
-                </p>
-            </div>
-            
-            <div class="info-item">
-                <h4>
-                    <i class="fas fa-user-shield me-2"></i>
-                    Permissions
-                </h4>
-                <p>Le syndic pourra :</p>
-                <ul class="info-list">
-                    <li><i class="fas fa-check me-2"></i>Créer et gérer des résidents</li>
-                    <li><i class="fas fa-check me-2"></i>Envoyer des notifications</li>
-                    <li><i class="fas fa-check me-2"></i>Gérer les documents</li>
-                    <li><i class="fas fa-check me-2"></i>Consulter les statistiques</li>
-                </ul>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== STYLES MODERNES POUR SYNDIC FORM ===== */
+
+.info-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color, #e9ecef);
+}
+
+.info-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.info-title {
+    color: var(--primary-600, #0a58ca);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.info-text {
+    color: var(--text-muted, #6c757d);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 0;
+}
+
+.info-list {
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+    color: var(--text-muted, #6c757d);
+    font-size: 0.85rem;
+}
+
+.info-list li {
+    margin-bottom: 0.25rem;
+}
+
+.password-code {
+    background: var(--danger-100, #f8d7da);
+    color: var(--danger-800, #721c24);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.modern-switch .form-check-input {
+    width: 2.5rem;
+    height: 1.25rem;
+    border-radius: 1rem;
+    background-color: var(--border-color, #dee2e6);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.modern-switch .form-check-input:checked {
+    background-color: var(--primary-500, #0d6efd);
+    border-color: var(--primary-500, #0d6efd);
+}
+
+.modern-switch .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color, #e9ecef);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
 {% endblock %}
 
 {% block extra_js %}
