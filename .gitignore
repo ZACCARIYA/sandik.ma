@@ -11,6 +11,10 @@ media/
 
 # SQLite dev database
 /db.sqlite3
+syndic_db
+*.db
+*.sqlite
+*.sqlite3
 
 # Virtual environments
 .venv/
