@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Rappel de Paiement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #6366f1;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #6366f1;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .header p {
+            color: #666;
+            margin: 5px 0 0;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .amount {
+            color: #dc3545;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .message {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🏢 SyndicPro</h1>
+        <p>Rappel de Paiement</p>
+    </div>
+
+    <div class="info-box">
+        <div class="info-row">
+            <span class="info-label">Résident</span>
+            <span>{{ resident.get_full_name|default:resident.username }}</span>
+        </div>
+        {% if resident.apartment %}
+        <div class="info-row">
+            <span class="info-label">Appartement</span>
+            <span>{{ resident.apartment }}</span>
+        </div>
+        {% endif %}
+        <div class="info-row">
+            <span class="info-label">Document</span>
+            <span>{{ document.title }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date du document</span>
+            <span>{{ document.date|date:"d/m/Y" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date d'échéance</span>
+            <span>{{ document.due_date|date:"d/m/Y" }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Montant</span>
+            <span class="amount">{{ document.amount|floatformat:2 }} DH</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Retard</span>
+            <span style="color: #dc3545; font-weight: bold;">{{ document.days_overdue }} jours</span>
+        </div>
+    </div>
+
+    <div class="message">
+        <strong>⚠️ Message important :</strong>
+        <p>{{ message|linebreaksbr }}</p>
+    </div>
+
+    <p>Nous vous prions de bien vouloir régulariser votre situation dans les meilleurs délais.</p>
+    <p>Pour toute question, n'hésitez pas à contacter votre syndic.</p>
+
+    <div class="footer">
+        <p>Document généré le {{ date|date:"d/m/Y à H:i" }} — SyndicPro © {{ date|date:"Y" }}</p>
+    </div>
+</body>
+
+</html>

@@ -18,7 +18,7 @@ from django import forms
 from decimal import Decimal
 import json
 
-from .models import Document, Notification, Payment, ResidentStatus, ResidentReport, ReportComment, Event, Depense, ChatbotFAQ, ChatbotConversation, ChatbotMessage, send_sms, send_email
+from .models import Document, Notification, Payment, ResidentStatus, ResidentReport, ReportComment, Event, Depense, ChatbotFAQ, ChatbotConversation, ChatbotMessage, Reminder, send_sms, send_email
 
 User = get_user_model()
 
@@ -1878,60 +1878,240 @@ class OverduePaymentsDashboardView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Documents impayés par catégorie
-        from django.utils import timezone
         today = timezone.now().date()
         
-        unpaid_docs = Document.objects.filter(is_paid=False, is_archived=False).select_related('resident')
+        unpaid_docs = Document.objects.filter(
+            is_paid=False, is_archived=False
+        ).select_related('resident')
         
-        # Catégoriser les impayés
-        due_soon = []      # Échéance dans 7 jours
-        overdue_30 = []    # 30-59 jours de retard
-        overdue_60 = []    # 60-89 jours de retard
-        critical_90 = []   # 90+ jours de retard
-        
+        # Group by resident
+        residents_data = {}
         total_overdue_amount = Decimal('0')
+        total_partially_paid = 0
+        total_overdue = 0
+        total_critical = 0
         
         for doc in unpaid_docs:
-            days_until_due = (doc.due_date - today).days
-            days_overdue = doc.days_overdue
+            rid = doc.resident_id
+            if rid not in residents_data:
+                residents_data[rid] = {
+                    'resident': doc.resident,
+                    'documents': [],
+                    'total_due': Decimal('0'),
+                    'total_paid': Decimal('0'),
+                    'max_days_overdue': 0,
+                    'unpaid_count': 0,
+                }
             
-            if 0 <= days_until_due <= 7:
-                due_soon.append(doc)
-            elif 30 <= days_overdue < 60:
-                overdue_30.append(doc)
-                total_overdue_amount += doc.amount
-            elif 60 <= days_overdue < 90:
-                overdue_60.append(doc)
-                total_overdue_amount += doc.amount
-            elif days_overdue >= 90:
-                critical_90.append(doc)
-                total_overdue_amount += doc.amount
+            paid_amount = doc.payments.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+            
+            residents_data[rid]['documents'].append(doc)
+            residents_data[rid]['total_due'] += doc.amount
+            residents_data[rid]['total_paid'] += paid_amount
+            residents_data[rid]['unpaid_count'] += 1
+            residents_data[rid]['max_days_overdue'] = max(
+                residents_data[rid]['max_days_overdue'], doc.days_overdue
+            )
+            
+            total_overdue_amount += doc.amount - paid_amount
+            
+            if paid_amount > 0 and paid_amount < doc.amount:
+                total_partially_paid += 1
+            if doc.days_overdue >= 90:
+                total_critical += 1
+            elif doc.days_overdue > 0:
+                total_overdue += 1
         
-        # Statistiques des notifications envoyées
-        from .models import OverdueNotificationLog
-        recent_notifications = OverdueNotificationLog.objects.filter(
-            created_at__gte=today - timezone.timedelta(days=30)
-        ).select_related('document__resident')
+        # Compute status and balance for each resident
+        residents_list = []
+        for rid, data in residents_data.items():
+            balance = data['total_due'] - data['total_paid']
+            if balance <= 0:
+                status = 'paid'
+                status_label = 'À jour'
+                status_color = 'success'
+            elif data['total_paid'] > 0:
+                status = 'partial'
+                status_label = 'Partiellement payé'
+                status_color = 'warning'
+            elif data['max_days_overdue'] >= 90:
+                status = 'critical'
+                status_label = 'Critique'
+                status_color = 'danger'
+            elif data['max_days_overdue'] >= 30:
+                status = 'overdue'
+                status_label = 'En retard'
+                status_color = 'danger'
+            else:
+                status = 'pending'
+                status_label = 'En attente'
+                status_color = 'warning'
+            
+            data['balance'] = balance
+            data['status'] = status
+            data['status_label'] = status_label
+            data['status_color'] = status_color
+            data['reminders_count'] = Reminder.objects.filter(resident_id=rid).count()
+            residents_list.append(data)
+        
+        # Sort: critical first, then overdue, then partial, then pending
+        status_order = {'critical': 0, 'overdue': 1, 'partial': 2, 'pending': 3, 'paid': 4}
+        residents_list.sort(key=lambda r: (status_order.get(r['status'], 5), -r['balance']))
+        
+        # Recent reminders
+        recent_reminders = Reminder.objects.select_related(
+            'document', 'resident', 'created_by'
+        ).order_by('-created_at')[:10]
         
         context.update({
-            'due_soon': due_soon,
-            'overdue_30': overdue_30,
-            'overdue_60': overdue_60,
-            'critical_90': critical_90,
+            'residents': residents_list,
             'total_overdue_amount': total_overdue_amount,
-            'recent_notifications': recent_notifications[:10],
+            'recent_reminders': recent_reminders,
             'stats': {
-                'due_soon_count': len(due_soon),
-                'overdue_30_count': len(overdue_30),
-                'overdue_60_count': len(overdue_60),
-                'critical_90_count': len(critical_90),
-                'total_notifications': recent_notifications.count(),
+                'total_unpaid_residents': len(residents_list),
+                'total_overdue': total_overdue,
+                'total_critical': total_critical,
+                'total_partially_paid': total_partially_paid,
+                'total_reminders_sent': Reminder.objects.filter(status='SENT').count(),
             }
         })
-        
         return context
+
+
+class ResidentPaymentHistoryView(TemplateView):
+    """Per-resident payment and reminder history."""
+    template_name = 'finance/resident_payment_history.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('finance:login')
+        if request.user.role not in ['SUPERADMIN', 'SYNDIC']:
+            messages.error(request, "Accès non autorisé.")
+            return redirect('finance:home')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        resident = get_object_or_404(User, pk=self.kwargs['resident_id'], role='RESIDENT')
+        
+        documents = Document.objects.filter(
+            resident=resident, is_archived=False
+        ).order_by('-date')
+        
+        # Enrich documents with payment info
+        docs_data = []
+        total_due = Decimal('0')
+        total_paid_all = Decimal('0')
+        for doc in documents:
+            paid = doc.payments.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+            balance = doc.amount - paid
+            if doc.is_paid:
+                status = 'paid'
+                status_label = 'Payé'
+                status_color = 'success'
+            elif paid > 0:
+                status = 'partial'
+                status_label = 'Partiellement payé'
+                status_color = 'warning'
+            elif doc.is_overdue:
+                status = 'overdue'
+                status_label = f'En retard ({doc.days_overdue}j)'
+                status_color = 'danger'
+            else:
+                status = 'pending'
+                status_label = 'En attente'
+                status_color = 'info'
+            
+            docs_data.append({
+                'document': doc,
+                'paid_amount': paid,
+                'balance': balance,
+                'status': status,
+                'status_label': status_label,
+                'status_color': status_color,
+                'payments': doc.payments.all().order_by('-payment_date'),
+            })
+            total_due += doc.amount
+            total_paid_all += paid
+        
+        reminders = Reminder.objects.filter(
+            resident=resident
+        ).select_related('document', 'created_by').order_by('-created_at')
+        
+        context.update({
+            'resident': resident,
+            'docs_data': docs_data,
+            'reminders': reminders,
+            'total_due': total_due,
+            'total_paid': total_paid_all,
+            'balance': total_due - total_paid_all,
+        })
+        return context
+
+
+class SendReminderView(View):
+    """Send a payment reminder to a resident for an overdue document."""
+    
+    def post(self, request, document_id):
+        if not request.user.is_authenticated or request.user.role not in ['SUPERADMIN', 'SYNDIC']:
+            return JsonResponse({'error': 'Non autorisé'}, status=403)
+        
+        doc = get_object_or_404(Document, pk=document_id)
+        reminder_type = request.POST.get('reminder_type', 'EMAIL')
+        
+        # Build reminder message
+        message = doc.get_reminder_message(for_syndic=False)
+        
+        reminder = Reminder.objects.create(
+            document=doc,
+            resident=doc.resident,
+            reminder_type=reminder_type,
+            message=message,
+            created_by=request.user,
+        )
+        
+        # Attempt to send email
+        if reminder_type == 'EMAIL' and doc.resident.email:
+            success = send_email(
+                recipient_email=doc.resident.email,
+                subject=f"Rappel de paiement - {doc.title}",
+                message=message,
+            )
+            if success:
+                reminder.mark_sent()
+                messages.success(request, f"Rappel envoyé par email à {doc.resident.email}")
+            else:
+                reminder.mark_failed()
+                messages.warning(request, "Échec de l'envoi de l'email. Le rappel a été enregistré.")
+        elif reminder_type == 'PDF':
+            # Generate a simple text-based PDF
+            try:
+                from io import BytesIO
+                from django.template.loader import render_to_string
+                
+                pdf_content = render_to_string('finance/reminder_pdf.html', {
+                    'document': doc,
+                    'resident': doc.resident,
+                    'message': message,
+                    'date': timezone.now(),
+                })
+                
+                filename = f"rappel_{doc.pk}_{doc.resident.username}_{timezone.now().strftime('%Y%m%d')}.html"
+                reminder.pdf_file.save(filename, ContentFile(pdf_content.encode('utf-8')))
+                reminder.mark_sent()
+                messages.success(request, "Rappel PDF généré avec succès.")
+            except Exception as e:
+                reminder.mark_failed()
+                messages.warning(request, f"Erreur lors de la génération du PDF: {e}")
+        else:
+            reminder.mark_sent()
+            messages.success(request, "Rappel enregistré.")
+        
+        # Redirect back to appropriate page
+        next_url = request.POST.get('next', '')
+        if next_url:
+            return redirect(next_url)
+        return redirect('finance:overdue_dashboard')
 
 
 class RunOverdueDetectionView(View):
@@ -2107,3 +2287,65 @@ class UserProfileView(TemplateView):
             }
         
         return context
+
+class SettingsView(View):
+    """User settings page - edit profile, change password, preferences."""
+    template_name = 'finance/settings.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            messages.warning(request, "Veuillez vous connecter.")
+            return redirect('finance:login')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get(self, request):
+        user = request.user
+        context = {
+            'user_info': {
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'phone': getattr(user, 'phone', ''),
+                'apartment': getattr(user, 'apartment', ''),
+                'address': getattr(user, 'address', ''),
+                'role': user.role,
+            }
+        }
+        return render(request, self.template_name, context)
+    
+    def post(self, request):
+        user = request.user
+        action = request.POST.get('action', 'update_profile')
+        
+        if action == 'update_profile':
+            user.first_name = request.POST.get('first_name', '').strip()
+            user.last_name = request.POST.get('last_name', '').strip()
+            user.email = request.POST.get('email', '').strip()
+            user.phone = request.POST.get('phone', '').strip()
+            user.address = request.POST.get('address', '').strip()
+            
+            try:
+                user.save()
+                messages.success(request, "Profil mis à jour avec succès.")
+            except Exception as e:
+                messages.error(request, f"Erreur lors de la mise à jour : {e}")
+        
+        elif action == 'change_password':
+            current_password = request.POST.get('current_password', '')
+            new_password = request.POST.get('new_password', '')
+            confirm_password = request.POST.get('confirm_password', '')
+            
+            if not user.check_password(current_password):
+                messages.error(request, "Le mot de passe actuel est incorrect.")
+            elif len(new_password) < 6:
+                messages.error(request, "Le nouveau mot de passe doit contenir au moins 6 caractères.")
+            elif new_password != confirm_password:
+                messages.error(request, "Les mots de passe ne correspondent pas.")
+            else:
+                user.set_password(new_password)
+                user.save()
+                login(request, user)
+                messages.success(request, "Mot de passe modifié avec succès.")
+        
+        return redirect('finance:settings')

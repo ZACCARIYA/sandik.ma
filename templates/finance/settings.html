@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Paramètres - SyndicPro{% endblock %}
+
+{% block content %}
+<!-- ===== EN-TÊTE DE PAGE ===== -->
+<div class="page-header mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="page-title text-primary mb-2">
+                    <i class="fas fa-cog me-3"></i>Paramètres
+                </h1>
+                <p class="page-subtitle text-muted mb-0">Gérer votre profil et vos préférences</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'finance:user_profile' %}" class="btn-modern btn-outline">
+                    <i class="fas fa-user me-2"></i>Mon Profil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row">
+        <!-- ===== COLONNE GAUCHE : MODIFIER LE PROFIL ===== -->
+        <div class="col-lg-7 mb-4">
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Informations Personnelles
+                    </h5>
+                </div>
+                <div class="card-body-modern">
+                    <form method="post" action="{% url 'finance:settings' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_profile">
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="settings-label" for="first_name">
+                                    <i class="fas fa-user me-2"></i>Prénom
+                                </label>
+                                <input type="text" class="settings-input" id="first_name" name="first_name"
+                                    value="{{ user_info.first_name }}" placeholder="Votre prénom">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="settings-label" for="last_name">
+                                    <i class="fas fa-user me-2"></i>Nom de famille
+                                </label>
+                                <input type="text" class="settings-input" id="last_name" name="last_name"
+                                    value="{{ user_info.last_name }}" placeholder="Votre nom">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="settings-label" for="email">
+                                <i class="fas fa-envelope me-2"></i>Adresse email
+                            </label>
+                            <input type="email" class="settings-input" id="email" name="email"
+                                value="{{ user_info.email }}" placeholder="nom@example.com">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="settings-label" for="phone">
+                                <i class="fas fa-phone me-2"></i>Téléphone
+                            </label>
+                            <input type="tel" class="settings-input" id="phone" name="phone"
+                                value="{{ user_info.phone }}" placeholder="06 XX XX XX XX">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="settings-label" for="address">
+                                <i class="fas fa-map-marker-alt me-2"></i>Adresse
+                            </label>
+                            <textarea class="settings-input" id="address" name="address" rows="2"
+                                placeholder="Votre adresse complète">{{ user_info.address }}</textarea>
+                        </div>
+
+                        <!-- Read-only fields -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="settings-label text-muted">
+                                    <i class="fas fa-at me-2"></i>Nom d'utilisateur
+                                </label>
+                                <input type="text" class="settings-input settings-input-disabled"
+                                    value="{{ user_info.username }}" disabled>
+                            </div>
+                            {% if user_info.apartment %}
+                            <div class="col-md-6">
+                                <label class="settings-label text-muted">
+                                    <i class="fas fa-building me-2"></i>Appartement
+                                </label>
+                                <input type="text" class="settings-input settings-input-disabled"
+                                    value="{{ user_info.apartment }}" disabled>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn-modern btn-primary">
+                                <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== COLONNE DROITE : MOT DE PASSE + INFOS ===== -->
+        <div class="col-lg-5">
+            <!-- Changer le mot de passe -->
+            <div class="card-modern mb-4">
+                <div class="card-header-modern" style="background: linear-gradient(135deg, #374151, #1f2937);">
+                    <h5 class="mb-0 text-white">
+                        <i class="fas fa-lock me-2"></i>Changer le mot de passe
+                    </h5>
+                </div>
+                <div class="card-body-modern">
+                    <form method="post" action="{% url 'finance:settings' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="change_password">
+
+                        <div class="mb-3">
+                            <label class="settings-label" for="current_password">
+                                <i class="fas fa-key me-2"></i>Mot de passe actuel
+                            </label>
+                            <input type="password" class="settings-input" id="current_password" name="current_password"
+                                placeholder="••••••••" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="settings-label" for="new_password">
+                                <i class="fas fa-lock me-2"></i>Nouveau mot de passe
+                            </label>
+                            <input type="password" class="settings-input" id="new_password" name="new_password"
+                                placeholder="Min. 6 caractères" required minlength="6">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="settings-label" for="confirm_password">
+                                <i class="fas fa-check-circle me-2"></i>Confirmer le mot de passe
+                            </label>
+                            <input type="password" class="settings-input" id="confirm_password" name="confirm_password"
+                                placeholder="Confirmer" required>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn-modern btn-warning">
+                                <i class="fas fa-shield-alt me-2"></i>Modifier le mot de passe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Informations du compte -->
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Compte
+                    </h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="settings-info-row">
+                        <span class="settings-info-label">Rôle</span>
+                        <span>
+                            {% if user_info.role == 'SUPERADMIN' %}
+                            <span class="badge-modern badge-danger"><i class="fas fa-crown me-1"></i>Super Admin</span>
+                            {% elif user_info.role == 'SYNDIC' %}
+                            <span class="badge-modern badge-primary"><i class="fas fa-user-tie me-1"></i>Syndic</span>
+                            {% else %}
+                            <span class="badge-modern badge-success"><i class="fas fa-user me-1"></i>Résident</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="settings-info-row">
+                        <span class="settings-info-label">Membre depuis</span>
+                        <span>{{ user.date_joined|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="settings-info-row">
+                        <span class="settings-info-label">Dernière connexion</span>
+                        <span>{{ user.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== SETTINGS PAGE STYLES ===== */
+    .settings-label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.02em;
+    }
+
+    .settings-input {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        background: var(--input-bg, #fff);
+        border: 1.5px solid var(--border-color, #d4d4d8);
+        border-radius: var(--radius-lg, 12px);
+        transition: all 0.25s ease;
+        outline: none;
+    }
+
+    .settings-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+
+    .settings-input::placeholder {
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    .settings-input-disabled {
+        background: var(--bg-secondary, #f4f4f5);
+        color: var(--text-muted);
+        cursor: not-allowed;
+        border-style: dashed;
+    }
+
+    textarea.settings-input {
+        resize: vertical;
+        min-height: 60px;
+    }
+
+    .settings-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-light, #e4e4e7);
+    }
+
+    .settings-info-row:last-child {
+        border-bottom: none;
+    }
+
+    .settings-info-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+        .settings-input {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}

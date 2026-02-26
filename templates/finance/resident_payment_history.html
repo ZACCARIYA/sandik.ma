@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Historique - {{ resident.get_full_name|default:resident.username }} - SyndicPro{% endblock %}
+
+{% block content %}
+<!-- ===== EN-TÊTE DE PAGE ===== -->
+<div class="page-header mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h1 class="page-title text-primary mb-2">
+                    <i class="fas fa-user me-3"></i>{{ resident.get_full_name|default:resident.username }}
+                </h1>
+                <p class="page-subtitle text-muted mb-0">
+                    {% if resident.apartment %}Apt. {{ resident.apartment }} · {% endif %}
+                    Historique des paiements et rappels
+                </p>
+            </div>
+            <div class="col-md-5 text-end">
+                <a href="{% url 'finance:overdue_dashboard' %}" class="btn-modern btn-outline">
+                    <i class="fas fa-arrow-left me-2"></i>Retour aux impayés
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- ===== RÉSUMÉ FINANCIER ===== -->
+    <section class="metrics-section mb-4">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                {% include 'components/stats_card.html' with value=total_due|floatformat:0 label="Total Dû (DH)"
+                icon="fas fa-file-invoice-dollar" color="warning" %}
+            </div>
+            <div class="col-md-4 mb-4">
+                {% include 'components/stats_card.html' with value=total_paid|floatformat:0 label="Total Payé (DH)"
+                icon="fas fa-check-circle" color="success" %}
+            </div>
+            <div class="col-md-4 mb-4">
+                {% include 'components/stats_card.html' with value=balance|floatformat:0 label="Solde Restant (DH)"
+                icon="fas fa-balance-scale" color="danger" %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DOCUMENTS ET PAIEMENTS ===== -->
+    <section class="mb-5">
+        <div class="card-modern">
+            <div class="card-header-modern">
+                <h5 class="mb-0">
+                    <i class="fas fa-file-invoice me-2"></i>Documents et Paiements
+                </h5>
+            </div>
+            <div class="card-body-modern p-0">
+                {% if docs_data %}
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Document</th>
+                                <th>Date</th>
+                                <th class="text-end">Montant</th>
+                                <th class="text-end">Payé</th>
+                                <th class="text-end">Reste</th>
+                                <th class="text-center">Statut</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in docs_data %}
+                            <tr>
+                                <td>
+                                    <strong>{{ d.document.title }}</strong>
+                                    <br><small class="text-muted">{{ d.document.get_document_type_display }}</small>
+                                </td>
+                                <td>
+                                    <small>{{ d.document.date|date:"d/m/Y" }}</small>
+                                    <br><small class="text-muted">Éch. {{ d.document.due_date|date:"d/m/Y" }}</small>
+                                </td>
+                                <td class="text-end"><strong>{{ d.document.amount|floatformat:2 }} DH</strong></td>
+                                <td class="text-end text-success">{{ d.paid_amount|floatformat:2 }} DH</td>
+                                <td class="text-end">
+                                    <strong class="text-{{ d.status_color }}">{{ d.balance|floatformat:2 }} DH</strong>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge-modern badge-{{ d.status_color }}">{{ d.status_label }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a href="{% url 'finance:document_detail' d.document.pk %}"
+                                            class="btn btn-sm btn-outline-primary" title="Voir le document">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if not d.document.is_paid %}
+                                        <form method="post" action="{% url 'finance:send_reminder' d.document.pk %}"
+                                            class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="reminder_type" value="EMAIL">
+                                            <input type="hidden" name="next"
+                                                value="{% url 'finance:resident_payment_history' resident.pk %}">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning"
+                                                title="Envoyer rappel email">
+                                                <i class="fas fa-envelope"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Inline payments for this document -->
+                            {% if d.payments %}
+                            {% for payment in d.payments %}
+                            <tr class="table-light">
+                                <td colspan="2" class="ps-5">
+                                    <i class="fas fa-receipt text-muted me-2"></i>
+                                    <small>Paiement {{ payment.get_payment_method_display }}</small>
+                                    {% if payment.reference %}<br><small class="text-muted ps-4">Réf: {{
+                                        payment.reference }}</small>{% endif %}
+                                </td>
+                                <td></td>
+                                <td class="text-end text-success"><small>{{ payment.amount|floatformat:2 }} DH</small>
+                                </td>
+                                <td></td>
+                                <td class="text-center">
+                                    {% if payment.is_verified %}
+                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Vérifié</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Non vérifié</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center"><small class="text-muted">{{ payment.payment_date|date:"d/m/Y"
+                                        }}</small></td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                    <h5>Aucun document</h5>
+                    <p class="text-muted">Ce résident n'a aucun document enregistré.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== HISTORIQUE DES RAPPELS ===== -->
+    <section>
+        <div class="card-modern">
+            <div class="card-header-modern" style="background: linear-gradient(135deg, #374151, #1f2937);">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-bell me-2"></i>Historique des Rappels
+                </h5>
+            </div>
+            <div class="card-body-modern">
+                {% if reminders %}
+                <div class="space-y-3">
+                    {% for rem in reminders %}
+                    <div class="d-flex align-items-start gap-3 p-3 rounded-lg border border-gray-100 mb-3"
+                        style="background: var(--gray-50);">
+                        <div>
+                            {% if rem.reminder_type == 'EMAIL' %}
+                            <div class="stats-icon bg-info" style="width:40px;height:40px;font-size:0.9rem;">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            {% elif rem.reminder_type == 'PDF' %}
+                            <div class="stats-icon bg-danger" style="width:40px;height:40px;font-size:0.9rem;">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            {% else %}
+                            <div class="stats-icon bg-primary" style="width:40px;height:40px;font-size:0.9rem;">
+                                <i class="fas fa-sms"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <strong>{{ rem.get_reminder_type_display }} — {{ rem.document.title }}</strong>
+                                {% if rem.status == 'SENT' %}
+                                <span class="badge-modern badge-success">Envoyé</span>
+                                {% elif rem.status == 'VIEWED' %}
+                                <span class="badge-modern badge-info">Vu</span>
+                                {% elif rem.status == 'FAILED' %}
+                                <span class="badge-modern badge-danger">Échoué</span>
+                                {% else %}
+                                <span class="badge-modern badge-warning">En attente</span>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">
+                                {{ rem.created_at|date:"d/m/Y à H:i" }}
+                                · Par {{ rem.created_by.get_full_name|default:rem.created_by.username }}
+                                {% if rem.sent_at %} · Envoyé le {{ rem.sent_at|date:"d/m/Y à H:i" }}{% endif %}
+                            </small>
+                            {% if rem.pdf_file %}
+                            <br><a href="{{ rem.pdf_file.url }}" class="btn btn-sm btn-outline-danger mt-1"
+                                target="_blank">
+                                <i class="fas fa-download me-1"></i>Télécharger PDF
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">Aucun rappel envoyé pour ce résident.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,275 +1,193 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ syndic.username }} - Détails du Syndic{% endblock %}
+{% block title %}{{ syndic.get_full_name|default:syndic.username }} - Détails du Syndic{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div class="page-header-content">
-        <div class="page-header-icon">
-            <i class="fas fa-user-tie"></i>
+<!-- ===== EN-TÊTE DE PAGE ===== -->
+<div class="page-header mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h1 class="page-title text-primary mb-2">
+                    <i class="fas fa-user-tie me-3"></i>
+                    {{ syndic.get_full_name|default:syndic.username }}
+                </h1>
+                <p class="page-subtitle text-muted mb-0">Détails et activité du syndic</p>
+            </div>
+            <div class="col-md-5 text-end">
+                <div class="page-actions d-flex gap-2 justify-content-end flex-wrap">
+                    <a href="{% url 'finance:syndic_update' syndic.pk %}" class="btn-modern btn-primary">
+                        <i class="fas fa-edit me-2"></i>Modifier
+                    </a>
+                    <a href="{% url 'finance:syndic_management' %}" class="btn-modern btn-outline">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="page-header-text">
-            <h1>{{ syndic.get_full_name|default:syndic.username }}</h1>
-            <p>Détails et activité du syndic</p>
-        </div>
-    </div>
-    <div class="page-header-actions">
-        <a href="{% url 'finance:syndic_update' syndic.pk %}" class="btn btn-primary">
-            <i class="fas fa-edit me-2"></i>Modifier
-        </a>
-        <a href="{% url 'finance:syndic_management' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
-        </a>
     </div>
 </div>
 
-<div class="grid grid-cols-2 gap-6">
-    <!-- Syndic Information -->
-    <div class="modern-form">
-        <div class="form-header">
-            <h3>
-                <i class="fas fa-user-tie me-2"></i>
-                Informations du Syndic
-            </h3>
+<div class="container pb-5">
+    <!-- Informations du Syndic -->
+    <div class="card-modern mb-8">
+        <div class="card-header-modern">
+            <h5 class="mb-0">
+                <i class="fas fa-id-card me-2"></i>Informations Personnelles
+            </h5>
         </div>
-        
-        <div class="form-content">
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-user me-2"></i>Nom d'utilisateur
-                </label>
-                <div class="form-control-plaintext">{{ syndic.username }}</div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-envelope me-2"></i>Email
-                </label>
-                <div class="form-control-plaintext">
-                    {% if syndic.email %}
-                        <a href="mailto:{{ syndic.email }}" class="text-decoration-none">
+        <div class="card-body-modern">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="info-group">
+                    <label class="text-xs text-muted uppercase font-bold tracking-wide">Nom d'utilisateur</label>
+                    <p class="text-gray-900 font-medium">{{ syndic.username }}</p>
+                </div>
+                <div class="info-group">
+                    <label class="text-xs text-muted uppercase font-bold tracking-wide">Email</label>
+                    <p class="text-gray-900">
+                        {% if syndic.email %}
+                        <a href="mailto:{{ syndic.email }}" class="text-primary hover:underline">
                             {{ syndic.email }}
                         </a>
-                    {% else %}
-                        <span class="text-muted">Non renseigné</span>
-                    {% endif %}
+                        {% else %}
+                        <span class="text-muted italic">Non renseigné</span>
+                        {% endif %}
+                    </p>
                 </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-user me-2"></i>Prénom
-                    </label>
-                    <div class="form-control-plaintext">
-                        {{ syndic.first_name|default:"Non renseigné" }}
+                <div class="info-group">
+                    <label class="text-xs text-muted uppercase font-bold tracking-wide">Prénom</label>
+                    <p class="text-gray-900">{{ syndic.first_name|default:"-" }}</p>
+                </div>
+                <div class="info-group">
+                    <label class="text-xs text-muted uppercase font-bold tracking-wide">Nom</label>
+                    <p class="text-gray-900">{{ syndic.last_name|default:"-" }}</p>
+                </div>
+                <div class="info-group">
+                    <label class="text-xs text-muted uppercase font-bold tracking-wide">Téléphone</label>
+                    <p class="text-gray-900">
+                        {% if syndic.phone %}
+                        <a href="tel:{{ syndic.phone }}" class="text-primary hover:underline">{{ syndic.phone }}</a>
+                        {% else %}
+                        <span class="text-muted italic">Non renseigné</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="info-group">
+                    <label class="text-xs text-muted uppercase font-bold tracking-wide">Statut</label>
+                    <div>
+                        {% if syndic.is_active %}
+                        <span class="badge-modern badge-success">Actif</span>
+                        {% else %}
+                        <span class="badge-modern badge-danger">Inactif</span>
+                        {% endif %}
                     </div>
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-user me-2"></i>Nom de famille
-                    </label>
-                    <div class="form-control-plaintext">
-                        {{ syndic.last_name|default:"Non renseigné" }}
-                    </div>
-                </div>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-phone me-2"></i>Téléphone
-                </label>
-                <div class="form-control-plaintext">
-                    {% if syndic.phone %}
-                        <a href="tel:{{ syndic.phone }}" class="text-decoration-none">
-                            {{ syndic.phone }}
-                        </a>
-                    {% else %}
-                        <span class="text-muted">Non renseigné</span>
-                    {% endif %}
-                </div>
+            <div class="info-group mt-6">
+                <label class="text-xs text-muted uppercase font-bold tracking-wide">Adresse</label>
+                <p class="text-gray-900">{{ syndic.address|default:"-" }}</p>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-map-marker-alt me-2"></i>Adresse
-                </label>
-                <div class="form-control-plaintext">
-                    {{ syndic.address|default:"Non renseigné" }}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div class="info-group">
+                    <label class="text-xs text-muted uppercase font-bold tracking-wide">Membre depuis</label>
+                    <p class="text-gray-900 text-sm">{{ syndic.date_joined|date:"d F Y" }}</p>
                 </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-toggle-on me-2"></i>Statut du compte
-                </label>
-                <div class="form-control-plaintext">
-                    {% if syndic.is_active %}
-                        <span class="badge bg-success">
-                            <i class="fas fa-check me-1"></i>Actif
-                        </span>
-                    {% else %}
-                        <span class="badge bg-danger">
-                            <i class="fas fa-times me-1"></i>Inactif
-                        </span>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-calendar me-2"></i>Date de création
-                </label>
-                <div class="form-control-plaintext">
-                    {{ syndic.date_joined|date:"d/m/Y à H:i" }}
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-clock me-2"></i>Dernière connexion
-                </label>
-                <div class="form-control-plaintext">
-                    {% if syndic.last_login %}
+                <div class="info-group">
+                    <label class="text-xs text-muted uppercase font-bold tracking-wide">Dernière connexion</label>
+                    <p class="text-gray-900 text-sm">
+                        {% if syndic.last_login %}
                         {{ syndic.last_login|date:"d/m/Y à H:i" }}
-                    {% else %}
-                        <span class="text-muted">Jamais connecté</span>
-                    {% endif %}
+                        {% else %}
+                        <span class="text-muted">Jamais</span>
+                        {% endif %}
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Activity Statistics -->
-    <div class="info-section">
-        <div class="info-header">
-            <h3>
-                <i class="fas fa-chart-bar me-2"></i>
-                Statistiques d'activité
-            </h3>
+
+    <!-- Activité Récente -->
+    <div class="card-modern mb-8">
+        <div class="card-header-modern bg-gradient-to-r from-gray-800 to-gray-900">
+            <h5 class="mb-0 text-white">
+                <i class="fas fa-history me-2"></i>Historique des actions
+            </h5>
         </div>
-        
-        <div class="info-content">
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-file-alt"></i>
+        <div class="card-body-modern">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Documents -->
+                <div>
+                    <h6 class="font-bold text-gray-800 mb-4 border-b pb-2">Derniers documents</h6>
+                    {% if recent_documents %}
+                    <div class="space-y-4">
+                        {% for document in recent_documents %}
+                        <div
+                            class="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-primary transition transition-all cursor-default">
+                            <div class="flex justify-between items-start">
+                                <div class="min-w-0">
+                                    <h6 class="font-semibold text-gray-900 truncate mb-1">{{ document.title }}</h6>
+                                    <p class="text-xs text-muted mb-2">{{ document.created_at|date:"d/m/Y" }} • {{
+                                        document.amount }} DH</p>
+                                </div>
+                                <span
+                                    class="badge-modern {% if document.is_paid %}badge-success{% else %}badge-warning{% endif %}">
+                                    {% if document.is_paid %}Payé{% else %}Attente{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state p-4">
+                        <i class="fas fa-file-alt text-gray-300 text-3xl mb-2"></i>
+                        <p class="text-sm text-muted">Aucun document récent</p>
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ documents_created }}</div>
-                    <div class="stat-label">Documents créés</div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-bell"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ notifications_sent }}</div>
-                    <div class="stat-label">Notifications envoyées</div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number">{{ residents_managed }}</div>
-                    <div class="stat-label">Résidents gérés</div>
+
+                <!-- Notifications -->
+                <div>
+                    <h6 class="font-bold text-gray-800 mb-4 border-b pb-2">Dernières notifications</h6>
+                    {% if recent_notifications %}
+                    <div class="space-y-4">
+                        {% for notification in recent_notifications %}
+                        <div
+                            class="p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-primary transition transition-all cursor-default">
+                            <div class="flex justify-between items-start">
+                                <div class="min-w-0">
+                                    <h6 class="font-semibold text-gray-900 truncate mb-1">{{ notification.title }}</h6>
+                                    <p class="text-xs text-muted">{{ notification.created_at|date:"d/m/Y à H:i" }}</p>
+                                </div>
+                                <span
+                                    class="badge-modern {% if notification.is_active %}badge-info{% else %}badge-secondary{% endif %}">
+                                    {% if notification.is_active %}Active{% else %}Archivée{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state p-4">
+                        <i class="fas fa-bell text-gray-300 text-3xl mb-2"></i>
+                        <p class="text-sm text-muted">Aucune notification récemment envoyée</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Recent Activity -->
-<div class="modern-form">
-    <div class="form-header">
-        <h3>
-            <i class="fas fa-history me-2"></i>
-            Activité récente
-        </h3>
-        <p>Dernières actions effectuées par ce syndic</p>
-    </div>
-    
-    <div class="form-content">
-        <div class="grid grid-cols-2 gap-6">
-            <!-- Recent Documents -->
-            <div>
-                <h4>
-                    <i class="fas fa-file-alt me-2"></i>
-                    Derniers documents créés
-                </h4>
-                {% if recent_documents %}
-                    <div class="list-group">
-                        {% for document in recent_documents %}
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1">{{ document.title }}</h6>
-                                    <p class="mb-1 text-muted">{{ document.description|truncatechars:50 }}</p>
-                                    <small class="text-muted">
-                                        <i class="fas fa-calendar me-1"></i>
-                                        {{ document.created_at|date:"d/m/Y" }}
-                                        <i class="fas fa-euro-sign me-1 ms-2"></i>
-                                        {{ document.amount }} DH
-                                    </small>
-                                </div>
-                                <span class="badge bg-{% if document.is_paid %}success{% else %}warning{% endif %}">
-                                    {% if document.is_paid %}Payé{% else %}En attente{% endif %}
-                                </span>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <p>Aucun document créé</p>
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Recent Notifications -->
-            <div>
-                <h4>
-                    <i class="fas fa-bell me-2"></i>
-                    Dernières notifications envoyées
-                </h4>
-                {% if recent_notifications %}
-                    <div class="list-group">
-                        {% for notification in recent_notifications %}
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1">{{ notification.title }}</h6>
-                                    <p class="mb-1 text-muted">{{ notification.message|truncatechars:50 }}</p>
-                                    <small class="text-muted">
-                                        <i class="fas fa-calendar me-1"></i>
-                                        {{ notification.created_at|date:"d/m/Y" }}
-                                    </small>
-                                </div>
-                                <span class="badge bg-{% if notification.is_active %}success{% else %}secondary{% endif %}">
-                                    {% if notification.is_active %}Active{% else %}Inactive{% endif %}
-                                </span>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="empty-state">
-                        <div class="empty-state-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <p>Aucune notification envoyée</p>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+    /* Styles additionnels spécifiques pour la page détail */
+    .info-group label {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+</style>
 {% endblock %}

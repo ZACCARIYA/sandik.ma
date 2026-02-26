@@ -438,6 +438,59 @@ class OverdueNotificationLog(models.Model):
         return f"{self.get_notification_type_display()} - {self.document.title}"
 
 
+class Reminder(models.Model):
+    """Individual reminders sent to residents for overdue payments."""
+    REMINDER_TYPES = [
+        ('EMAIL', 'Email'),
+        ('PDF', 'PDF'),
+        ('SMS', 'SMS'),
+    ]
+    
+    REMINDER_STATUSES = [
+        ('PENDING', 'En attente'),
+        ('SENT', 'Envoyé'),
+        ('VIEWED', 'Vu'),
+        ('FAILED', 'Échoué'),
+    ]
+    
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='reminders')
+    resident = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reminders_received',
+                                 limit_choices_to={'role': 'RESIDENT'})
+    reminder_type = models.CharField(max_length=10, choices=REMINDER_TYPES, default='EMAIL')
+    status = models.CharField(max_length=10, choices=REMINDER_STATUSES, default='PENDING')
+    message = models.TextField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    viewed_at = models.DateTimeField(null=True, blank=True)
+    pdf_file = models.FileField(upload_to='reminders/%Y/%m/', null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name='reminders_sent',
+                                   limit_choices_to={'role__in': ['SUPERADMIN', 'SYNDIC']})
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Rappel"
+        verbose_name_plural = "Rappels"
+    
+    def __str__(self):
+        return f"Rappel {self.get_reminder_type_display()} - {self.document.title} → {self.resident.username}"
+    
+    def mark_sent(self):
+        self.status = 'SENT'
+        self.sent_at = timezone.now()
+        self.save(update_fields=['status', 'sent_at'])
+    
+    def mark_viewed(self):
+        self.status = 'VIEWED'
+        self.viewed_at = timezone.now()
+        self.save(update_fields=['status', 'viewed_at'])
+    
+    def mark_failed(self):
+        self.status = 'FAILED'
+        self.save(update_fields=['status'])
+
+
+
 class ChatbotFAQ(models.Model):
     """Questions fréquentes pour l'assistant virtuel"""
     CATEGORIES = [
