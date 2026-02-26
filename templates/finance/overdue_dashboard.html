@@ -1,142 +1,206 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Impayés - SyndicPro{% endblock %}
+{% block title %}Gestion des Impayés - SyndicPro{% endblock %}
 
 {% block content %}
 <!-- ===== EN-TÊTE DE PAGE ===== -->
-{% include 'components/page_header.html' with title="Gestion des Impayés" subtitle="Vue d'ensemble" icon="fas fa-exclamation-triangle" %}
-
-<div class="container">
-    <!-- ===== MÉTRIQUES PRINCIPALES ===== -->
-    <section class="metrics-section mb-4">
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                {% include 'components/stats_card.html' with value=stats.overdue_30_count|add:stats.overdue_60_count|add:stats.critical_90_count label="Total Impayés" icon="fas fa-exclamation-triangle" color="warning" %}
+<div class="page-header mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h1 class="page-title text-primary mb-2">
+                    <i class="fas fa-exclamation-triangle me-3"></i>Gestion des Impayés
+                </h1>
+                <p class="page-subtitle text-muted mb-0">Suivi des paiements en retard et rappels</p>
             </div>
-            <div class="col-md-4 mb-4">
-                {% include 'components/stats_card.html' with value=stats.critical_90_count label="Situations Critiques" icon="fas fa-skull-crossbones" color="danger" %}
-            </div>
-            <div class="col-md-4 mb-4">
-                {% include 'components/stats_card.html' with value=total_overdue_amount|floatformat:0 label="Montant Total (DH)" icon="fas fa-coins" color="danger" %}
-            </div>
-        </div>
-    </section>
-
-    <!-- ===== ACTIONS RAPIDES ===== -->
-    <section class="quick-actions-section mb-4">
-        <div class="row">
-            <div class="col-12">
+            <div class="col-md-5 text-end">
                 <button class="btn-modern btn-primary" onclick="runOverdueDetection()">
                     <i class="fas fa-search me-2"></i>Détecter les Impayés
                 </button>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- ===== MÉTRIQUES ===== -->
+    <section class="metrics-section mb-4">
+        <div class="row">
+            <div class="col-md-3 col-6 mb-4">
+                {% include 'components/stats_card.html' with value=stats.total_unpaid_residents label="Résidents en
+                retard" icon="fas fa-users" color="warning" %}
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                {% include 'components/stats_card.html' with value=stats.total_critical label="Situations Critiques"
+                icon="fas fa-skull-crossbones" color="danger" %}
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                {% include 'components/stats_card.html' with value=total_overdue_amount|floatformat:0 label="Montant
+                Total (DH)" icon="fas fa-coins" color="danger" %}
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                {% include 'components/stats_card.html' with value=stats.total_reminders_sent label="Rappels Envoyés"
+                icon="fas fa-paper-plane" color="info" %}
+            </div>
+        </div>
     </section>
 
-    <!-- ===== LISTE DES IMPAYÉS ===== -->
-    <section class="overdue-section">
+    <!-- ===== TABLE DES IMPAYÉS PAR RÉSIDENT ===== -->
+    <section class="mb-5">
         <div class="card-modern">
             <div class="card-header-modern">
                 <h5 class="mb-0">
-                    <i class="fas fa-list me-2"></i>Liste des Impayés
+                    <i class="fas fa-list me-2"></i>Impayés par Résident
                 </h5>
             </div>
-            <div class="card-body-modern">
-                {% if critical_90 or overdue_60 or overdue_30 %}
-                    <div class="table-responsive">
-                        <table class="table table-modern">
-                            <thead>
-                                <tr>
-                                    <th>Document</th>
-                                    <th>Résident</th>
-                                    <th>Montant</th>
-                                    <th>Retard</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for doc in critical_90|slice:":10" %}
-                                <tr class="table-danger">
-                                    <td>
-                                        <strong>{{ doc.title }}</strong>
-                                        <br><small class="text-muted">{{ doc.due_date|date:"d/m/Y" }}</small>
-                                    </td>
-                                    <td>
-                                        {{ doc.resident.get_full_name|default:doc.resident.username }}
-                                        {% if doc.resident.apartment %}<br><small class="text-muted">Apt. {{ doc.resident.apartment }}</small>{% endif %}
-                                    </td>
-                                    <td><strong class="text-danger">{{ doc.amount|floatformat:2 }} DH</strong></td>
-                                    <td><span class="badge bg-danger">{{ doc.days_overdue }} jours</span></td>
-                                    <td>
-                                        <a href="{% url 'finance:document_detail' doc.pk %}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i>
+            <div class="card-body-modern p-0">
+                {% if residents %}
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Résident</th>
+                                <th>Appartement</th>
+                                <th class="text-center">Docs impayés</th>
+                                <th class="text-end">Montant dû</th>
+                                <th class="text-end">Déjà payé</th>
+                                <th class="text-end">Solde</th>
+                                <th class="text-center">Retard max</th>
+                                <th class="text-center">Statut</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in residents %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="resident-avatar bg-{{ r.status_color }}"
+                                            style="width:36px;height:36px;font-size:0.8rem;">
+                                            {{ r.resident.first_name|first|default:"?" }}{{
+                                            r.resident.last_name|first|default:"" }}
+                                        </div>
+                                        <div>
+                                            <strong>{{ r.resident.get_full_name|default:r.resident.username }}</strong>
+                                            {% if r.resident.email %}<br><small class="text-muted">{{ r.resident.email
+                                                }}</small>{% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ r.resident.apartment|default:"-" }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-{{ r.status_color }}">{{ r.unpaid_count }}</span>
+                                </td>
+                                <td class="text-end"><strong>{{ r.total_due|floatformat:2 }} DH</strong></td>
+                                <td class="text-end text-success">{{ r.total_paid|floatformat:2 }} DH</td>
+                                <td class="text-end">
+                                    <strong class="text-{{ r.status_color }}">{{ r.balance|floatformat:2 }} DH</strong>
+                                </td>
+                                <td class="text-center">
+                                    {% if r.max_days_overdue > 0 %}
+                                    <span class="badge bg-{{ r.status_color }}">{{ r.max_days_overdue }}j</span>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge-modern badge-{{ r.status_color }}">{{ r.status_label }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <a href="{% url 'finance:resident_payment_history' r.resident.pk %}"
+                                            class="btn btn-sm btn-outline-primary" title="Historique">
+                                            <i class="fas fa-history"></i>
                                         </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                                {% for doc in overdue_60|slice:":10" %}
-                                <tr class="table-warning">
-                                    <td>
-                                        <strong>{{ doc.title }}</strong>
-                                        <br><small class="text-muted">{{ doc.due_date|date:"d/m/Y" }}</small>
-                                    </td>
-                                    <td>
-                                        {{ doc.resident.get_full_name|default:doc.resident.username }}
-                                        {% if doc.resident.apartment %}<br><small class="text-muted">Apt. {{ doc.resident.apartment }}</small>{% endif %}
-                                    </td>
-                                    <td><strong class="text-warning">{{ doc.amount|floatformat:2 }} DH</strong></td>
-                                    <td><span class="badge bg-warning">{{ doc.days_overdue }} jours</span></td>
-                                    <td>
-                                        <a href="{% url 'finance:document_detail' doc.pk %}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                        {% if r.documents %}
+                                        <form method="post" action="{% url 'finance:send_reminder' r.documents.0.pk %}"
+                                            class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="reminder_type" value="EMAIL">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning"
+                                                title="Envoyer rappel">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                        <h5>Aucun impayé</h5>
-                        <p class="text-muted">Tous les paiements sont à jour.</p>
-                    </div>
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5>Aucun impayé</h5>
+                    <p class="text-muted">Tous les paiements sont à jour.</p>
+                </div>
                 {% endif %}
             </div>
         </div>
     </section>
-</div>
 
-<!-- Modal de Résultats -->
-<div class="modal fade" id="detectionResultModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-search me-2"></i>Résultats de la Détection
+    <!-- ===== DERNIERS RAPPELS ENVOYÉS ===== -->
+    {% if recent_reminders %}
+    <section>
+        <div class="card-modern">
+            <div class="card-header-modern" style="background: linear-gradient(135deg, #374151, #1f2937);">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-paper-plane me-2"></i>Derniers Rappels Envoyés
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div id="detectionResults">
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Chargement...</span>
-                        </div>
-                        <p class="mt-3">Détection en cours...</p>
-                    </div>
+            <div class="card-body-modern p-0">
+                <div class="table-responsive">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Résident</th>
+                                <th>Document</th>
+                                <th class="text-center">Type</th>
+                                <th class="text-center">Statut</th>
+                                <th>Envoyé par</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rem in recent_reminders %}
+                            <tr>
+                                <td><small>{{ rem.created_at|date:"d/m/Y H:i" }}</small></td>
+                                <td>{{ rem.resident.get_full_name|default:rem.resident.username }}</td>
+                                <td>{{ rem.document.title }}</td>
+                                <td class="text-center">
+                                    {% if rem.reminder_type == 'EMAIL' %}
+                                    <span class="badge bg-info"><i class="fas fa-envelope me-1"></i>Email</span>
+                                    {% elif rem.reminder_type == 'PDF' %}
+                                    <span class="badge bg-secondary"><i class="fas fa-file-pdf me-1"></i>PDF</span>
+                                    {% else %}
+                                    <span class="badge bg-primary"><i class="fas fa-sms me-1"></i>SMS</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if rem.status == 'SENT' %}
+                                    <span class="badge-modern badge-success">Envoyé</span>
+                                    {% elif rem.status == 'VIEWED' %}
+                                    <span class="badge-modern badge-info">Vu</span>
+                                    {% elif rem.status == 'FAILED' %}
+                                    <span class="badge-modern badge-danger">Échoué</span>
+                                    {% else %}
+                                    <span class="badge-modern badge-warning">En attente</span>
+                                    {% endif %}
+                                </td>
+                                <td><small class="text-muted">{{
+                                        rem.created_by.get_full_name|default:rem.created_by.username }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="button" class="btn btn-primary" onclick="location.reload()">
-                    <i class="fas fa-sync me-2"></i>Actualiser
-                </button>
-            </div>
         </div>
-    </div>
+    </section>
+    {% endif %}
 </div>
 
 <!-- Modal de Résultats -->
@@ -175,7 +239,7 @@
     function runOverdueDetection() {
         const modal = new bootstrap.Modal(document.getElementById('detectionResultModal'));
         modal.show();
-        
+
         fetch('{% url "finance:run_overdue_detection" %}', {
             method: 'POST',
             headers: {
@@ -183,34 +247,33 @@
                 'Content-Type': 'application/json',
             },
         })
-        .then(response => response.json())
-        .then(data => {
-            const resultsDiv = document.getElementById('detectionResults');
-            if (data.success) {
-                resultsDiv.innerHTML = `
+            .then(response => response.json())
+            .then(data => {
+                const resultsDiv = document.getElementById('detectionResults');
+                if (data.success) {
+                    resultsDiv.innerHTML = `
                     <div class="alert alert-success">
                         <h6><i class="fas fa-check-circle me-2"></i>Détection Terminée</h6>
                         <p class="mb-0">${data.message}</p>
                     </div>
                 `;
-            } else {
-                resultsDiv.innerHTML = `
+                } else {
+                    resultsDiv.innerHTML = `
                     <div class="alert alert-danger">
                         <h6><i class="fas fa-exclamation-triangle me-2"></i>Erreur</h6>
                         <p class="mb-0">${data.error}</p>
                     </div>
                 `;
-            }
-        })
-        .catch(error => {
-            const resultsDiv = document.getElementById('detectionResults');
-            resultsDiv.innerHTML = `
+                }
+            })
+            .catch(error => {
+                document.getElementById('detectionResults').innerHTML = `
                 <div class="alert alert-danger">
                     <h6><i class="fas fa-exclamation-triangle me-2"></i>Erreur</h6>
                     <p class="mb-0">Impossible de contacter le serveur</p>
                 </div>
             `;
-        });
+            });
     }
 </script>
 {% endblock %}

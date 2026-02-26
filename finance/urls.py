@@ -12,6 +12,7 @@ urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('profile/', views.UserProfileView.as_view(), name='user_profile'),
+    path('settings/', views.SettingsView.as_view(), name='settings'),
     
     # Test components (development only)
     path('test-components/', views.TestComponentsView.as_view(), name='test_components'),
@@ -74,6 +75,8 @@ urlpatterns = [
     
     # Overdue payments management
     path('impayes/', views.OverduePaymentsDashboardView.as_view(), name='overdue_dashboard'),
+    path('impayes/<int:resident_id>/historique/', views.ResidentPaymentHistoryView.as_view(), name='resident_payment_history'),
+    path('impayes/<int:document_id>/rappel/', views.SendReminderView.as_view(), name='send_reminder'),
     path('api/run-overdue-detection/', views.RunOverdueDetectionView.as_view(), name='run_overdue_detection'),
     
     # Chatbot / Assistant virtuel

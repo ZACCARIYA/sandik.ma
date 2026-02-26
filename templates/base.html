@@ -1,26 +1,29 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <!-- ===== META ET CONFIGURATION ===== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="SyndicPro - Système de gestion de syndic moderne et professionnel">
     <meta name="author" content="SyndicPro">
-    
+
     <!-- ===== TITRE ===== -->
     <title>{% block title %}SyndicPro{% endblock %} - Gestion de Syndic</title>
-    
+
     <!-- ===== FAVICON ===== -->
     <link rel="icon" type="image/svg+xml" href="{% static 'images/logos/favicon.svg' %}">
     <link rel="shortcut icon" type="image/svg+xml" href="{% static 'images/logos/favicon.svg' %}">
-    
+
     <!-- ===== STYLES ===== -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link href="{% static 'css/app.css' %}?v={{ timestamp|default:'8.0' }}" rel="stylesheet">
-    
+    <link href="{% static 'css/dist.css' %}" rel="stylesheet">
+
     <!-- ===== CSS ADDITIONNEL ===== -->
     {% block extra_css %}{% endblock %}
 </head>
@@ -31,7 +34,7 @@
     <div class="app-wrapper">
         <!-- ===== OVERLAY MOBILE ===== -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
-        
+
         <!-- ===== SIDEBAR ===== -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -43,77 +46,77 @@
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
-            
+
             <nav class="sidebar-nav">
                 {% if user.role == 'RESIDENT' %}
-                    <!-- Navigation Résident -->
-                    <a href="{% url 'finance:resident_dashboard' %}" class="sidebar-nav-item">
-                        <i class="fas fa-home"></i>
-                        <span>Mon Espace</span>
-                    </a>
-                    <a href="{% url 'finance:document_list' %}" class="sidebar-nav-item">
-                        <i class="fas fa-file-alt"></i>
-                        <span>Mes Documents</span>
-                    </a>
-                    <a href="{% url 'finance:payment_list' %}" class="sidebar-nav-item">
-                        <i class="fas fa-credit-card"></i>
-                        <span>Mes Paiements</span>
-                    </a>
-                    <a href="{% url 'finance:report_create' %}" class="sidebar-nav-item sidebar-nav-highlight">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>Nouveau Rapport</span>
-                    </a>
-                    <a href="{% url 'finance:calendar' %}" class="sidebar-nav-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Calendrier</span>
-                    </a>
-                    <a href="{% url 'finance:chatbot' %}" class="sidebar-nav-item">
-                        <i class="fas fa-robot"></i>
-                        <span>Assistant</span>
-                    </a>
+                <!-- Navigation Résident -->
+                <a href="{% url 'finance:resident_dashboard' %}" class="sidebar-nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Mon Espace</span>
+                </a>
+                <a href="{% url 'finance:document_list' %}" class="sidebar-nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Mes Documents</span>
+                </a>
+                <a href="{% url 'finance:payment_list' %}" class="sidebar-nav-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Mes Paiements</span>
+                </a>
+                <a href="{% url 'finance:report_create' %}" class="sidebar-nav-item sidebar-nav-highlight">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nouveau Rapport</span>
+                </a>
+                <a href="{% url 'finance:calendar' %}" class="sidebar-nav-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Calendrier</span>
+                </a>
+                <a href="{% url 'finance:chatbot' %}" class="sidebar-nav-item">
+                    <i class="fas fa-robot"></i>
+                    <span>Assistant</span>
+                </a>
                 {% else %}
-                    <!-- Navigation Syndic/Admin -->
-                    <a href="{% url 'finance:syndic_dashboard' %}" class="sidebar-nav-item">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Tableau de Bord</span>
-                    </a>
-                    <a href="{% url 'finance:resident_management' %}" class="sidebar-nav-item">
-                        <i class="fas fa-users"></i>
-                        <span>Résidents</span>
-                        <span class="sidebar-badge" id="nav-badge-residents">0</span>
-                    </a>
-                    <a href="{% url 'finance:document_list' %}" class="sidebar-nav-item">
-                        <i class="fas fa-file-invoice"></i>
-                        <span>Documents</span>
-                        <span class="sidebar-badge" id="nav-badge-documents">0</span>
-                    </a>
-                    <a href="{% url 'finance:depense_list' %}" class="sidebar-nav-item">
-                        <i class="fas fa-receipt"></i>
-                        <span>Dépenses</span>
-                    </a>
-                    <a href="{% url 'finance:overdue_dashboard' %}" class="sidebar-nav-item">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>Impayés</span>
-                        <span class="sidebar-badge badge-danger" id="nav-badge-overdue">0</span>
-                    </a>
-                    <a href="{% url 'finance:notification_list' %}" class="sidebar-nav-item">
-                        <i class="fas fa-bell"></i>
-                        <span>Notifications</span>
-                        <span class="sidebar-badge" id="nav-badge-notifications">0</span>
-                    </a>
-                    <a href="{% url 'finance:calendar' %}" class="sidebar-nav-item">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Calendrier</span>
-                    </a>
-                    {% if user.role == 'SUPERADMIN' %}
-                    <a href="{% url 'finance:syndic_management' %}" class="sidebar-nav-item">
-                        <i class="fas fa-user-tie"></i>
-                        <span>Syndics</span>
-                    </a>
-                    {% endif %}
+                <!-- Navigation Syndic/Admin -->
+                <a href="{% url 'finance:syndic_dashboard' %}" class="sidebar-nav-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Tableau de Bord</span>
+                </a>
+                <a href="{% url 'finance:resident_management' %}" class="sidebar-nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Résidents</span>
+                    <span class="sidebar-badge" id="nav-badge-residents">0</span>
+                </a>
+                <a href="{% url 'finance:document_list' %}" class="sidebar-nav-item">
+                    <i class="fas fa-file-invoice"></i>
+                    <span>Documents</span>
+                    <span class="sidebar-badge" id="nav-badge-documents">0</span>
+                </a>
+                <a href="{% url 'finance:depense_list' %}" class="sidebar-nav-item">
+                    <i class="fas fa-receipt"></i>
+                    <span>Dépenses</span>
+                </a>
+                <a href="{% url 'finance:overdue_dashboard' %}" class="sidebar-nav-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Impayés</span>
+                    <span class="sidebar-badge badge-danger" id="nav-badge-overdue">0</span>
+                </a>
+                <a href="{% url 'finance:notification_list' %}" class="sidebar-nav-item">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="sidebar-badge" id="nav-badge-notifications">0</span>
+                </a>
+                <a href="{% url 'finance:calendar' %}" class="sidebar-nav-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Calendrier</span>
+                </a>
+                {% if user.role == 'SUPERADMIN' %}
+                <a href="{% url 'finance:syndic_management' %}" class="sidebar-nav-item">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Syndics</span>
+                </a>
+                {% endif %}
                 {% endif %}
             </nav>
-            
+
             <div class="sidebar-footer">
                 <div class="sidebar-user">
                     <div class="sidebar-user-avatar">
@@ -131,13 +134,16 @@
                     <a href="{% url 'finance:user_profile' %}" class="sidebar-action-btn" title="Mon Profil">
                         <i class="fas fa-user"></i>
                     </a>
+                    <a href="{% url 'finance:settings' %}" class="sidebar-action-btn" title="Paramètres">
+                        <i class="fas fa-cog"></i>
+                    </a>
                     <a href="{% url 'finance:logout' %}" class="sidebar-action-btn text-danger" title="Déconnexion">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
                 </div>
             </div>
         </aside>
-        
+
         <!-- ===== CONTENU PRINCIPAL AVEC HEADER ===== -->
         <div class="app-main">
             <!-- ===== HEADER TOP ===== -->
@@ -163,18 +169,19 @@
                     </div>
                 </div>
             </header>
-            
+
             <!-- ===== CONTENU PRINCIPAL ===== -->
             <main class="app-content">
                 <!-- ===== MESSAGES SYSTÈME ===== -->
                 {% if messages %}
                 <div class="container mt-3">
                     {% for message in messages %}
-                        <div class="alert-modern alert-{{ message.tags }} alert-dismissible fade show">
-                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
+                    <div class="alert-modern alert-{{ message.tags }} alert-dismissible fade show">
+                        <i
+                            class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -201,11 +208,12 @@
         {% if messages %}
         <div class="container mt-3">
             {% for message in messages %}
-                <div class="alert-modern alert-{{ message.tags }} alert-dismissible fade show">
-                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
+            <div class="alert-modern alert-{{ message.tags }} alert-dismissible fade show">
+                <i
+                    class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
             {% endfor %}
         </div>
         {% endif %}
@@ -240,37 +248,37 @@
 
     <!-- ===== BOUTONS FLOTTANTS ===== -->
     {% if user.is_authenticated %}
-        <!-- Assistant virtuel (tous utilisateurs) -->
-        <a href="{% url 'finance:chatbot' %}" class="chatbot-fab" title="Assistant virtuel">
-            <i class="fas fa-robot"></i>
-        </a>
-        
-        <!-- Actions rapides (syndics seulement) -->
-        {% if user.role in 'SUPERADMIN,SYNDIC' %}
-        <button class="fab" onclick="showQuickActions()" title="Actions rapides">
-            <i class="fas fa-plus"></i>
-        </button>
-        {% endif %}
+    <!-- Assistant virtuel (tous utilisateurs) -->
+    <a href="{% url 'finance:chatbot' %}" class="chatbot-fab" title="Assistant virtuel">
+        <i class="fas fa-robot"></i>
+    </a>
+
+    <!-- Actions rapides (syndics seulement) -->
+    {% if user.role in 'SUPERADMIN,SYNDIC' %}
+    <button class="fab" onclick="showQuickActions()" title="Actions rapides">
+        <i class="fas fa-plus"></i>
+    </button>
+    {% endif %}
     {% endif %}
 
     <!-- ===== DONNÉES DJANGO CACHÉES ===== -->
-    <div id="user-data" style="display: none;" 
-         data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
-         data-role="{% if user.is_authenticated %}{{ user.role }}{% endif %}">
+    <div id="user-data" style="display: none;"
+        data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
+        data-role="{% if user.is_authenticated %}{{ user.role }}{% endif %}">
     </div>
 
     <!-- ===== SCRIPTS ===== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- ===== JAVASCRIPT PRINCIPAL ===== -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // ===== DÉPLACEMENT DU CONTENU DANS LE BON CONTENEUR =====
             const contentBlock = document.querySelector('[data-content-block]');
             if (contentBlock) {
                 const userDataElement = document.getElementById('user-data');
                 const isAuthenticated = userDataElement && userDataElement.dataset.authenticated === 'true';
-                
+
                 if (isAuthenticated) {
                     const mainContent = document.querySelector('.app-content');
                     if (mainContent) {
@@ -293,7 +301,7 @@
                     }
                 }
             }
-            
+
             // ===== RÉCUPÉRATION DES DONNÉES UTILISATEUR =====
             const userDataElement = document.getElementById('user-data');
             const isAuthenticated = userDataElement && userDataElement.dataset.authenticated === 'true';
@@ -310,7 +318,7 @@
             if (isAuthenticated && (userRole === 'SYNDIC' || userRole === 'SUPERADMIN')) {
                 // Mise à jour des badges en temps réel
                 updateNavigationBadges();
-                
+
                 // Auto-refresh des badges toutes les 30 secondes
                 setInterval(updateNavigationBadges, 30000);
             }
@@ -353,18 +361,18 @@
 
             // ===== MODE SOMBRE =====
             initializeTheme();
-            
+
             // ===== SIDEBAR TOGGLE =====
             initializeSidebar();
-            
+
             // ===== NAVBAR SCROLL EFFECT (si navbar existe) =====
             if (document.querySelector('.navbar')) {
                 initializeNavbarScroll();
             }
-            
+
             // ===== NAVIGATION ACTIVE STATE =====
             updateActiveNavigation();
-            
+
             // ===== MOBILE NAVIGATION ENHANCEMENTS =====
             enhanceMobileNavigation();
         });
@@ -380,7 +388,7 @@
                     updateBadge('nav-badge-documents', data.total_documents || 0);
                     updateBadge('nav-badge-overdue', data.overdue_count || 0);
                     updateBadge('nav-badge-notifications', data.unread_notifications || 0);
-                    
+
                     // Mise à jour des badges dans l'ancienne navbar (si elle existe)
                     updateBadge('residents-count', data.total_residents || 0);
                     updateBadge('documents-count', data.total_documents || 0);
@@ -388,7 +396,7 @@
                     updateBadge('overdue-count', data.overdue_count || 0);
                     updateBadge('notifications-count', data.unread_notifications || 0);
                     updateBadge('issues-count', data.issue_reports || 0);
-                    
+
                     // Mise à jour du badge dans le header
                     const headerBadge = document.querySelector('.header-badge');
                     if (headerBadge) {
@@ -401,12 +409,12 @@
                     console.log('Erreur mise à jour badges:', error);
                 });
         }
-        
+
         function updateBadge(elementId, count) {
             const badge = document.getElementById(elementId);
             if (badge) {
                 badge.textContent = count;
-                
+
                 // Animation pour les changements
                 if (count > 0) {
                     badge.style.animation = 'pulse 0.5s ease';
@@ -419,7 +427,7 @@
 
         // ===== GESTION DES DROPDOWNS SYNDIC =====
         document.querySelectorAll('.syndic-navigation .dropdown-toggle').forEach(toggle => {
-            toggle.addEventListener('click', function(e) {
+            toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 const dropdown = this.nextElementSibling;
                 if (dropdown) {
@@ -429,7 +437,7 @@
         });
 
         // Fermer les dropdowns en cliquant ailleurs
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!e.target.closest('.syndic-navigation .dropdown')) {
                 document.querySelectorAll('.syndic-navigation .dropdown-menu').forEach(menu => {
                     menu.classList.remove('show');
@@ -489,62 +497,62 @@
         function initializeNavbarScroll() {
             const navbar = document.querySelector('.navbar');
             if (!navbar) return;
-            
+
             let lastScroll = 0;
-            window.addEventListener('scroll', function() {
+            window.addEventListener('scroll', function () {
                 const currentScroll = window.pageYOffset;
-                
+
                 // Ajouter classe scrolled après un certain scroll
                 if (currentScroll > 50) {
                     navbar.classList.add('scrolled');
                 } else {
                     navbar.classList.remove('scrolled');
                 }
-                
+
                 lastScroll = currentScroll;
             });
         }
-        
+
         // ===== MISE À JOUR ÉTAT ACTIF NAVIGATION =====
         function initializeSidebar() {
             const sidebar = document.getElementById('sidebar');
             const sidebarToggle = document.getElementById('sidebarToggle');
             const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
-            
+
             if (!sidebar) return;
-            
+
             // Toggle sidebar (desktop)
             if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', function() {
+                sidebarToggle.addEventListener('click', function () {
                     sidebar.classList.toggle('collapsed');
                     localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
                 });
             }
-            
+
             // Toggle sidebar (mobile)
             const sidebarOverlay = document.getElementById('sidebarOverlay');
             if (mobileSidebarToggle) {
-                mobileSidebarToggle.addEventListener('click', function() {
+                mobileSidebarToggle.addEventListener('click', function () {
                     sidebar.classList.toggle('mobile-open');
                     if (sidebarOverlay) {
                         sidebarOverlay.style.display = sidebar.classList.contains('mobile-open') ? 'block' : 'none';
                     }
                 });
             }
-            
+
             // Fermer sidebar mobile en cliquant sur l'overlay
             if (sidebarOverlay) {
-                sidebarOverlay.addEventListener('click', function() {
+                sidebarOverlay.addEventListener('click', function () {
                     sidebar.classList.remove('mobile-open');
                     sidebarOverlay.style.display = 'none';
                 });
             }
-            
+
             // Fermer sidebar mobile en cliquant à l'extérieur
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (window.innerWidth <= 992) {
-                    if (!sidebar.contains(e.target) && 
-                        mobileSidebarToggle && 
+                    if (!sidebar.contains(e.target) &&
+                        mobileSidebarToggle &&
                         !mobileSidebarToggle.contains(e.target) &&
                         !sidebarOverlay.contains(e.target)) {
                         sidebar.classList.remove('mobile-open');
@@ -552,13 +560,13 @@
                     }
                 }
             });
-            
+
             // Restaurer l'état de la sidebar
             const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
             if (sidebarCollapsed && window.innerWidth > 992) {
                 sidebar.classList.add('collapsed');
             }
-            
+
             // Mettre à jour l'état actif des liens
             const currentPath = window.location.pathname;
             document.querySelectorAll('.sidebar-nav-item').forEach(link => {
@@ -568,11 +576,11 @@
                 }
             });
         }
-        
+
         function updateActiveNavigation() {
             const currentPath = window.location.pathname;
             const navLinks = document.querySelectorAll('.nav-link-modern, .nav-link, .sidebar-nav-item');
-            
+
             navLinks.forEach(link => {
                 const href = link.getAttribute('href');
                 if (href && currentPath.includes(href.split('/').filter(Boolean)[0])) {
@@ -582,64 +590,64 @@
                 }
             });
         }
-        
+
         // ===== AMÉLIORATION NAVIGATION MOBILE =====
         function enhanceMobileNavigation() {
             const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
-            
+
             mobileNavItems.forEach(item => {
-                item.addEventListener('click', function() {
+                item.addEventListener('click', function () {
                     // Animation de clic
                     this.style.transform = 'scale(0.95)';
                     setTimeout(() => {
                         this.style.transform = '';
                     }, 150);
                 });
-                
+
                 // Effet ripple au clic
-                item.addEventListener('click', function(e) {
+                item.addEventListener('click', function (e) {
                     const ripple = document.createElement('span');
                     const rect = this.getBoundingClientRect();
                     const size = Math.max(rect.width, rect.height);
                     const x = e.clientX - rect.left - size / 2;
                     const y = e.clientY - rect.top - size / 2;
-                    
+
                     ripple.style.width = ripple.style.height = size + 'px';
                     ripple.style.left = x + 'px';
                     ripple.style.top = y + 'px';
                     ripple.classList.add('ripple');
-                    
+
                     this.appendChild(ripple);
-                    
+
                     setTimeout(() => {
                         ripple.remove();
                     }, 600);
                 });
             });
         }
-        
+
         // ===== FONCTIONS MODE SOMBRE =====
         function initializeTheme() {
             const themeToggle = document.getElementById('themeToggle');
             const themeIcon = document.getElementById('themeIcon');
-            
+
             if (!themeToggle || !themeIcon) return;
-            
+
             // Récupérer le thème sauvegardé ou utiliser le thème système
             const savedTheme = localStorage.getItem('theme');
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             const currentTheme = savedTheme || systemTheme;
-            
+
             // Appliquer le thème
             applyTheme(currentTheme);
-            
+
             // Écouter les changements de thème système
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
                 if (!localStorage.getItem('theme')) {
                     applyTheme(e.matches ? 'dark' : 'light');
                 }
             });
-            
+
             // Écouter le clic sur le toggle
             themeToggle.addEventListener('click', () => {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -648,13 +656,13 @@
                 localStorage.setItem('theme', newTheme);
             });
         }
-        
+
         function applyTheme(theme) {
             const themeIcon = document.getElementById('themeIcon');
-            
+
             // Appliquer le thème au document
             document.documentElement.setAttribute('data-theme', theme);
-            
+
             // Mettre à jour l'icône
             if (themeIcon) {
                 if (theme === 'dark') {
@@ -665,24 +673,24 @@
                     themeIcon.parentElement.title = 'Passer au mode sombre';
                 }
             }
-            
+
             // Animation de transition
             document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
-            
+
             // Mettre à jour les couleurs des graphiques si Chart.js est chargé
             if (typeof Chart !== 'undefined') {
                 updateChartColors(theme);
             }
         }
-        
+
         function updateChartColors(theme) {
             // Mettre à jour les couleurs des graphiques selon le thème
             const isDark = theme === 'dark';
             const textColor = isDark ? '#cbd5e1' : '#4b5563';
             const gridColor = isDark ? '#475569' : '#e5e7eb';
-            
+
             // Mettre à jour les graphiques existants
-            Chart.helpers.each(Chart.instances, function(chart) {
+            Chart.helpers.each(Chart.instances, function (chart) {
                 if (chart.options.scales) {
                     if (chart.options.scales.x) {
                         chart.options.scales.x.ticks.color = textColor;
@@ -705,20 +713,38 @@
     <style>
         /* Styles pour les actions rapides */
         @keyframes slideInUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-        
+
         .hover-item:hover {
             background: var(--gray-100) !important;
             transform: translateX(5px);
             transition: var(--transition);
         }
-        
-        .badge-superadmin { background: var(--danger-bg); color: var(--danger); }
-        .badge-syndic { background: var(--primary-bg); color: var(--primary); }
-        .badge-resident { background: var(--success-bg); color: var(--success); }
-        
+
+        .badge-superadmin {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .badge-syndic {
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+
+        .badge-resident {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
         /* Styles pour le lien Nouveau Rapport */
         .navbar-nav .nav-link-highlight {
             background: linear-gradient(135deg, #fd7e14, #ff8c42) !important;
@@ -727,14 +753,14 @@
             box-shadow: 0 2px 8px rgba(253, 126, 20, 0.3) !important;
             border-radius: var(--border-radius) !important;
         }
-        
+
         .navbar-nav .nav-link-highlight:hover {
             background: linear-gradient(135deg, #e8690b, #ff7a1a) !important;
             transform: translateY(-1px) !important;
             box-shadow: 0 4px 12px rgba(253, 126, 20, 0.4) !important;
             color: white !important;
         }
-        
+
         /* Navigation responsive */
         @media (max-width: 991.98px) {
             .navbar-nav {
@@ -744,12 +770,12 @@
                 padding: var(--spacing-4);
                 box-shadow: var(--shadow-lg);
             }
-            
+
             .nav-link {
                 margin: var(--spacing-1) 0;
                 padding: var(--spacing-3) var(--spacing-4);
             }
-            
+
             .nav-link-highlight {
                 background: linear-gradient(135deg, #fd7e14, #ff8c42) !important;
                 color: white !important;
@@ -757,7 +783,7 @@
                 box-shadow: 0 2px 8px rgba(253, 126, 20, 0.3) !important;
                 border-radius: var(--radius-md) !important;
             }
-            
+
             .nav-link-highlight:hover {
                 background: linear-gradient(135deg, #e8690b, #ff7a1a) !important;
                 transform: translateY(-1px) !important;
@@ -766,19 +792,21 @@
             }
         }
     </style>
-    
+
     <!-- ===== NAVIGATION MOBILE RÉSIDENT ===== -->
     {% if user.is_authenticated and user.role == 'RESIDENT' %}
-        {% include 'components/resident_mobile_nav.html' %}
+    {% include 'components/resident_mobile_nav.html' %}
     {% endif %}
-    
+
     <!-- ===== NAVIGATION MOBILE SYNDIC ===== -->
     {% if user.is_authenticated and user.role in 'SYNDIC,SUPERADMIN' %}
-        {% include 'components/syndic_mobile_nav.html' %}
+    {% include 'components/syndic_mobile_nav.html' %}
     {% endif %}
-    
+
     <!-- ===== JAVASCRIPT ADDITIONNEL ===== -->
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>
+
 </html>
