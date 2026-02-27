@@ -31,16 +31,13 @@
     <section class="metrics-section mb-4">
         <div class="row">
             <div class="col-md-4 mb-4">
-                {% include 'components/stats_card.html' with value=total_due|floatformat:0 label="Total Dû (DH)"
-                icon="fas fa-file-invoice-dollar" color="warning" %}
+                {% include 'components/stats_card.html' with value=total_due|floatformat:0 label="Total Dû (DH)" icon="fas fa-file-invoice-dollar" color="warning" %}
             </div>
             <div class="col-md-4 mb-4">
-                {% include 'components/stats_card.html' with value=total_paid|floatformat:0 label="Total Payé (DH)"
-                icon="fas fa-check-circle" color="success" %}
+                {% include 'components/stats_card.html' with value=total_paid|floatformat:0 label="Total Payé (DH)" icon="fas fa-check-circle" color="success" %}
             </div>
             <div class="col-md-4 mb-4">
-                {% include 'components/stats_card.html' with value=balance|floatformat:0 label="Solde Restant (DH)"
-                icon="fas fa-balance-scale" color="danger" %}
+                {% include 'components/stats_card.html' with value=balance|floatformat:0 label="Solde Restant (DH)" icon="fas fa-balance-scale" color="danger" %}
             </div>
         </div>
     </section>
