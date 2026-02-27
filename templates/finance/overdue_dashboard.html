@@ -28,20 +28,16 @@
     <section class="metrics-section mb-4">
         <div class="row">
             <div class="col-md-3 col-6 mb-4">
-                {% include 'components/stats_card.html' with value=stats.total_unpaid_residents label="Résidents en
-                retard" icon="fas fa-users" color="warning" %}
+                {% include 'components/stats_card.html' with value=stats.total_unpaid_residents label="Résidents en retard" icon="fas fa-users" color="warning" %}
             </div>
             <div class="col-md-3 col-6 mb-4">
-                {% include 'components/stats_card.html' with value=stats.total_critical label="Situations Critiques"
-                icon="fas fa-skull-crossbones" color="danger" %}
+                {% include 'components/stats_card.html' with value=stats.total_critical label="Situations Critiques" icon="fas fa-skull-crossbones" color="danger" %}
             </div>
             <div class="col-md-3 col-6 mb-4">
-                {% include 'components/stats_card.html' with value=total_overdue_amount|floatformat:0 label="Montant
-                Total (DH)" icon="fas fa-coins" color="danger" %}
+                {% include 'components/stats_card.html' with value=total_overdue_amount|floatformat:0 label="Montant Total (DH)" icon="fas fa-coins" color="danger" %}
             </div>
             <div class="col-md-3 col-6 mb-4">
-                {% include 'components/stats_card.html' with value=stats.total_reminders_sent label="Rappels Envoyés"
-                icon="fas fa-paper-plane" color="info" %}
+                {% include 'components/stats_card.html' with value=stats.total_reminders_sent label="Rappels Envoyés" icon="fas fa-paper-plane" color="info" %}
             </div>
         </div>
     </section>
