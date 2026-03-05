@@ -1469,6 +1469,52 @@ body {
   transform: translateX(5px);
 }
 
+/* ===== PAGE HEADERS ===== */
+.page-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  padding: var(--spacing-8) 0;
+  margin-bottom: var(--spacing-6);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 10% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 10%, rgba(255, 255, 255, 0.1) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.page-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--white);
+  margin-bottom: var(--spacing-2);
+  position: relative;
+  z-index: 1;
+}
+
+.page-subtitle {
+  font-size: var(--font-size-base);
+  color: rgba(255, 255, 255, 0.7);
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: var(--spacing-6) 0;
+  }
+
+  .page-title {
+    font-size: var(--font-size-2xl);
+  }
+}
+
 /* ===== COMPOSANTS RÉUTILISABLES ===== */
 
 /* Cartes modernes */

@@ -1,52 +1,1357 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Tableau de Bord Syndic{% endblock %}
+{% block title %}Tableau de Bord Syndic - SyndicPro{% endblock %}
 
 {% block content %}
-<!-- ===== EN-TÊTE DE PAGE ===== -->
-{% include 'components/page_header.html' with title="Tableau de Bord Syndic" subtitle="Vue d'ensemble" icon="fas fa-tachometer-alt" %}
+<div class="sd-wrapper">
 
-<div class="container">
-    <!-- ===== MÉTRIQUES PRINCIPALES ===== -->
-    <section class="metrics-section mb-4">
-        <div class="row">
-            <div class="col-md-6 mb-4">
-                {% include 'components/stats_card.html' with value=total_residents label="Total Résidents" icon="fas fa-users" color="primary" %}
-            </div>
-            <div class="col-md-6 mb-4">
-                {% include 'components/stats_card.html' with value=total_due|floatformat:0 label="Montants Dus (DH)" icon="fas fa-exclamation-triangle" color="warning" %}
-            </div>
-        </div>
-    </section>
-
-    <!-- ===== ACTIONS RAPIDES ===== -->
-    <section class="quick-actions-section mb-4">
-        <div class="row">
-            {% include 'components/quick_action.html' with url='finance:document_create' icon='fas fa-file-plus' icon_class='bg-primary' title='Document' description='Créer facture' %}
-            {% include 'components/quick_action.html' with url='finance:overdue_dashboard' icon='fas fa-exclamation-triangle' icon_class='bg-danger' title='Impayés' description='Gérer' %}
-        </div>
-    </section>
-
-    <!-- ===== ALERTES IMPORTANTES ===== -->
-    {% if critical or overdue %}
-    <section class="alerts-section">
-        <div class="alert-modern alert-warning">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-exclamation-triangle me-3"></i>
-                <div class="flex-grow-1">
-                    <p class="mb-0">
-                        {% if critical %}{{ critical|length }} situation(s) critique(s){% endif %}
-                        {% if critical and overdue %} et {% endif %}
-                        {% if overdue %}{{ overdue|length }} résident(s) en retard{% endif %}
-                    </p>
+    <!-- ===== HERO HEADER ===== -->
+    <div class="sd-hero">
+        <div class="sd-hero-bg"></div>
+        <div class="container-fluid px-4">
+            <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+                <div class="sd-hero-content">
+                    <div class="sd-hero-greeting">
+                        <i class="fas fa-shield-alt sd-greeting-icon"></i>
+                        Tableau de Bord Syndic
+                    </div>
+                    <h1 class="sd-hero-title">
+                        <span class="sd-hero-icon-wrap"><i class="fas fa-tachometer-alt"></i></span>
+                        Vue d'ensemble
+                    </h1>
+                    <p class="sd-hero-sub">Gérez votre copropriété en temps réel</p>
                 </div>
-                <a href="{% url 'finance:overdue_dashboard' %}" class="btn-modern btn-warning btn-sm">
-                    <i class="fas fa-eye"></i>Voir
+
+                <!-- Alert badge if critical situations -->
+                {% if critical or overdue %}
+                <a href="{% url 'finance:overdue_dashboard' %}" class="sd-alert-badge">
+                    <div class="sd-alert-badge-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <div class="sd-alert-badge-label">Situations urgentes</div>
+                        <div class="sd-alert-badge-value">
+                            {% if critical %}
+                            {{ critical|length }} critique{% if critical|length > 1 %}s{% endif %}
+                            {% endif %}
+                            {% if critical and overdue %}
+                            ·
+                            {% endif %}
+                            {% if overdue %}
+                            {{ overdue|length }} en retard
+                            {% endif %}
+                        </div>
+                    </div>
+                    <i class="fas fa-arrow-right ms-2 sd-alert-badge-arrow"></i>
                 </a>
+                {% endif %}
             </div>
         </div>
-    </section>
-    {% endif %}
+    </div>
+
+    <div class="container-fluid px-4 pb-5">
+
+        <!-- ===== KPI METRICS ===== -->
+        <div class="row g-3 mb-4">
+            <!-- Résidents -->
+            <div class="col-xl-3 col-sm-6">
+                <div class="sd-kpi sd-kpi-blue">
+                    <div class="sd-kpi-icon"><i class="fas fa-users"></i></div>
+                    <div class="sd-kpi-body">
+                        <div class="sd-kpi-value" data-target="{{ total_residents }}">{{ total_residents }}</div>
+                        <div class="sd-kpi-label">Résidents</div>
+                    </div>
+                    <div class="sd-kpi-trend">
+                        <i class="fas fa-user-plus"></i>
+                        <span>+{{ recent_residents }} ce mois</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Montant dû -->
+            <div class="col-xl-3 col-sm-6">
+                <div class="sd-kpi sd-kpi-amber">
+                    <div class="sd-kpi-icon"><i class="fas fa-coins"></i></div>
+                    <div class="sd-kpi-body">
+                        <div class="sd-kpi-value">{{ total_due|floatformat:0 }}</div>
+                        <div class="sd-kpi-label">Montants Dus (DH)</div>
+                    </div>
+                    <div class="sd-kpi-trend">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>{{ overdue_count }} en retard</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Paiements ce mois -->
+            <div class="col-xl-3 col-sm-6">
+                <div class="sd-kpi sd-kpi-green">
+                    <div class="sd-kpi-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="sd-kpi-body">
+                        <div class="sd-kpi-value">{{ payments_this_month|floatformat:0|default:"0" }}</div>
+                        <div class="sd-kpi-label">Encaissés ce mois (DH)</div>
+                    </div>
+                    <div class="sd-kpi-trend">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>{{ documents_this_month }} docs</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Dépenses -->
+            <div class="col-xl-3 col-sm-6">
+                <div class="sd-kpi sd-kpi-violet">
+                    <div class="sd-kpi-icon"><i class="fas fa-receipt"></i></div>
+                    <div class="sd-kpi-body">
+                        <div class="sd-kpi-value">{{ expenses_this_month|floatformat:0|default:"0" }}</div>
+                        <div class="sd-kpi-label">Dépenses ce mois (DH)</div>
+                    </div>
+                    <div class="sd-kpi-trend">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Budget mensuel</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            <!-- ===== LEFT MAIN COLUMN ===== -->
+            <div class="col-xl-8 col-lg-7">
+
+                <!-- Residents status breakdown -->
+                <div class="sd-card mb-4">
+                    <div class="sd-card-header">
+                        <div class="sd-card-header-left">
+                            <div class="sd-card-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <h5 class="sd-card-title">Statut des Résidents</h5>
+                                <p class="sd-card-subtitle">{{ total_residents }} résident{{
+                                    total_residents|pluralize:"s" }} au total</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'finance:resident_management' %}" class="sd-link-btn">
+                            Gérer <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    <div class="sd-card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <div class="sd-status-tile sd-st-green">
+                                    <div class="sd-st-count">{{ up_to_date|length }}</div>
+                                    <div class="sd-st-label">À jour</div>
+                                    <div class="sd-st-icon"><i class="fas fa-check-circle"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="sd-status-tile sd-st-blue">
+                                    <div class="sd-st-count">{{ pending|length }}</div>
+                                    <div class="sd-st-label">En attente</div>
+                                    <div class="sd-st-icon"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="sd-status-tile sd-st-amber">
+                                    <div class="sd-st-count">{{ overdue|length }}</div>
+                                    <div class="sd-st-label">En retard</div>
+                                    <div class="sd-st-icon"><i class="fas fa-exclamation-circle"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="sd-status-tile sd-st-red">
+                                    <div class="sd-st-count">{{ critical|length }}</div>
+                                    <div class="sd-st-label">Critique</div>
+                                    <div class="sd-st-icon"><i class="fas fa-fire"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent documents -->
+                {% if recent_documents %}
+                <div class="sd-card mb-4">
+                    <div class="sd-card-header">
+                        <div class="sd-card-header-left">
+                            <div class="sd-card-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div>
+                                <h5 class="sd-card-title">Documents Récents</h5>
+                                <p class="sd-card-subtitle">Dernières factures créées</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'finance:document_list' %}" class="sd-link-btn">
+                            Voir tout <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    <div class="sd-card-body">
+                        <div class="sd-list">
+                            {% for doc in recent_documents %}
+                            <div class="sd-list-row">
+                                <div
+                                    class="sd-list-icon {% if doc.is_paid %}sd-icon-green{% else %}sd-icon-blue{% endif %}">
+                                    <i class="fas fa-file-invoice"></i>
+                                </div>
+                                <div class="sd-list-info">
+                                    <span class="sd-list-title">{{ doc.title }}</span>
+                                    <span class="sd-list-sub">
+                                        <i class="fas fa-user me-1"></i>{{
+                                        doc.resident.get_full_name|default:doc.resident.username }}
+                                        · {{ doc.date|date:"d/m/Y" }}
+                                    </span>
+                                </div>
+                                <div class="sd-list-right">
+                                    <span class="sd-list-amount">{{ doc.amount|floatformat:2 }} DH</span>
+                                    <span
+                                        class="sd-doc-badge {% if doc.is_paid %}sd-badge-paid{% else %}sd-badge-pending{% endif %}">
+                                        {% if doc.is_paid %}Payé{% else %}En attente{% endif %}
+                                    </span>
+                                </div>
+                                <a href="{% url 'finance:document_detail' doc.pk %}" class="sd-row-action">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Recent payments -->
+                {% if recent_payments %}
+                <div class="sd-card mb-4">
+                    <div class="sd-card-header">
+                        <div class="sd-card-header-left">
+                            <div class="sd-card-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <div>
+                                <h5 class="sd-card-title">Paiements Récents</h5>
+                                <p class="sd-card-subtitle">Dernières transactions enregistrées</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'finance:payment_list' %}" class="sd-link-btn">
+                            Voir tout <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                    <div class="sd-card-body">
+                        <div class="sd-list">
+                            {% for payment in recent_payments %}
+                            <div class="sd-list-row">
+                                <div
+                                    class="sd-list-icon {% if payment.is_verified %}sd-icon-green{% else %}sd-icon-amber{% endif %}">
+                                    <i class="fas fa-{% if payment.is_verified %}check{% else %}clock{% endif %}"></i>
+                                </div>
+                                <div class="sd-list-info">
+                                    <span class="sd-list-title">{{ payment.document.title }}</span>
+                                    <span class="sd-list-sub">
+                                        <i class="fas fa-user me-1"></i>{{
+                                        payment.document.resident.get_full_name|default:payment.document.resident.username
+                                        }}
+                                        · {{ payment.payment_date|date:"d/m/Y" }}
+                                    </span>
+                                </div>
+                                <div class="sd-list-right">
+                                    <span class="sd-list-amount">{{ payment.amount|floatformat:2 }} DH</span>
+                                    <span
+                                        class="sd-doc-badge {% if payment.is_verified %}sd-badge-paid{% else %}sd-badge-pending{% endif %}">
+                                        {% if payment.is_verified %}Vérifié{% else %}En attente{% endif %}
+                                    </span>
+                                </div>
+                                <a href="{% url 'finance:payment_detail' payment.pk %}" class="sd-row-action">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Monthly chart -->
+                {% if monthly_payments %}
+                <div class="sd-card mb-4">
+                    <div class="sd-card-header">
+                        <div class="sd-card-header-left">
+                            <div class="sd-card-icon" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div>
+                                <h5 class="sd-card-title">Évolution des Paiements</h5>
+                                <p class="sd-card-subtitle">6 derniers mois</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sd-card-body p-3 pt-4">
+                        <div class="sd-chart-wrap">
+                            {% for mp in monthly_payments %}
+                            <div class="sd-chart-col">
+                                <div class="sd-chart-bar-wrap">
+                                    <span class="sd-chart-val">{{ mp.amount|floatformat:0 }}</span>
+                                    <div class="sd-chart-bar" style="--bar-h: {% widthratio mp.amount 1 1 %}px;"
+                                        data-value="{{ mp.amount }}"></div>
+                                </div>
+                                <div class="sd-chart-label">{{ mp.month }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- ===== RIGHT SIDEBAR ===== -->
+            <div class="col-xl-4 col-lg-5">
+
+                <!-- Quick Actions -->
+                <div class="sd-sidebar-card mb-4">
+                    <div class="sd-sidebar-header">
+                        <i class="fas fa-bolt"></i> Actions Rapides
+                    </div>
+                    <div class="sd-quick-actions">
+                        <a href="{% url 'finance:document_create' %}" class="sd-quick-btn" style="--qa:#6366f1;">
+                            <div class="sd-quick-icon"><i class="fas fa-file-plus"></i></div>
+                            <div class="sd-quick-text">
+                                <span class="sd-quick-title">Nouveau Document</span>
+                                <span class="sd-quick-desc">Créer une facture</span>
+                            </div>
+                            <i class="fas fa-chevron-right sd-quick-arr"></i>
+                        </a>
+                        <a href="{% url 'finance:resident_create' %}" class="sd-quick-btn" style="--qa:#3b82f6;">
+                            <div class="sd-quick-icon"><i class="fas fa-user-plus"></i></div>
+                            <div class="sd-quick-text">
+                                <span class="sd-quick-title">Ajouter Résident</span>
+                                <span class="sd-quick-desc">Nouveau résident</span>
+                            </div>
+                            <i class="fas fa-chevron-right sd-quick-arr"></i>
+                        </a>
+                        <a href="{% url 'finance:notification_create' %}" class="sd-quick-btn" style="--qa:#f59e0b;">
+                            <div class="sd-quick-icon"><i class="fas fa-bell"></i></div>
+                            <div class="sd-quick-text">
+                                <span class="sd-quick-title">Notification</span>
+                                <span class="sd-quick-desc">Envoyer aux résidents</span>
+                            </div>
+                            <i class="fas fa-chevron-right sd-quick-arr"></i>
+                        </a>
+                        <a href="{% url 'finance:overdue_dashboard' %}" class="sd-quick-btn" style="--qa:#ef4444;">
+                            <div class="sd-quick-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="sd-quick-text">
+                                <span class="sd-quick-title">Impayés</span>
+                                <span class="sd-quick-desc">Gérer les retards</span>
+                            </div>
+                            <i class="fas fa-chevron-right sd-quick-arr"></i>
+                        </a>
+                        <a href="{% url 'finance:depense_create' %}" class="sd-quick-btn" style="--qa:#10b981;">
+                            <div class="sd-quick-icon"><i class="fas fa-receipt"></i></div>
+                            <div class="sd-quick-text">
+                                <span class="sd-quick-title">Dépense</span>
+                                <span class="sd-quick-desc">Enregistrer une charge</span>
+                            </div>
+                            <i class="fas fa-chevron-right sd-quick-arr"></i>
+                        </a>
+                        <a href="{% url 'finance:event_create' %}" class="sd-quick-btn" style="--qa:#8b5cf6;">
+                            <div class="sd-quick-icon"><i class="fas fa-calendar-plus"></i></div>
+                            <div class="sd-quick-text">
+                                <span class="sd-quick-title">Événement</span>
+                                <span class="sd-quick-desc">Planifier un événement</span>
+                            </div>
+                            <i class="fas fa-chevron-right sd-quick-arr"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Recent Notifications -->
+                {% if recent_notifications %}
+                <div class="sd-sidebar-card mb-4">
+                    <div class="sd-sidebar-header">
+                        <i class="fas fa-bell"></i> Notifications Récentes
+                        {% if unread_notifications > 0 %}
+                        <span class="sd-notif-count">{{ unread_notifications }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="sd-notif-list">
+                        {% for notif in recent_notifications|slice:":4" %}
+                        <a href="{% url 'finance:notification_detail' notif.pk %}" class="sd-notif-item">
+                            <div class="sd-notif-dot {% if not notif.is_read %}active{% endif %}"></div>
+                            <div class="sd-notif-body">
+                                <span class="sd-notif-title">{{ notif.title|truncatechars:40 }}</span>
+                                <span class="sd-notif-time">{{ notif.created_at|timesince }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                        <a href="{% url 'finance:notification_list' %}" class="sd-notif-more">
+                            Toutes les notifications <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Recent reports -->
+                {% if recent_reports %}
+                <div class="sd-sidebar-card mb-4">
+                    <div class="sd-sidebar-header">
+                        <i class="fas fa-flag"></i> Rapports Récents
+                    </div>
+                    <div class="sd-notif-list">
+                        {% for report in recent_reports|slice:":4" %}
+                        <div class="sd-notif-item">
+                            <div class="sd-notif-dot {% if report.status == 'NEW' %}active{% endif %}"></div>
+                            <div class="sd-notif-body">
+                                <span class="sd-notif-title">{{ report.title|truncatechars:35 }}</span>
+                                <span class="sd-notif-time">
+                                    {{ report.resident.get_full_name|default:report.resident.username }} · {{
+                                    report.created_at|timesince }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <a href="{% url 'finance:report_management' %}" class="sd-notif-more">
+                            Gérer les rapports <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Financial summary mini -->
+                <div class="sd-fin-card">
+                    <div class="sd-fin-header">
+                        <i class="fas fa-chart-pie"></i> Bilan Financier
+                    </div>
+                    <div class="sd-fin-body">
+                        <div class="sd-fin-row">
+                            <span><i class="fas fa-arrow-down text-danger"></i> Total dû</span>
+                            <strong>{{ total_due|floatformat:2 }} DH</strong>
+                        </div>
+                        <div class="sd-fin-row">
+                            <span><i class="fas fa-arrow-up text-success"></i> Total encaissé</span>
+                            <strong class="text-success">{{ total_paid|floatformat:2 }} DH</strong>
+                        </div>
+                        <div class="sd-fin-divider"></div>
+                        <div class="sd-fin-row sd-fin-net">
+                            <span>Solde net</span>
+                            <strong>{{ total_paid|floatformat:2 }} DH</strong>
+                        </div>
+                        <!-- Payment rate progress -->
+                        {% if total_due > 0 %}
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted">Taux de recouvrement</small>
+                                <small class="fw-bold text-success">{% widthratio total_paid total_due 100 %}%</small>
+                            </div>
+                            <div class="sd-progress-bar">
+                                <div class="sd-progress-fill" style="width:{% widthratio total_paid total_due 100 %}%">
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    /* ============================================================
+       SYNDIC DASHBOARD — MODERN SAAS DESIGN
+       Inspired by Notion / Linear / Stripe
+       ============================================================ */
+
+    /* — Font import — */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    .sd-wrapper {
+        min-height: 100vh;
+        background: #f8f9fb;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ===== HERO ===== */
+    .sd-hero {
+        position: relative;
+        background: linear-gradient(160deg, #1e1b3a 0%, #2d2a5e 50%, #3b3580 100%);
+        padding: 2.75rem 0 3.5rem;
+        margin-bottom: -1.5rem;
+        overflow: hidden;
+    }
+
+    .sd-hero-bg {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 15% 50%, rgba(99, 102, 241, 0.2) 0%, transparent 55%),
+            radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.12) 0%, transparent 45%);
+        pointer-events: none;
+    }
+
+    .sd-hero-content {
+        position: relative;
+    }
+
+    .sd-hero-greeting {
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 0.6rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sd-greeting-icon {
+        color: #a5b4fc;
+    }
+
+    .sd-hero-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        margin-bottom: 0.35rem;
+        letter-spacing: -0.3px;
+    }
+
+    .sd-hero-icon-wrap {
+        width: 44px;
+        height: 44px;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #c7d2fe;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sd-hero-sub {
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 0.85rem;
+        font-weight: 400;
+    }
+
+    /* — Alert badge — */
+    .sd-alert-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.85rem 1.15rem;
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        backdrop-filter: blur(12px);
+        border-radius: 14px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .sd-alert-badge:hover {
+        background: rgba(239, 68, 68, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15);
+    }
+
+    .sd-alert-badge-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        animation: pulseRed 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseRed {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
+        }
+
+        50% {
+            box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+        }
+    }
+
+    .sd-alert-badge-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .sd-alert-badge-value {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #fca5a5;
+    }
+
+    .sd-alert-badge-arrow {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.75rem;
+        transition: transform 0.2s ease;
+    }
+
+    .sd-alert-badge:hover .sd-alert-badge-arrow {
+        transform: translateX(3px);
+    }
+
+    /* ===== KPI CARDS ===== */
+    .sd-kpi {
+        border-radius: 18px;
+        padding: 1.35rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: default;
+    }
+
+    .sd-kpi:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .sd-kpi-blue {
+        background: #f0f4ff;
+    }
+
+    .sd-kpi-amber {
+        background: #fffbeb;
+    }
+
+    .sd-kpi-green {
+        background: #f0fdf4;
+    }
+
+    .sd-kpi-violet {
+        background: #f5f3ff;
+    }
+
+    .sd-kpi-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .sd-kpi-blue .sd-kpi-icon {
+        color: #4f46e5;
+    }
+
+    .sd-kpi-amber .sd-kpi-icon {
+        color: #b45309;
+    }
+
+    .sd-kpi-green .sd-kpi-icon {
+        color: #15803d;
+    }
+
+    .sd-kpi-violet .sd-kpi-icon {
+        color: #6d28d9;
+    }
+
+    .sd-kpi-value {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1;
+        letter-spacing: -0.5px;
+    }
+
+    .sd-kpi-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #64748b;
+        letter-spacing: 0.2px;
+    }
+
+    .sd-kpi-trend {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: #94a3b8;
+        margin-top: auto;
+        padding-top: 0.45rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* ===== CARDS ===== */
+    .sd-card {
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid #e8eaed;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .sd-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .sd-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.1rem 1.35rem;
+        border-bottom: 1px solid #f1f3f5;
+        background: #fafbfc;
+    }
+
+    .sd-card-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .sd-card-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .sd-card-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        letter-spacing: -0.1px;
+    }
+
+    .sd-card-subtitle {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        margin: 0;
+        font-weight: 400;
+    }
+
+    .sd-link-btn {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #6366f1;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        background: rgba(99, 102, 241, 0.06);
+        transition: all 0.2s ease;
+    }
+
+    .sd-link-btn:hover {
+        background: rgba(99, 102, 241, 0.12);
+        color: #4f46e5;
+    }
+
+    .sd-card-body {
+        padding: 0;
+    }
+
+    /* — Status tiles — */
+    .sd-status-tile {
+        border-radius: 14px;
+        padding: 1.15rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: default;
+    }
+
+    .sd-status-tile:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .sd-st-green {
+        background: #f0fdf4;
+        border: 1px solid #dcfce7;
+    }
+
+    .sd-st-blue {
+        background: #f0f4ff;
+        border: 1px solid #dbeafe;
+    }
+
+    .sd-st-amber {
+        background: #fffbeb;
+        border: 1px solid #fef3c7;
+    }
+
+    .sd-st-red {
+        background: #fef2f2;
+        border: 1px solid #fee2e2;
+    }
+
+    .sd-st-count {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1;
+    }
+
+    .sd-st-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-top: 0.3rem;
+    }
+
+    .sd-st-icon {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        font-size: 1.3rem;
+        opacity: 0.1;
+    }
+
+    .sd-st-green .sd-st-icon {
+        color: #16a34a;
+    }
+
+    .sd-st-blue .sd-st-icon {
+        color: #2563eb;
+    }
+
+    .sd-st-amber .sd-st-icon {
+        color: #d97706;
+    }
+
+    .sd-st-red .sd-st-icon {
+        color: #dc2626;
+    }
+
+    /* — List rows — */
+    .sd-list-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.8rem 1.35rem;
+        border-bottom: 1px solid #f1f3f5;
+        transition: background 0.15s ease;
+    }
+
+    .sd-list-row:last-child {
+        border-bottom: none;
+    }
+
+    .sd-list-row:hover {
+        background: #fafbfc;
+    }
+
+    .sd-list-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .sd-icon-green {
+        background: rgba(16, 185, 129, 0.08);
+        color: #10b981;
+    }
+
+    .sd-icon-blue {
+        background: rgba(99, 102, 241, 0.08);
+        color: #6366f1;
+    }
+
+    .sd-icon-amber {
+        background: rgba(245, 158, 11, 0.08);
+        color: #f59e0b;
+    }
+
+    .sd-list-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .sd-list-title {
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #1e293b;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sd-list-sub {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .sd-list-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.2rem;
+        flex-shrink: 0;
+    }
+
+    .sd-list-amount {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .sd-doc-badge {
+        padding: 0.12rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
+
+    .sd-badge-paid {
+        background: rgba(16, 185, 129, 0.08);
+        color: #059669;
+    }
+
+    .sd-badge-pending {
+        background: rgba(245, 158, 11, 0.08);
+        color: #d97706;
+    }
+
+    .sd-row-action {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(99, 102, 241, 0.06);
+        color: #6366f1;
+        text-decoration: none;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    .sd-row-action:hover {
+        background: #6366f1;
+        color: #fff;
+        transform: scale(1.08);
+    }
+
+    /* — Chart — */
+    .sd-chart-wrap {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.75rem;
+        height: 140px;
+        padding: 0 0.5rem;
+    }
+
+    .sd-chart-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .sd-chart-bar-wrap {
+        flex: 1;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.2rem;
+    }
+
+    .sd-chart-val {
+        font-size: 0.58rem;
+        font-weight: 600;
+        color: #94a3b8;
+    }
+
+    .sd-chart-bar {
+        width: 100%;
+        border-radius: 6px 6px 0 0;
+        background: linear-gradient(180deg, #818cf8, #6366f1);
+        min-height: 4px;
+        transition: height 0.8s ease;
+    }
+
+    .sd-chart-label {
+        font-size: 0.6rem;
+        font-weight: 500;
+        color: #94a3b8;
+        text-align: center;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sd-sidebar-card {
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid #e8eaed;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: box-shadow 0.2s ease;
+    }
+
+    .sd-sidebar-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .sd-sidebar-header {
+        padding: 0.85rem 1.15rem;
+        background: #fafbfc;
+        border-bottom: 1px solid #f1f3f5;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .sd-sidebar-header i {
+        color: #6366f1;
+        font-size: 0.8rem;
+    }
+
+    .sd-notif-count {
+        margin-left: auto;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border-radius: 999px;
+        min-width: 18px;
+        text-align: center;
+    }
+
+    /* — Quick actions — */
+    .sd-quick-actions {
+        padding: 0.4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+
+    .sd-quick-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .sd-quick-btn:hover {
+        background: #f8f9fb;
+        transform: translateX(2px);
+    }
+
+    .sd-quick-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+        background: color-mix(in srgb, var(--qa) 10%, transparent);
+        color: var(--qa);
+        transition: all 0.2s ease;
+    }
+
+    .sd-quick-btn:hover .sd-quick-icon {
+        background: var(--qa);
+        color: #fff;
+        transform: scale(1.05);
+    }
+
+    .sd-quick-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sd-quick-title {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .sd-quick-desc {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .sd-quick-arr {
+        font-size: 0.6rem;
+        opacity: 0;
+        color: #94a3b8;
+        transition: all 0.2s ease;
+    }
+
+    .sd-quick-btn:hover .sd-quick-arr {
+        opacity: 1;
+        color: var(--qa);
+        transform: translateX(2px);
+    }
+
+    /* — Notifications — */
+    .sd-notif-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        padding: 0.65rem 1.15rem;
+        transition: background 0.15s ease;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .sd-notif-item:hover {
+        background: #fafbfc;
+    }
+
+    .sd-notif-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        flex-shrink: 0;
+        margin-top: 6px;
+    }
+
+    .sd-notif-dot.active {
+        background: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .sd-notif-body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sd-notif-title {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .sd-notif-time {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .sd-notif-more {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.65rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6366f1;
+        text-decoration: none;
+        border-top: 1px solid #f1f3f5;
+        transition: background 0.15s ease;
+    }
+
+    .sd-notif-more:hover {
+        background: rgba(99, 102, 241, 0.04);
+        color: #4f46e5;
+    }
+
+    /* ===== FINANCIAL CARD ===== */
+    .sd-fin-card {
+        background: linear-gradient(145deg, #1e293b, #1e1b4b);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+    }
+
+    .sd-fin-header {
+        padding: 0.85rem 1.15rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: rgba(255, 255, 255, 0.6);
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .sd-fin-header i {
+        color: #818cf8;
+    }
+
+    .sd-fin-body {
+        padding: 1.15rem;
+    }
+
+    .sd-fin-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.4rem 0;
+        font-size: 0.84rem;
+    }
+
+    .sd-fin-row span {
+        color: rgba(255, 255, 255, 0.5);
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-weight: 400;
+    }
+
+    .sd-fin-row strong {
+        color: rgba(255, 255, 255, 0.85);
+        font-weight: 700;
+    }
+
+    .sd-fin-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        margin: 0.4rem 0;
+    }
+
+    .sd-fin-net strong {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #a5b4fc;
+    }
+
+    .sd-progress-bar {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .sd-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #6366f1, #10b981);
+        border-radius: 999px;
+        transition: width 1s ease;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .sd-hero {
+            padding: 1.75rem 0 2.5rem;
+        }
+
+        .sd-hero-title {
+            font-size: 1.3rem;
+        }
+
+        .sd-kpi {
+            padding: 1rem;
+        }
+
+        .sd-kpi-value {
+            font-size: 1.35rem;
+        }
+
+        .sd-card-header {
+            padding: 0.9rem 1rem;
+        }
+
+        .sd-list-row {
+            padding: 0.7rem 1rem;
+        }
+
+        .sd-sidebar-header {
+            padding: 0.75rem 1rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Animate KPI counters
+        document.querySelectorAll('.sd-kpi-value').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(10px)';
+        });
+        document.querySelectorAll('.sd-kpi').forEach((card, i) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.4s ease, transform 0.4s ease, box-shadow 0.25s';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+                const val = card.querySelector('.sd-kpi-value');
+                if (val) {
+                    val.style.transition = 'opacity 0.3s, transform 0.3s';
+                    val.style.opacity = '1';
+                    val.style.transform = 'translateY(0)';
+                }
+            }, 100 + i * 100);
+        });
+
+        // Animate bar chart heights
+        const maxVal = Math.max(...Array.from(document.querySelectorAll('.sd-chart-bar')).map(b => parseFloat(b.dataset.value) || 0));
+        document.querySelectorAll('.sd-chart-bar').forEach((bar, i) => {
+            const val = parseFloat(bar.dataset.value) || 0;
+            const h = maxVal > 0 ? Math.max(4, (val / maxVal) * 100) : 4;
+            bar.style.height = '0px';
+            setTimeout(() => {
+                bar.style.transition = 'height 0.6s ease';
+                bar.style.height = h + 'px';
+            }, 400 + i * 80);
+        });
+
+        // Progress bar animation
+        const fill = document.querySelector('.sd-progress-fill');
+        if (fill) {
+            const w = fill.style.width;
+            fill.style.width = '0';
+            setTimeout(() => { fill.style.width = w; }, 600);
+        }
+    });
+</script>
 {% endblock %}
