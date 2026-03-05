@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mon Tableau de Bord - Résident{% endblock %}
+{% block title %}Mon Tableau de Bord - SyndicPro{% endblock %}
 
 {% block content %}
 <<<<<<< Updated upstream
@@ -31,19 +31,24 @@
                             </p>
                         </div>
                     </div>
+                    <h1 class="rd-hero-title">
+                        <span class="rd-hero-icon-wrap"><i class="fas fa-home"></i></span>
+                        Mon Tableau de Bord
+                    </h1>
+                    <p class="rd-hero-sub">Vue d'ensemble de votre espace résident</p>
                 </div>
-            </div>
-            <div class="col-md-6 mb-3">
-                <div class="stats-card-modern stats-info">
-                    <div class="stats-card-content">
-                        <div class="stats-card-header">
-                            <div class="stats-icon">
-                                <i class="fas fa-file-invoice"></i>
-                            </div>
-                        </div>
-                        <div class="stats-card-body">
-                            <h3 class="stats-value">{{ status.total_due|floatformat:2 }} DH</h3>
-                            <p class="stats-label">Total des documents</p>
+
+                <!-- Status badge -->
+                <div class="rd-status-badge {% if status.balance <= 0 %}rd-status-ok{% else %}rd-status-due{% endif %}">
+                    <div class="rd-status-icon">
+                        <i
+                            class="fas fa-{% if status.balance <= 0 %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                    </div>
+                    <div>
+                        <div class="rd-status-label">Situation financière</div>
+                        <div class="rd-status-value">
+                            {% if status.balance <= 0 %} À jour ✓ {% else %} {{ status.balance|floatformat:2 }} DH due
+                                {% endif %} </div>
                         </div>
                     </div>
 =======
@@ -663,30 +668,112 @@
                     <i class="fas fa-external-link-alt me-1"></i>Voir tout
                 </a>
             </div>
-            <div class="card-body-modern">
-                {% if documents %}
-                    <div class="table-responsive">
-                        <table class="table table-modern">
-                            <thead>
-                                <tr>
-                                    <th>Document</th>
-                                    <th>Date</th>
-                                    <th>Montant</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for document in documents|slice:":5" %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-file-invoice text-primary me-2"></i>
-                                            <div>
-                                                <strong>{{ document.title }}</strong>
-                                                {% if document.description %}
-                                                    <br><small class="text-muted">{{ document.description|truncatechars:50 }}</small>
+            {% endif %}
+
+            <div class="row g-4">
+
+                <!-- ===== MAIN COLUMN ===== -->
+                <div class="col-xl-8 col-lg-7">
+
+                    <!-- Metric cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <div
+                                class="rd-metric-card rd-metric-{% if status.balance <= 0 %}green{% else %}amber{% endif %}">
+                                <div class="rd-metric-icon">
+                                    <i
+                                        class="fas fa-{% if status.balance <= 0 %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                                </div>
+                                <div class="rd-metric-body">
+                                    <div class="rd-metric-value">{{ status.balance|floatformat:2 }} <span>DH</span>
+                                    </div>
+                                    <div class="rd-metric-label">{% if status.balance <= 0 %}Solde créditeur{% else
+                                            %}Montant dû{% endif %}</div>
+                                    </div>
+                                    <div class="rd-metric-glow"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="rd-metric-card rd-metric-blue">
+                                    <div class="rd-metric-icon">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </div>
+                                    <div class="rd-metric-body">
+                                        <div class="rd-metric-value">{{ status.total_due|floatformat:2 }}
+                                            <span>DH</span></div>
+                                        <div class="rd-metric-label">Total des documents</div>
+                                    </div>
+                                    <div class="rd-metric-glow"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="rd-metric-card rd-metric-violet">
+                                    <div class="rd-metric-icon">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="rd-metric-body">
+                                        <div class="rd-metric-value">{{ documents|length }} <span>doc{{
+                                                documents|length|pluralize:"s" }}</span></div>
+                                        <div class="rd-metric-label">Documents actifs</div>
+                                    </div>
+                                    <div class="rd-metric-glow"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="rd-metric-card rd-metric-teal">
+                                    <div class="rd-metric-icon">
+                                        <i class="fas fa-check-double"></i>
+                                    </div>
+                                    <div class="rd-metric-body">
+                                        <div class="rd-metric-value">{{ status.total_paid|floatformat:2 }}
+                                            <span>DH</span></div>
+                                        <div class="rd-metric-label">Total payé</div>
+                                    </div>
+                                    <div class="rd-metric-glow"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documents table card -->
+                        <div class="rd-card">
+                            <div class="rd-card-header">
+                                <div class="rd-card-header-left">
+                                    <div class="rd-card-icon"
+                                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="rd-card-title">Mes Documents</h5>
+                                        <p class="rd-card-subtitle">{{ documents|length }} document{{
+                                            documents|length|pluralize:"s" }} actif{{ documents|length|pluralize:"s" }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <a href="{% url 'finance:document_list' %}" class="rd-link-btn">
+                                    Voir tout <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+
+                            <div class="rd-card-body">
+                                {% if documents %}
+                                <div class="rd-doc-list">
+                                    {% for document in documents|slice:":6" %}
+                                    <div
+                                        class="rd-doc-row {% if document.is_paid %}rd-doc-paid{% elif document.is_overdue %}rd-doc-overdue{% else %}rd-doc-pending{% endif %}">
+                                        <div class="rd-doc-left">
+                                            <div class="rd-doc-icon">
+                                                {% if document.is_paid %}
+                                                <i class="fas fa-check-circle"></i>
+                                                {% elif document.is_overdue %}
+                                                <i class="fas fa-exclamation-circle"></i>
+                                                {% else %}
+                                                <i class="fas fa-file-invoice"></i>
                                                 {% endif %}
+                                            </div>
+                                            <div class="rd-doc-info">
+                                                <span class="rd-doc-title">{{ document.title }}</span>
+                                                <span class="rd-doc-date"><i class="far fa-calendar-alt"></i> {{
+                                                    document.date|date:"d/m/Y" }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -1053,21 +1140,93 @@
                 </p>
             </div>
         </div>
-    </section>
-    {% endif %}
-</div>
 
-<style>
-/* Styles minimaux pour les cartes de statistiques */
-.stats-card-modern {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    overflow: hidden;
-    position: relative;
-}
+        <style>
+            /* ============================================================
+   RESIDENT DASHBOARD — PREMIUM DESIGN
+   ============================================================ */
+            .rd-wrapper {
+                min-height: 100vh;
+                background: var(--bg-primary, #f8fafc);
+            }
+
+            /* HERO */
+            .rd-hero {
+                position: relative;
+                background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%);
+                padding: 2.5rem 0 3.5rem;
+                margin-bottom: -1.5rem;
+                overflow: hidden;
+            }
+
+            .rd-hero-bg {
+                position: absolute;
+                inset: 0;
+                background:
+                    radial-gradient(ellipse at 15% 60%, rgba(99, 102, 241, 0.35) 0%, transparent 55%),
+                    radial-gradient(ellipse at 85% 10%, rgba(139, 92, 246, 0.25) 0%, transparent 45%),
+                    radial-gradient(ellipse at 50% 100%, rgba(167, 139, 250, 0.15) 0%, transparent 50%);
+                pointer-events: none;
+            }
+
+            .rd-hero-content {
+                position: relative;
+            }
+
+            .rd-hero-greeting {
+                font-size: 0.875rem;
+                color: rgba(255, 255, 255, 0.7);
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+
+            .rd-greeting-icon {
+                color: #fbbf24;
+            }
+
+            .rd-hero-title {
+                font-size: 2rem;
+                font-weight: 800;
+                color: #fff;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 0.4rem;
+            }
+
+            .rd-hero-icon-wrap {
+                width: 48px;
+                height: 48px;
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(10px);
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+                color: #c4b5fd;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .rd-hero-sub {
+                color: rgba(255, 255, 255, 0.6);
+                font-size: 0.9rem;
+            }
+
+            /* Status badge in hero */
+            .rd-status-badge {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 1rem 1.5rem;
+                border-radius: 16px;
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                position: relative;
+            }
 
 .stats-card-modern:hover {
     transform: translateY(-4px);

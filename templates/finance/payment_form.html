@@ -208,6 +208,9 @@
                                             label="Référence" icon="fas fa-hashtag" help_text="Numéro de transaction,
                                             référence bancaire, etc." %}
                                         </div>
+                                        {% endif %}
+                                        <div class="pf-field-hint"><i class="fas fa-lightbulb"></i> N° de transaction,
+                                            référence bancaire, etc.</div>
                                     </div>
                                 </div>
 
@@ -245,19 +248,23 @@
                                         <i class="fas fa-credit-card me-1"></i>Enregistrer le Paiement
                                     </button>
                                 </div>
-                            </form>
+                                <img id="previewImg" src="" alt="Aperçu" class="pf-preview-img">
+                            </div>
+                            {% if form.payment_proof.errors %}
+                            <div class="pf-field-error mt-2">
+                                {% for e in form.payment_proof.errors %}<span><i class="fas fa-exclamation-circle"></i>
+                                    {{ e }}</span>{% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
-                    </div>
-                </div>
 
-                <div class="col-md-4">
-                    <!-- ===== INFORMATIONS DE PAIEMENT ===== -->
-                    <div class="card-modern payment-info-card">
-                        <div class="modern-card-header">
-                            <div class="card-header-content">
-                                <div class="card-title-section">
-                                    <i class="fas fa-info-circle card-icon"></i>
-                                    <h5 class="card-title">Informations</h5>
+                        <!-- Section 4: Notes -->
+                        <div class="pf-section pf-section-last">
+                            <div class="pf-section-header">
+                                <div class="pf-section-num">4</div>
+                                <div>
+                                    <h6 class="pf-section-title">Notes Complémentaires</h6>
+                                    <p class="pf-section-desc">Informations supplémentaires (optionnel)</p>
                                 </div>
                             </div>
                         </div>
@@ -341,52 +348,49 @@
                                     </div>
                                 </div>
                             </div>
+                            <span>Chèque</span>
+                        </div>
+                        <div class="pf-method-item">
+                            <div class="pf-method-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span>Carte bancaire</span>
                         </div>
                     </div>
+                </div>
 
-                    <!-- ===== PROCESSUS DE VÉRIFICATION ===== -->
-                    <div class="card-modern payment-process-card">
-                        <div class="modern-card-header">
-                            <div class="card-header-content">
-                                <div class="card-title-section">
-                                    <i class="fas fa-clock card-icon"></i>
-                                    <h5 class="card-title">Processus de Vérification</h5>
-                                </div>
+                <!-- Process Timeline -->
+                <div class="pf-sidebar-card">
+                    <div class="pf-sidebar-header">
+                        <i class="fas fa-route"></i> Processus de Vérification
+                    </div>
+                    <div class="pf-timeline">
+                        <div class="pf-tl-item active">
+                            <div class="pf-tl-dot"><i class="fas fa-pen"></i></div>
+                            <div class="pf-tl-connector"></div>
+                            <div class="pf-tl-body">
+                                <h6>Enregistrement</h6>
+                                <p>Vous soumettez votre paiement</p>
                             </div>
                         </div>
-                        <div class="modern-card-body">
-                            <div class="process-timeline">
-                                <div class="timeline-item active">
-                                    <div class="timeline-marker">
-                                        <i class="fas fa-edit"></i>
-                                    </div>
-                                    <div class="timeline-content">
-                                        <h6>Enregistrement</h6>
-                                        <p>Vous enregistrez votre paiement</p>
-                                    </div>
-                                </div>
-                                <div class="timeline-item">
-                                    <div class="timeline-marker">
-                                        <i class="fas fa-search"></i>
-                                    </div>
-                                    <div class="timeline-content">
-                                        <h6>Vérification</h6>
-                                        <p>Le syndic vérifie le justificatif</p>
-                                    </div>
-                                </div>
-                                <div class="timeline-item">
-                                    <div class="timeline-marker">
-                                        <i class="fas fa-check"></i>
-                                    </div>
-                                    <div class="timeline-content">
-                                        <h6>Validation</h6>
-                                        <p>Le paiement est validé</p>
-                                    </div>
-                                </div>
+                        <div class="pf-tl-item">
+                            <div class="pf-tl-dot"><i class="fas fa-search"></i></div>
+                            <div class="pf-tl-connector"></div>
+                            <div class="pf-tl-body">
+                                <h6>Vérification</h6>
+                                <p>Le syndic examine le justificatif</p>
+                            </div>
+                        </div>
+                        <div class="pf-tl-item pf-tl-last">
+                            <div class="pf-tl-dot"><i class="fas fa-check-double"></i></div>
+                            <div class="pf-tl-body">
+                                <h6>Validation</h6>
+                                <p>Le paiement est officiellement validé</p>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

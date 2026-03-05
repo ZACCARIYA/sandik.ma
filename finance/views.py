@@ -1435,10 +1435,27 @@ class PaymentCreateView(CreateView):
             return redirect('finance:home')
         return super().dispatch(request, *args, **kwargs)
     
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        for field_name, field in form.fields.items():
+            widget = field.widget
+            widget_class = widget.__class__.__name__
+            if widget_class in ('Select', 'SelectMultiple'):
+                widget.attrs['class'] = 'form-select'
+            elif widget_class == 'Textarea':
+                widget.attrs['class'] = 'form-control'
+            elif widget_class == 'ClearableFileInput':
+                widget.attrs['class'] = 'form-control'
+            else:
+                widget.attrs['class'] = 'form-control'
+        return form
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         document_id = self.kwargs.get('document_id')
-        context['document'] = get_object_or_404(Document, id=document_id, resident=self.request.user)
+        document = get_object_or_404(Document, id=document_id, resident=self.request.user)
+        context['document'] = document
+        context['help_text_amount'] = f"Montant du document : {document.amount} DH"
         return context
     
     def form_valid(self, form):
