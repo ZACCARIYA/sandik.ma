@@ -355,6 +355,210 @@
                                 <i class="fas fa-credit-card"></i>
                             </div>
                             <span>Carte bancaire</span>
+=======
+                        <div class="modern-card-body">
+                            <form method="post" enctype="multipart/form-data" class="payment-form">
+                                {% csrf_token %}
+
+                                <div class="form-section">
+                                    <h6 class="form-section-title">
+                                        <i class="fas fa-money-bill-wave me-2"></i>Montant et Méthode
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {% if help_text_amount %}
+                                            {% include 'components/form_field.html' with field=form.amount
+                                            label="Montant Payé (DH)" icon="fas fa-money-bill-wave"
+                                            help_text=help_text_amount %}
+                                            {% elif document %}
+                                            {% include 'components/form_field.html' with field=form.amount
+                                            label="Montant Payé (DH)" icon="fas fa-money-bill-wave" help_text="Montant
+                                            du document : "|add:document.amount|stringformat:"s"|add:" DH" %}
+                                            {% elif payment and payment.document %}
+                                            {% include 'components/form_field.html' with field=form.amount
+                                            label="Montant Payé (DH)" icon="fas fa-money-bill-wave" help_text="Montant
+                                            du document : "|add:payment.document.amount|stringformat:"s"|add:" DH" %}
+                                            {% else %}
+                                            {% include 'components/form_field.html' with field=form.amount
+                                            label="Montant Payé (DH)" icon="fas fa-money-bill-wave" %}
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {% include 'components/form_field.html' with field=form.payment_method
+                                            label="Méthode de Paiement" icon="fas fa-credit-card" %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <h6 class="form-section-title">
+                                        <i class="fas fa-calendar-alt me-2"></i>Détails du Paiement
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {% include 'components/form_field.html' with field=form.payment_date
+                                            label="Date de Paiement" icon="fas fa-calendar" %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {% include 'components/form_field.html' with field=form.reference
+                                            label="Référence" icon="fas fa-hashtag" help_text="Numéro de transaction,
+                                            référence bancaire, etc." %}
+                                        </div>
+                                        {% endif %}
+                                        <div class="pf-field-hint"><i class="fas fa-lightbulb"></i> N° de transaction,
+                                            référence bancaire, etc.</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <h6 class="form-section-title">
+                                        <i class="fas fa-image me-2"></i>Justificatif
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {% include 'components/form_field.html' with field=form.payment_proof
+                                            label="Justificatif de Paiement" icon="fas fa-image" help_text="Reçu,
+                                            capture d'écran, photo du chèque, etc. (Max 5MB)" %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <h6 class="form-section-title">
+                                        <i class="fas fa-sticky-note me-2"></i>Notes Complémentaires
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            {% include 'components/form_field.html' with field=form.notes label="Notes"
+                                            icon="fas fa-sticky-note" help_text="Informations complémentaires sur le
+                                            paiement" %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <a href="{% url 'finance:document_list' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>Annuler
+                                    </a>
+                                    <button type="submit" class="btn btn-success btn-modern">
+                                        <i class="fas fa-credit-card me-1"></i>Enregistrer le Paiement
+                                    </button>
+                                </div>
+                                <img id="previewImg" src="" alt="Aperçu" class="pf-preview-img">
+                            </div>
+                            {% if form.payment_proof.errors %}
+                            <div class="pf-field-error mt-2">
+                                {% for e in form.payment_proof.errors %}<span><i class="fas fa-exclamation-circle"></i>
+                                    {{ e }}</span>{% endfor %}
+                            </div>
+                            {% endif %}
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
+                        </div>
+
+<<<<<<< HEAD
+                <!-- Process Timeline -->
+                <div class="pf-sidebar-card">
+                    <div class="pf-sidebar-header">
+                        <i class="fas fa-route"></i> Processus de Vérification
+                    </div>
+=======
+                        <!-- Section 4: Notes -->
+                        <div class="pf-section pf-section-last">
+                            <div class="pf-section-header">
+                                <div class="pf-section-num">4</div>
+                                <div>
+                                    <h6 class="pf-section-title">Notes Complémentaires</h6>
+                                    <p class="pf-section-desc">Informations supplémentaires (optionnel)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modern-card-body">
+                            <div class="info-section">
+                                <h6 class="info-section-title">
+                                    <i class="fas fa-credit-card me-2"></i>Méthodes de paiement acceptées
+                                </h6>
+                                <div class="info-items">
+                                    <div class="info-item">
+                                        <i class="fas fa-money-bill-wave info-icon success"></i>
+                                        <span>Espèces</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-university info-icon primary"></i>
+                                        <span>Virement bancaire</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-file-invoice info-icon info"></i>
+                                        <span>Chèque</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-credit-card info-icon warning"></i>
+                                        <span>Carte bancaire</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-ellipsis-h info-icon secondary"></i>
+                                        <span>Autre</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h6 class="info-section-title">
+                                    <i class="fas fa-file-image me-2"></i>Justificatifs acceptés
+                                </h6>
+                                <div class="info-items">
+                                    <div class="info-item">
+                                        <i class="fas fa-file-image info-icon info"></i>
+                                        <span>Reçus de paiement</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-mobile-alt info-icon primary"></i>
+                                        <span>Captures d'écran</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-file-invoice info-icon success"></i>
+                                        <span>Photos de chèques</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-file-alt info-icon warning"></i>
+                                        <span>Relevés bancaires</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h6 class="info-section-title">
+                                    <i class="fas fa-image me-2"></i>Formats d'images
+                                </h6>
+                                <div class="format-tags">
+                                    <span class="format-tag jpeg">JPEG</span>
+                                    <span class="format-tag png">PNG</span>
+                                    <span class="format-tag gif">GIF</span>
+                                    <span class="format-tag webp">WebP</span>
+                                </div>
+                            </div>
+
+                            <div class="info-section">
+                                <h6 class="info-section-title">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Limites
+                                </h6>
+                                <div class="limit-items">
+                                    <div class="limit-item">
+                                        <i class="fas fa-weight-hanging me-2"></i>
+                                        <span>Taille max : 5 MB</span>
+                                    </div>
+                                    <div class="limit-item">
+                                        <i class="fas fa-image me-2"></i>
+                                        <span>Images uniquement</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span>Chèque</span>
+                        </div>
+                        <div class="pf-method-item">
+                            <div class="pf-method-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span>Carte bancaire</span>
                         </div>
                     </div>
                 </div>
@@ -364,6 +568,7 @@
                     <div class="pf-sidebar-header">
                         <i class="fas fa-route"></i> Processus de Vérification
                     </div>
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
                     <div class="pf-timeline">
                         <div class="pf-tl-item active">
                             <div class="pf-tl-dot"><i class="fas fa-pen"></i></div>

@@ -4,6 +4,7 @@
 {% block title %}Tableau de Bord Syndic - SyndicPro{% endblock %}
 
 {% block content %}
+<<<<<<< HEAD
 <div class="ft-page">
     <div class="container-fluid px-3 px-lg-4 py-4 py-lg-5">
         <section class="ft-hero card border-0 mb-4 ft-reveal">
@@ -207,11 +208,53 @@
                             </div>
                             {% endfor %}
                         </div>
+=======
+            <!-- Montant dû -->
+            <div class="col-xl-3 col-sm-6">
+                <div class="sd-kpi sd-kpi-amber">
+                    <div class="sd-kpi-icon"><i class="fas fa-coins"></i></div>
+                    <div class="sd-kpi-body">
+                        <div class="sd-kpi-value">{{ total_due|floatformat:0 }}</div>
+                        <div class="sd-kpi-label">Montants Dus (DH)</div>
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
                     </div>
-                </article>
+                    <div class="sd-kpi-trend">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>{{ overdue_count }} en retard</span>
+                    </div>
+                </div>
             </div>
-        </section>
+            <!-- Paiements ce mois -->
+            <div class="col-xl-3 col-sm-6">
+                <div class="sd-kpi sd-kpi-green">
+                    <div class="sd-kpi-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="sd-kpi-body">
+                        <div class="sd-kpi-value">{{ payments_this_month|floatformat:0|default:"0" }}</div>
+                        <div class="sd-kpi-label">Encaissés ce mois (DH)</div>
+                    </div>
+                    <div class="sd-kpi-trend">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>{{ documents_this_month }} docs</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Dépenses -->
+            <div class="col-xl-3 col-sm-6">
+                <div class="sd-kpi sd-kpi-violet">
+                    <div class="sd-kpi-icon"><i class="fas fa-receipt"></i></div>
+                    <div class="sd-kpi-body">
+                        <div class="sd-kpi-value">{{ expenses_this_month|floatformat:0|default:"0" }}</div>
+                        <div class="sd-kpi-label">Dépenses ce mois (DH)</div>
+                    </div>
+                    <div class="sd-kpi-trend">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Budget mensuel</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+<<<<<<< HEAD
         <section class="row g-4">
             <div class="col-12 col-xl-8">
                 <!-- Cashflow Analytics -->
@@ -258,9 +301,31 @@
                                     <i class="fa-regular fa-circle-check mb-2" style="display: block; font-size: 2rem;"></i>
                                     <p class="mb-0">Aucun résident dans le scope actuel.</p>
                                 </div>
+=======
+        <div class="row g-4">
+
+            <!-- ===== LEFT MAIN COLUMN ===== -->
+            <div class="col-xl-8 col-lg-7">
+
+                <!-- Residents status breakdown -->
+                <div class="sd-card mb-4">
+                    <div class="sd-card-header">
+                        <div class="sd-card-header-left">
+                            <div class="sd-card-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                                <i class="fas fa-users"></i>
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
                             </div>
-                        </article>
+                            <div>
+                                <h5 class="sd-card-title">Statut des Résidents</h5>
+                                <p class="sd-card-subtitle">{{ total_residents }} résident{{
+                                    total_residents|pluralize:"s" }} au total</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'finance:resident_management' %}" class="sd-link-btn">
+                            Gérer <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
                     </div>
+<<<<<<< HEAD
                     <div class="col-12 col-lg-6">
                         <article class="card-modern h-100">
                             <header class="card-header-modern">
@@ -278,9 +343,39 @@
                                 <div id="notifEmpty" class="d-none" style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
                                     <i class="fa-regular fa-bell-slash mb-2" style="display: block; font-size: 2rem;"></i>
                                     <p class="mb-0">Pas de catégories disponibles.</p>
+=======
+                    <div class="sd-card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <div class="sd-status-tile sd-st-green">
+                                    <div class="sd-st-count">{{ up_to_date|length }}</div>
+                                    <div class="sd-st-label">À jour</div>
+                                    <div class="sd-st-icon"><i class="fas fa-check-circle"></i></div>
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
                                 </div>
                             </div>
-                        </article>
+                            <div class="col-6 col-md-3">
+                                <div class="sd-status-tile sd-st-blue">
+                                    <div class="sd-st-count">{{ pending|length }}</div>
+                                    <div class="sd-st-label">En attente</div>
+                                    <div class="sd-st-icon"><i class="fas fa-clock"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="sd-status-tile sd-st-amber">
+                                    <div class="sd-st-count">{{ overdue|length }}</div>
+                                    <div class="sd-st-label">En retard</div>
+                                    <div class="sd-st-icon"><i class="fas fa-exclamation-circle"></i></div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="sd-status-tile sd-st-red">
+                                    <div class="sd-st-count">{{ critical|length }}</div>
+                                    <div class="sd-st-label">Critique</div>
+                                    <div class="sd-st-icon"><i class="fas fa-fire"></i></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -344,9 +439,26 @@
                                     <p class="mb-0">Aucun paiement enregistré sur cette période.</p>
                                 </div>
                                 {% endif %}
+=======
+                <!-- Recent documents -->
+                {% if recent_documents %}
+                <div class="sd-card mb-4">
+                    <div class="sd-card-header">
+                        <div class="sd-card-header-left">
+                            <div class="sd-card-icon" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div>
+                                <h5 class="sd-card-title">Documents Récents</h5>
+                                <p class="sd-card-subtitle">Dernières factures créées</p>
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
                             </div>
                         </div>
+                        <a href="{% url 'finance:document_list' %}" class="sd-link-btn">
+                            Voir tout <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
                     </div>
+<<<<<<< HEAD
                 </article>
             </div>
 
@@ -389,15 +501,37 @@
                                     <p class="fw-semibold mb-0 text-danger">{{ debtor.balance|floatformat:0 }} DH</p>
                                     <span class="badge {% if debtor.category == 'critical' %}bg-danger{% elif debtor.category == 'overdue' %}bg-warning{% else %}bg-secondary{% endif %}" style="font-size: 0.75rem;">{{ debtor.category }}</span>
                                 </div>
-                            </a>
+                                <div class="sd-list-info">
+                                    <span class="sd-list-title">{{ doc.title }}</span>
+                                    <span class="sd-list-sub">
+                                        <i class="fas fa-user me-1"></i>{{
+                                        doc.resident.get_full_name|default:doc.resident.username }}
+                                        · {{ doc.date|date:"d/m/Y" }}
+                                    </span>
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
+                                </div>
+                                <div class="sd-list-right">
+                                    <span class="sd-list-amount">{{ doc.amount|floatformat:2 }} DH</span>
+                                    <span
+                                        class="sd-doc-badge {% if doc.is_paid %}sd-badge-paid{% else %}sd-badge-pending{% endif %}">
+                                        {% if doc.is_paid %}Payé{% else %}En attente{% endif %}
+                                    </span>
+                                </div>
+                                <a href="{% url 'finance:document_detail' doc.pk %}" class="sd-row-action">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
                             {% endfor %}
                         </div>
+<<<<<<< HEAD
                         {% else %}
                         <div style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
                             <i class="fa-regular fa-thumbs-up mb-2" style="display: block; font-size: 2rem;"></i>
                             <p class="mb-0">Aucun profil à risque élevé.</p>
                         </div>
                         {% endif %}
+=======
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
                     </div>
                 </article>
 
@@ -457,9 +591,39 @@
                         </div>
                         {% endif %}
                     </div>
-                </article>
+                    <div class="sd-fin-body">
+                        <div class="sd-fin-row">
+                            <span><i class="fas fa-arrow-down text-danger"></i> Total dû</span>
+                            <strong>{{ total_due|floatformat:2 }} DH</strong>
+                        </div>
+                        <div class="sd-fin-row">
+                            <span><i class="fas fa-arrow-up text-success"></i> Total encaissé</span>
+                            <strong class="text-success">{{ total_paid|floatformat:2 }} DH</strong>
+                        </div>
+                        <div class="sd-fin-divider"></div>
+                        <div class="sd-fin-row sd-fin-net">
+                            <span>Solde net</span>
+                            <strong>{{ total_paid|floatformat:2 }} DH</strong>
+                        </div>
+                        <!-- Payment rate progress -->
+                        {% if total_due > 0 %}
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small class="text-muted">Taux de recouvrement</small>
+                                <small class="fw-bold text-success">{% widthratio total_paid total_due 100 %}%</small>
+                            </div>
+                            <div class="sd-progress-bar">
+                                <div class="sd-progress-fill" style="width:{% widthratio total_paid total_due 100 %}%">
+                                </div>
+                            </div>
+                        </div>
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
+                        {% endif %}
+                    </div>
+                </div>
+
             </div>
-        </section>
+        </div>
     </div>
 </div>
 
@@ -503,235 +667,804 @@
         });
     }
 
-    function animateKpis() {
-        const counters = document.querySelectorAll('[data-kpi-count]');
-        counters.forEach((node) => {
-            const target = Number(String(node.dataset.kpiCount).replace(/[^0-9.-]/g, ''));
-            if (!Number.isFinite(target)) return;
-
-            const duration = 700;
-            const startAt = performance.now();
-            const prefix = node.textContent.includes('DH') ? '' : '';
-            const suffix = node.textContent.includes('DH') ? ' DH' : '';
-
-            function tick(now) {
-                const p = Math.min(1, (now - startAt) / duration);
-                const eased = 1 - Math.pow(1 - p, 3);
-                const current = Math.round(target * eased);
-                node.textContent = prefix + current.toLocaleString('fr-MA') + suffix;
-                if (p < 1) requestAnimationFrame(tick);
-            }
-
-            requestAnimationFrame(tick);
-        });
+    .sd-alert-badge-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        animation: pulseRed 2.5s ease-in-out infinite;
     }
 
-    function initializeCharts(monthlyTrend, statusDistribution, notificationMix) {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const axisColor = isDark ? '#94a3b8' : '#64748b';
-        const gridColor = isDark ? 'rgba(148,163,184,.14)' : 'rgba(100,116,139,.16)';
+    @keyframes pulseRed {
 
-        renderCashflowChart(monthlyTrend, axisColor, gridColor);
-        renderStatusChart(statusDistribution, axisColor);
-        renderNotificationChart(notificationMix, axisColor, gridColor);
-    }
-
-    function renderCashflowChart(monthlyTrend, axisColor, gridColor) {
-        const loading = document.getElementById('cashflowLoading');
-        const wrap = document.getElementById('cashflowChartWrap');
-        const empty = document.getElementById('cashflowEmpty');
-        const canvas = document.getElementById('cashflowChart');
-        if (!canvas) return;
-
-        const hasData = Array.isArray(monthlyTrend) && monthlyTrend.some((item) => Number(item.payments || 0) > 0 || Number(item.expenses || 0) > 0);
-        if (!hasData) {
-            if (loading) loading.classList.add('d-none');
-            if (empty) empty.classList.remove('d-none');
-            return;
+        0%,
+        100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
         }
 
-        const labels = monthlyTrend.map((item) => item.month);
-        const payments = monthlyTrend.map((item) => Number(item.payments || 0));
-        const expenses = monthlyTrend.map((item) => Number(item.expenses || 0));
-        const net = monthlyTrend.map((item) => Number(item.net || 0));
-
-        new Chart(canvas, {
-            data: {
-                labels,
-                datasets: [
-                    {
-                        type: 'line',
-                        label: 'Paiements (DH)',
-                        data: payments,
-                        borderColor: '#16a34a',
-                        backgroundColor: 'rgba(22,163,74,.14)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.35,
-                        pointRadius: 2
-                    },
-                    {
-                        type: 'line',
-                        label: 'Dépenses (DH)',
-                        data: expenses,
-                        borderColor: '#ea580c',
-                        backgroundColor: 'rgba(234,88,12,.12)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.35,
-                        pointRadius: 2
-                    },
-                    {
-                        type: 'bar',
-                        label: 'Flux net (DH)',
-                        data: net,
-                        backgroundColor: net.map((value) => value >= 0 ? 'rgba(2,132,199,.45)' : 'rgba(239,68,68,.45)'),
-                        borderRadius: 8,
-                        maxBarThickness: 28
-                    }
-                ]
-            },
-            options: {
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: axisColor,
-                            usePointStyle: true
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: (context) => `${context.dataset.label}: ${Number(context.parsed.y || 0).toLocaleString('fr-MA')} DH`
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: { color: axisColor },
-                        grid: { color: 'transparent' }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            color: axisColor,
-                            callback: (value) => `${Number(value).toLocaleString('fr-MA')} DH`
-                        },
-                        grid: { color: gridColor }
-                    }
-                }
-            }
-        });
-
-        if (loading) loading.classList.add('d-none');
-        if (wrap) wrap.classList.remove('d-none');
+        50% {
+            box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+        }
     }
 
-    function renderStatusChart(statusDistribution, axisColor) {
-        const loading = document.getElementById('statusLoading');
-        const wrap = document.getElementById('statusChartWrap');
-        const empty = document.getElementById('statusEmpty');
-        const canvas = document.getElementById('statusChart');
-        if (!canvas) return;
+    .sd-alert-badge-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: rgba(255, 255, 255, 0.5);
+    }
 
-        const hasData = Array.isArray(statusDistribution) && statusDistribution.some((item) => Number(item.value || 0) > 0);
-        if (!hasData) {
-            if (loading) loading.classList.add('d-none');
-            if (empty) empty.classList.remove('d-none');
-            return;
+    .sd-alert-badge-value {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #fca5a5;
+    }
+
+    .sd-alert-badge-arrow {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.75rem;
+        transition: transform 0.2s ease;
+    }
+
+    .sd-alert-badge:hover .sd-alert-badge-arrow {
+        transform: translateX(3px);
+    }
+
+    /* ===== KPI CARDS ===== */
+    .sd-kpi {
+        border-radius: 18px;
+        padding: 1.35rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: default;
+    }
+
+    .sd-kpi:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    .sd-kpi-blue {
+        background: #f0f4ff;
+    }
+
+    .sd-kpi-amber {
+        background: #fffbeb;
+    }
+
+    .sd-kpi-green {
+        background: #f0fdf4;
+    }
+
+    .sd-kpi-violet {
+        background: #f5f3ff;
+    }
+
+    .sd-kpi-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .sd-kpi-blue .sd-kpi-icon {
+        color: #4f46e5;
+    }
+
+    .sd-kpi-amber .sd-kpi-icon {
+        color: #b45309;
+    }
+
+    .sd-kpi-green .sd-kpi-icon {
+        color: #15803d;
+    }
+
+    .sd-kpi-violet .sd-kpi-icon {
+        color: #6d28d9;
+    }
+
+    .sd-kpi-value {
+        font-size: 1.65rem;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1;
+        letter-spacing: -0.5px;
+    }
+
+    .sd-kpi-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #64748b;
+        letter-spacing: 0.2px;
+    }
+
+    .sd-kpi-trend {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: #94a3b8;
+        margin-top: auto;
+        padding-top: 0.45rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* ===== CARDS ===== */
+    .sd-card {
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid #e8eaed;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .sd-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .sd-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.1rem 1.35rem;
+        border-bottom: 1px solid #f1f3f5;
+        background: #fafbfc;
+    }
+
+    .sd-card-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .sd-card-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .sd-card-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        letter-spacing: -0.1px;
+    }
+
+    .sd-card-subtitle {
+        font-size: 0.72rem;
+        color: #94a3b8;
+        margin: 0;
+        font-weight: 400;
+    }
+
+    .sd-link-btn {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #6366f1;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        background: rgba(99, 102, 241, 0.06);
+        transition: all 0.2s ease;
+    }
+
+    .sd-link-btn:hover {
+        background: rgba(99, 102, 241, 0.12);
+        color: #4f46e5;
+    }
+
+    .sd-card-body {
+        padding: 0;
+    }
+
+    /* — Status tiles — */
+    .sd-status-tile {
+        border-radius: 14px;
+        padding: 1.15rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        cursor: default;
+    }
+
+    .sd-status-tile:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .sd-st-green {
+        background: #f0fdf4;
+        border: 1px solid #dcfce7;
+    }
+
+    .sd-st-blue {
+        background: #f0f4ff;
+        border: 1px solid #dbeafe;
+    }
+
+    .sd-st-amber {
+        background: #fffbeb;
+        border: 1px solid #fef3c7;
+    }
+
+    .sd-st-red {
+        background: #fef2f2;
+        border: 1px solid #fee2e2;
+    }
+
+    .sd-st-count {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1;
+    }
+
+    .sd-st-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-top: 0.3rem;
+    }
+
+    .sd-st-icon {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        font-size: 1.3rem;
+        opacity: 0.1;
+    }
+
+    .sd-st-green .sd-st-icon {
+        color: #16a34a;
+    }
+
+    .sd-st-blue .sd-st-icon {
+        color: #2563eb;
+    }
+
+    .sd-st-amber .sd-st-icon {
+        color: #d97706;
+    }
+
+    .sd-st-red .sd-st-icon {
+        color: #dc2626;
+    }
+
+    /* — List rows — */
+    .sd-list-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.8rem 1.35rem;
+        border-bottom: 1px solid #f1f3f5;
+        transition: background 0.15s ease;
+    }
+
+    .sd-list-row:last-child {
+        border-bottom: none;
+    }
+
+    .sd-list-row:hover {
+        background: #fafbfc;
+    }
+
+    .sd-list-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .sd-icon-green {
+        background: rgba(16, 185, 129, 0.08);
+        color: #10b981;
+    }
+
+    .sd-icon-blue {
+        background: rgba(99, 102, 241, 0.08);
+        color: #6366f1;
+    }
+
+    .sd-icon-amber {
+        background: rgba(245, 158, 11, 0.08);
+        color: #f59e0b;
+    }
+
+    .sd-list-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .sd-list-title {
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #1e293b;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .sd-list-sub {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .sd-list-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.2rem;
+        flex-shrink: 0;
+    }
+
+    .sd-list-amount {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .sd-doc-badge {
+        padding: 0.12rem 0.5rem;
+        border-radius: 999px;
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
+
+    .sd-badge-paid {
+        background: rgba(16, 185, 129, 0.08);
+        color: #059669;
+    }
+
+    .sd-badge-pending {
+        background: rgba(245, 158, 11, 0.08);
+        color: #d97706;
+    }
+
+    .sd-row-action {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(99, 102, 241, 0.06);
+        color: #6366f1;
+        text-decoration: none;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    .sd-row-action:hover {
+        background: #6366f1;
+        color: #fff;
+        transform: scale(1.08);
+    }
+
+    /* — Chart — */
+    .sd-chart-wrap {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.75rem;
+        height: 140px;
+        padding: 0 0.5rem;
+    }
+
+    .sd-chart-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .sd-chart-bar-wrap {
+        flex: 1;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.2rem;
+    }
+
+    .sd-chart-val {
+        font-size: 0.58rem;
+        font-weight: 600;
+        color: #94a3b8;
+    }
+
+    .sd-chart-bar {
+        width: 100%;
+        border-radius: 6px 6px 0 0;
+        background: linear-gradient(180deg, #818cf8, #6366f1);
+        min-height: 4px;
+        transition: height 0.8s ease;
+    }
+
+    .sd-chart-label {
+        font-size: 0.6rem;
+        font-weight: 500;
+        color: #94a3b8;
+        text-align: center;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sd-sidebar-card {
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid #e8eaed;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: box-shadow 0.2s ease;
+    }
+
+    .sd-sidebar-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .sd-sidebar-header {
+        padding: 0.85rem 1.15rem;
+        background: #fafbfc;
+        border-bottom: 1px solid #f1f3f5;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .sd-sidebar-header i {
+        color: #6366f1;
+        font-size: 0.8rem;
+    }
+
+    .sd-notif-count {
+        margin-left: auto;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.62rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border-radius: 999px;
+        min-width: 18px;
+        text-align: center;
+    }
+
+    /* — Quick actions — */
+    .sd-quick-actions {
+        padding: 0.4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+
+    .sd-quick-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .sd-quick-btn:hover {
+        background: #f8f9fb;
+        transform: translateX(2px);
+    }
+
+    .sd-quick-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+        background: color-mix(in srgb, var(--qa) 10%, transparent);
+        color: var(--qa);
+        transition: all 0.2s ease;
+    }
+
+    .sd-quick-btn:hover .sd-quick-icon {
+        background: var(--qa);
+        color: #fff;
+        transform: scale(1.05);
+    }
+
+    .sd-quick-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sd-quick-title {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .sd-quick-desc {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .sd-quick-arr {
+        font-size: 0.6rem;
+        opacity: 0;
+        color: #94a3b8;
+        transition: all 0.2s ease;
+    }
+
+    .sd-quick-btn:hover .sd-quick-arr {
+        opacity: 1;
+        color: var(--qa);
+        transform: translateX(2px);
+    }
+
+    /* — Notifications — */
+    .sd-notif-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        padding: 0.65rem 1.15rem;
+        transition: background 0.15s ease;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .sd-notif-item:hover {
+        background: #fafbfc;
+    }
+
+    .sd-notif-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        flex-shrink: 0;
+        margin-top: 6px;
+    }
+
+    .sd-notif-dot.active {
+        background: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .sd-notif-body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sd-notif-title {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .sd-notif-time {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .sd-notif-more {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.65rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6366f1;
+        text-decoration: none;
+        border-top: 1px solid #f1f3f5;
+        transition: background 0.15s ease;
+    }
+
+    .sd-notif-more:hover {
+        background: rgba(99, 102, 241, 0.04);
+        color: #4f46e5;
+    }
+
+    /* ===== FINANCIAL CARD ===== */
+    .sd-fin-card {
+        background: linear-gradient(145deg, #1e293b, #1e1b4b);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+    }
+
+    .sd-fin-header {
+        padding: 0.85rem 1.15rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: rgba(255, 255, 255, 0.6);
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .sd-fin-header i {
+        color: #818cf8;
+    }
+
+    .sd-fin-body {
+        padding: 1.15rem;
+    }
+
+    .sd-fin-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.4rem 0;
+        font-size: 0.84rem;
+    }
+
+    .sd-fin-row span {
+        color: rgba(255, 255, 255, 0.5);
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-weight: 400;
+    }
+
+    .sd-fin-row strong {
+        color: rgba(255, 255, 255, 0.85);
+        font-weight: 700;
+    }
+
+    .sd-fin-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        margin: 0.4rem 0;
+    }
+
+    .sd-fin-net strong {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #a5b4fc;
+    }
+
+    .sd-progress-bar {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .sd-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #6366f1, #10b981);
+        border-radius: 999px;
+        transition: width 1s ease;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .sd-hero {
+            padding: 1.75rem 0 2.5rem;
         }
 
-        new Chart(canvas, {
-            type: 'doughnut',
-            data: {
-                labels: statusDistribution.map((item) => item.label),
-                datasets: [{
-                    data: statusDistribution.map((item) => Number(item.value || 0)),
-                    backgroundColor: statusDistribution.map((item) => item.color),
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                cutout: '68%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: axisColor,
-                            usePointStyle: true
-                        }
-                    }
-                }
-            }
-        });
-
-        if (loading) loading.classList.add('d-none');
-        if (wrap) wrap.classList.remove('d-none');
-    }
-
-    function renderNotificationChart(notificationMix, axisColor, gridColor) {
-        const loading = document.getElementById('notifLoading');
-        const wrap = document.getElementById('notifChartWrap');
-        const empty = document.getElementById('notifEmpty');
-        const canvas = document.getElementById('notifChart');
-        if (!canvas) return;
-
-        const hasData = Array.isArray(notificationMix) && notificationMix.length > 0;
-        if (!hasData) {
-            if (loading) loading.classList.add('d-none');
-            if (empty) empty.classList.remove('d-none');
-            return;
+        .sd-hero-title {
+            font-size: 1.3rem;
         }
 
-        new Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: notificationMix.map((item) => item.label),
-                datasets: [{
-                    label: 'Volume',
-                    data: notificationMix.map((item) => Number(item.count || 0)),
-                    backgroundColor: 'rgba(3,105,161,.62)',
-                    borderRadius: 10,
-                    maxBarThickness: 20
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    x: {
-                        ticks: { color: axisColor },
-                        grid: { color: gridColor }
-                    },
-                    y: {
-                        ticks: { color: axisColor },
-                        grid: { color: 'transparent' }
-                    }
+        .sd-kpi {
+            padding: 1rem;
+        }
+
+        .sd-kpi-value {
+            font-size: 1.35rem;
+        }
+
+        .sd-card-header {
+            padding: 0.9rem 1rem;
+        }
+
+        .sd-list-row {
+            padding: 0.7rem 1rem;
+        }
+
+        .sd-sidebar-header {
+            padding: 0.75rem 1rem;
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Animate KPI counters
+        document.querySelectorAll('.sd-kpi-value').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(10px)';
+        });
+        document.querySelectorAll('.sd-kpi').forEach((card, i) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.4s ease, transform 0.4s ease, box-shadow 0.25s';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+                const val = card.querySelector('.sd-kpi-value');
+                if (val) {
+                    val.style.transition = 'opacity 0.3s, transform 0.3s';
+                    val.style.opacity = '1';
+                    val.style.transform = 'translateY(0)';
                 }
-            }
+            }, 100 + i * 100);
         });
 
-        if (loading) loading.classList.add('d-none');
-        if (wrap) wrap.classList.remove('d-none');
-    }
-
-    function addActionPressFeedback() {
-        document.querySelectorAll('.ft-action').forEach((node) => {
-            node.addEventListener('mousedown', () => {
-                node.style.transform = 'translateY(1px) scale(0.99)';
-            });
-            node.addEventListener('mouseup', () => {
-                node.style.transform = '';
-            });
-            node.addEventListener('mouseleave', () => {
-                node.style.transform = '';
-            });
+        // Animate bar chart heights
+        const maxVal = Math.max(...Array.from(document.querySelectorAll('.sd-chart-bar')).map(b => parseFloat(b.dataset.value) || 0));
+        document.querySelectorAll('.sd-chart-bar').forEach((bar, i) => {
+            const val = parseFloat(bar.dataset.value) || 0;
+            const h = maxVal > 0 ? Math.max(4, (val / maxVal) * 100) : 4;
+            bar.style.height = '0px';
+            setTimeout(() => {
+                bar.style.transition = 'height 0.6s ease';
+                bar.style.height = h + 'px';
+            }, 400 + i * 80);
         });
-    }
+
+        // Progress bar animation
+        const fill = document.querySelector('.sd-progress-fill');
+        if (fill) {
+            const w = fill.style.width;
+            fill.style.width = '0';
+            setTimeout(() => { fill.style.width = w; }, 600);
+        }
+    });
 </script>
+<<<<<<< HEAD
 {% endblock %}
+=======
+{% endblock %}
+>>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
