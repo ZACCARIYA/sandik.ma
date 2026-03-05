@@ -4,1032 +4,1459 @@
 {% block title %}Effectuer un Paiement - SyndicPro{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- ===== EN-TÊTE DE PAGE ===== -->
-    {% include 'components/page_header.html' with title="Effectuer un Paiement" icon="fas fa-credit-card" subtitle="Enregistrez votre paiement en quelques étapes" %}
-    
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="page-actions">
-                <a href="{% url 'finance:document_list' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Retour aux documents
-                </a>
+<div class="pf-wrapper">
+
+    <!-- ===== HERO HEADER ===== -->
+    <div class="pf-hero">
+        <div class="pf-hero-bg"></div>
+        <div class="container-fluid px-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="pf-hero-content">
+                    <a href="{% url 'finance:document_list' %}" class="pf-back-link">
+                        <i class="fas fa-arrow-left"></i> Retour aux documents
+                    </a>
+                    <h1 class="pf-hero-title">
+                        <span class="pf-hero-icon"><i class="fas fa-credit-card"></i></span>
+                        Effectuer un Paiement
+                    </h1>
+                    <p class="pf-hero-subtitle">Enregistrez votre paiement en quelques étapes simples</p>
+                </div>
+                <div class="pf-steps-indicator d-none d-md-flex">
+                    <div class="pf-step active">
+                        <div class="pf-step-dot"><i class="fas fa-pen"></i></div>
+                        <span>Saisie</span>
+                    </div>
+                    <div class="pf-step-line"></div>
+                    <div class="pf-step">
+                        <div class="pf-step-dot"><i class="fas fa-search"></i></div>
+                        <span>Vérification</span>
+                    </div>
+                    <div class="pf-step-line"></div>
+                    <div class="pf-step">
+                        <div class="pf-step-dot"><i class="fas fa-check"></i></div>
+                        <span>Validation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4 pb-5">
+        <div class="row g-4">
+
+            <!-- ===== LEFT COLUMN ===== -->
+            <div class="col-xl-8 col-lg-7">
+
+                <!-- Document Info Card -->
+                {% if document %}
+                <div class="pf-card pf-doc-card mb-4">
+                    <div class="pf-doc-badge">
+                        <i class="fas fa-file-invoice-dollar me-1"></i> Document à Régler
+                    </div>
+                    <div class="pf-doc-grid">
+                        <div class="pf-doc-field">
+                            <span class="pf-doc-label"><i class="fas fa-tag"></i> Titre</span>
+                            <span class="pf-doc-value">{{ document.title }}</span>
+                        </div>
+                        <div class="pf-doc-field">
+                            <span class="pf-doc-label"><i class="fas fa-calendar-day"></i> Échéance</span>
+                            <span class="pf-doc-value">{{ document.date|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="pf-doc-field pf-doc-amount">
+                            <span class="pf-doc-label"><i class="fas fa-coins"></i> Montant dû</span>
+                            <span class="pf-amount-big">{{ document.amount|floatformat:2 }} <sup>DH</sup></span>
+                        </div>
+                        <div class="pf-doc-field">
+                            <span class="pf-doc-label"><i class="fas fa-layer-group"></i> Type</span>
+                            <span class="pf-doc-value">
+                                <span class="pf-type-badge">{{ document.get_document_type_display }}</span>
+                            </span>
+                        </div>
+                    </div>
+                    {% if document.description %}
+                    <div class="pf-doc-desc">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <em>{{ document.description }}</em>
+                    </div>
+                    {% else %}
+                    <div class="pf-doc-desc pf-desc-empty">
+                        <i class="fas fa-minus-circle me-1"></i>Aucune description fournie
+                    </div>
+                    {% endif %}
+                </div>
+                {% elif payment and payment.document %}
+                <div class="pf-card pf-doc-card mb-4">
+                    <div class="pf-doc-badge">
+                        <i class="fas fa-file-invoice-dollar me-1"></i> Document Associé
+                    </div>
+                    <div class="pf-doc-grid">
+                        <div class="pf-doc-field">
+                            <span class="pf-doc-label"><i class="fas fa-tag"></i> Titre</span>
+                            <span class="pf-doc-value">{{ payment.document.title }}</span>
+                        </div>
+                        <div class="pf-doc-field">
+                            <span class="pf-doc-label"><i class="fas fa-calendar-day"></i> Échéance</span>
+                            <span class="pf-doc-value">{{ payment.document.date|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="pf-doc-field pf-doc-amount">
+                            <span class="pf-doc-label"><i class="fas fa-coins"></i> Montant dû</span>
+                            <span class="pf-amount-big">{{ payment.document.amount|floatformat:2 }} <sup>DH</sup></span>
+                        </div>
+                        <div class="pf-doc-field">
+                            <span class="pf-doc-label"><i class="fas fa-layer-group"></i> Type</span>
+                            <span class="pf-doc-value">
+                                <span class="pf-type-badge">{{ payment.document.get_document_type_display }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Payment Form Card -->
+                <div class="pf-card pf-form-card">
+                    <div class="pf-form-header">
+                        <div class="pf-form-header-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div>
+                            <h5 class="pf-form-title">Informations du Paiement</h5>
+                            <p class="pf-form-subtitle">Complétez tous les champs requis</p>
+                        </div>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" class="pf-form" id="paymentForm">
+                        {% csrf_token %}
+
+                        <!-- Section 1: Montant & Méthode -->
+                        <div class="pf-section">
+                            <div class="pf-section-header">
+                                <div class="pf-section-num">1</div>
+                                <div>
+                                    <h6 class="pf-section-title">Montant &amp; Méthode</h6>
+                                    <p class="pf-section-desc">Indiquez le montant et votre mode de paiement</p>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <div class="pf-field-wrap">
+                                        <label class="pf-label" for="{{ form.amount.id_for_label }}">
+                                            <i class="fas fa-money-bill-wave"></i> Montant Payé
+                                            <span class="pf-currency">DH</span>
+                                        </label>
+                                        {{ form.amount }}
+                                        {% if form.amount.errors %}
+                                        <div class="pf-field-error">
+                                            {% for e in form.amount.errors %}<span><i
+                                                    class="fas fa-exclamation-circle"></i> {{ e }}</span>{% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        {% if help_text_amount %}
+                                        <div class="pf-field-hint"><i class="fas fa-info-circle"></i> {{
+                                            help_text_amount }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="pf-field-wrap">
+                                        <label class="pf-label" for="{{ form.payment_method.id_for_label }}">
+                                            <i class="fas fa-credit-card"></i> Méthode de Paiement
+                                        </label>
+                                        {{ form.payment_method }}
+                                        {% if form.payment_method.errors %}
+                                        <div class="pf-field-error">
+                                            {% for e in form.payment_method.errors %}<span><i
+                                                    class="fas fa-exclamation-circle"></i> {{ e }}</span>{% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Détails -->
+                        <div class="pf-section">
+                            <div class="pf-section-header">
+                                <div class="pf-section-num">2</div>
+                                <div>
+                                    <h6 class="pf-section-title">Détails du Paiement</h6>
+                                    <p class="pf-section-desc">Date et référence de votre transaction</p>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <div class="pf-field-wrap">
+                                        <label class="pf-label" for="{{ form.payment_date.id_for_label }}">
+                                            <i class="fas fa-calendar-alt"></i> Date de Paiement
+                                        </label>
+                                        {{ form.payment_date }}
+                                        {% if form.payment_date.errors %}
+                                        <div class="pf-field-error">
+                                            {% for e in form.payment_date.errors %}<span><i
+                                                    class="fas fa-exclamation-circle"></i> {{ e }}</span>{% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="pf-field-wrap">
+                                        <label class="pf-label" for="{{ form.reference.id_for_label }}">
+                                            <i class="fas fa-hashtag"></i> Référence
+                                        </label>
+                                        {{ form.reference }}
+                                        {% if form.reference.errors %}
+                                        <div class="pf-field-error">
+                                            {% for e in form.reference.errors %}<span><i
+                                                    class="fas fa-exclamation-circle"></i> {{ e }}</span>{% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        <div class="pf-field-hint"><i class="fas fa-lightbulb"></i> N° de transaction,
+                                            référence bancaire, etc.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Justificatif -->
+                        <div class="pf-section">
+                            <div class="pf-section-header">
+                                <div class="pf-section-num">3</div>
+                                <div>
+                                    <h6 class="pf-section-title">Justificatif de Paiement</h6>
+                                    <p class="pf-section-desc">Joignez une preuve de votre paiement</p>
+                                </div>
+                            </div>
+
+                            <!-- Upload Zone -->
+                            <div class="pf-upload-zone" id="uploadZone">
+                                <div class="pf-upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <p class="pf-upload-title">Glissez votre fichier ici</p>
+                                <p class="pf-upload-sub">ou cliquez pour sélectionner</p>
+                                <div class="pf-upload-formats">
+                                    <span>JPEG</span><span>PNG</span><span>GIF</span><span>WebP</span>
+                                </div>
+                                <div class="pf-upload-limit">Max 5 MB</div>
+                                {{ form.payment_proof }}
+                            </div>
+                            <!-- Preview area -->
+                            <div class="pf-preview-area d-none" id="previewArea">
+                                <div class="pf-preview-header">
+                                    <div class="pf-preview-icon"><i class="fas fa-image"></i></div>
+                                    <div class="pf-preview-info">
+                                        <span id="previewName" class="pf-preview-name"></span>
+                                        <span id="previewSize" class="pf-preview-size"></span>
+                                    </div>
+                                    <button type="button" class="pf-preview-remove" id="removeFile">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <img id="previewImg" src="" alt="Aperçu" class="pf-preview-img">
+                            </div>
+                            {% if form.payment_proof.errors %}
+                            <div class="pf-field-error mt-2">
+                                {% for e in form.payment_proof.errors %}<span><i class="fas fa-exclamation-circle"></i>
+                                    {{ e }}</span>{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Section 4: Notes -->
+                        <div class="pf-section pf-section-last">
+                            <div class="pf-section-header">
+                                <div class="pf-section-num">4</div>
+                                <div>
+                                    <h6 class="pf-section-title">Notes Complémentaires</h6>
+                                    <p class="pf-section-desc">Informations supplémentaires (optionnel)</p>
+                                </div>
+                            </div>
+                            <div class="pf-field-wrap">
+                                <label class="pf-label" for="{{ form.notes.id_for_label }}">
+                                    <i class="fas fa-comment-alt"></i> Notes
+                                </label>
+                                {{ form.notes }}
+                                {% if form.notes.errors %}
+                                <div class="pf-field-error">
+                                    {% for e in form.notes.errors %}<span><i class="fas fa-exclamation-circle"></i> {{ e
+                                        }}</span>{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="pf-actions">
+                            <a href="{% url 'finance:document_list' %}" class="pf-btn-cancel">
+                                <i class="fas fa-times"></i> Annuler
+                            </a>
+                            <button type="submit" class="pf-btn-submit" id="submitBtn">
+                                <span class="pf-btn-content">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Enregistrer le Paiement
+                                </span>
+                                <span class="pf-btn-loader d-none">
+                                    <i class="fas fa-spinner fa-spin"></i> Traitement...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-8">
-                    <!-- ===== DOCUMENT À PAYER ===== -->
-                    {% if document %}
-                    <div class="card-modern payment-document-card">
-                        <div class="modern-card-header">
-                            <div class="card-header-content">
-                                <div class="card-title-section">
-                                    <i class="fas fa-file-alt card-icon"></i>
-                                    <h5 class="card-title">Document à Payer</h5>
-                                </div>
-                                <div class="document-status">
-                                    <span class="badge-modern badge-warning">
-                                        <i class="fas fa-clock me-1"></i>En attente
-                                    </span>
-                                </div>
-                            </div>
+            <!-- ===== RIGHT SIDEBAR ===== -->
+            <div class="col-xl-4 col-lg-5">
+
+                <!-- Quick Summary -->
+                {% if document %}
+                <div class="pf-sidebar-card pf-summary-card mb-4">
+                    <div class="pf-sidebar-header">
+                        <i class="fas fa-receipt"></i> Récapitulatif
+                    </div>
+                    <div class="pf-summary-body">
+                        <div class="pf-summary-row">
+                            <span>Document</span>
+                            <strong>{{ document.title }}</strong>
                         </div>
-                        <div class="modern-card-body">
-                            <div class="document-info-grid">
-                                <div class="document-info-item">
-                                    <div class="info-label">
-                                        <i class="fas fa-tag me-1"></i>Titre
-                                    </div>
-                                    <div class="info-value">{{ document.title }}</div>
-                                </div>
-                                
-                                <div class="document-info-item">
-                                    <div class="info-label">
-                                        <i class="fas fa-calendar me-1"></i>Date
-                                    </div>
-                                    <div class="info-value">{{ document.date|date:"d/m/Y" }}</div>
-                                </div>
-                                
-                                <div class="document-info-item amount-highlight">
-                                    <div class="info-label">
-                                        <i class="fas fa-money-bill-wave me-1"></i>Montant
-                                    </div>
-                                    <div class="info-value amount-value">{{ document.amount|floatformat:2 }} DH</div>
-                                </div>
-                                
-                                <div class="document-info-item">
-                                    <div class="info-label">
-                                        <i class="fas fa-file me-1"></i>Type
-                                    </div>
-                                    <div class="info-value">{{ document.get_document_type_display }}</div>
-                                </div>
-                            </div>
-                            
-                            {% if document.description %}
-                                <div class="document-description">
-                                    <div class="info-label">
-                                        <i class="fas fa-align-left me-1"></i>Description
-                                    </div>
-                                    <div class="info-value description-text">{{ document.description }}</div>
-                                </div>
-                            {% endif %}
+                        <div class="pf-summary-row">
+                            <span>Montant total</span>
+                            <strong class="pf-summary-amount">{{ document.amount|floatformat:2 }} DH</strong>
+                        </div>
+                        <div class="pf-summary-divider"></div>
+                        <div class="pf-summary-row pf-summary-total">
+                            <span>À payer</span>
+                            <strong id="summaryAmount">{{ document.amount|floatformat:2 }} DH</strong>
                         </div>
                     </div>
-                    {% elif payment and payment.document %}
-                    <div class="card-modern payment-document-card">
-                        <div class="modern-card-header">
-                            <div class="card-header-content">
-                                <div class="card-title-section">
-                                    <i class="fas fa-file-alt card-icon"></i>
-                                    <h5 class="card-title">Document Associé</h5>
-                                </div>
-                                <div class="document-status">
-                                    {% if payment.is_verified %}
-                                    <span class="badge-modern badge-success">
-                                        <i class="fas fa-check me-1"></i>Vérifié
-                                    </span>
-                                    {% else %}
-                                    <span class="badge-modern badge-warning">
-                                        <i class="fas fa-clock me-1"></i>En attente
-                                    </span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modern-card-body">
-                            <div class="document-info-grid">
-                                <div class="document-info-item">
-                                    <div class="info-label">
-                                        <i class="fas fa-tag me-1"></i>Titre
-                                    </div>
-                                    <div class="info-value">{{ payment.document.title }}</div>
-                                </div>
-                                
-                                <div class="document-info-item">
-                                    <div class="info-label">
-                                        <i class="fas fa-calendar me-1"></i>Date
-                                    </div>
-                                    <div class="info-value">{{ payment.document.date|date:"d/m/Y" }}</div>
-                                </div>
-                                
-                                <div class="document-info-item amount-highlight">
-                                    <div class="info-label">
-                                        <i class="fas fa-money-bill-wave me-1"></i>Montant
-                                    </div>
-                                    <div class="info-value amount-value">{{ payment.document.amount|floatformat:2 }} DH</div>
-                                </div>
-                                
-                                <div class="document-info-item">
-                                    <div class="info-label">
-                                        <i class="fas fa-file me-1"></i>Type
-                                    </div>
-                                    <div class="info-value">{{ payment.document.get_document_type_display }}</div>
-                                </div>
-                            </div>
-                            
-                            {% if payment.document.description %}
-                                <div class="document-description">
-                                    <div class="info-label">
-                                        <i class="fas fa-align-left me-1"></i>Description
-                                    </div>
-                                    <div class="info-value description-text">{{ payment.document.description }}</div>
-                                </div>
-                            {% endif %}
-                        </div>
+                </div>
+                {% endif %}
+
+                <!-- Payment Methods -->
+                <div class="pf-sidebar-card mb-4">
+                    <div class="pf-sidebar-header">
+                        <i class="fas fa-hand-holding-usd"></i> Méthodes Acceptées
                     </div>
-                    {% endif %}
-
-                    <!-- ===== FORMULAIRE DE PAIEMENT ===== -->
-                    <div class="card-modern payment-form-card">
-                        <div class="modern-card-header">
-                            <div class="card-header-content">
-                                <div class="card-title-section">
-                                    <i class="fas fa-credit-card card-icon"></i>
-                                    <h5 class="card-title">Informations du Paiement</h5>
-                                </div>
-                                <div class="form-progress">
-                                    <span class="progress-step active">1</span>
-                                    <span class="progress-line"></span>
-                                    <span class="progress-step">2</span>
-                                    <span class="progress-line"></span>
-                                    <span class="progress-step">3</span>
-                                </div>
+                    <div class="pf-methods-list">
+                        <div class="pf-method-item">
+                            <div class="pf-method-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">
+                                <i class="fas fa-money-bill-wave"></i>
                             </div>
+                            <span>Espèces</span>
                         </div>
-                        <div class="modern-card-body">
-                            <form method="post" enctype="multipart/form-data" class="payment-form">
-                                {% csrf_token %}
-                                
-                                <div class="form-section">
-                                    <h6 class="form-section-title">
-                                        <i class="fas fa-money-bill-wave me-2"></i>Montant et Méthode
-                                    </h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                            {% if help_text_amount %}
-                                                {% include 'components/form_field.html' with field=form.amount label="Montant Payé (DH)" icon="fas fa-money-bill-wave" help_text=help_text_amount %}
-                                            {% elif document %}
-                                                {% include 'components/form_field.html' with field=form.amount label="Montant Payé (DH)" icon="fas fa-money-bill-wave" help_text="Montant du document : "|add:document.amount|stringformat:"s"|add:" DH" %}
-                                            {% elif payment and payment.document %}
-                                                {% include 'components/form_field.html' with field=form.amount label="Montant Payé (DH)" icon="fas fa-money-bill-wave" help_text="Montant du document : "|add:payment.document.amount|stringformat:"s"|add:" DH" %}
-                                            {% else %}
-                                                {% include 'components/form_field.html' with field=form.amount label="Montant Payé (DH)" icon="fas fa-money-bill-wave" %}
-                                            {% endif %}
-                                    </div>
-                                    <div class="col-md-6">
-                                            {% include 'components/form_field.html' with field=form.payment_method label="Méthode de Paiement" icon="fas fa-credit-card" %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-section">
-                                    <h6 class="form-section-title">
-                                        <i class="fas fa-calendar-alt me-2"></i>Détails du Paiement
-                                    </h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                            {% include 'components/form_field.html' with field=form.payment_date label="Date de Paiement" icon="fas fa-calendar" %}
-                                    </div>
-                                    <div class="col-md-6">
-                                            {% include 'components/form_field.html' with field=form.reference label="Référence" icon="fas fa-hashtag" help_text="Numéro de transaction, référence bancaire, etc." %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-section">
-                                    <h6 class="form-section-title">
-                                        <i class="fas fa-image me-2"></i>Justificatif
-                                    </h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                            {% include 'components/form_field.html' with field=form.payment_proof label="Justificatif de Paiement" icon="fas fa-image" help_text="Reçu, capture d'écran, photo du chèque, etc. (Max 5MB)" %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-section">
-                                    <h6 class="form-section-title">
-                                        <i class="fas fa-sticky-note me-2"></i>Notes Complémentaires
-                                    </h6>
-                                    <div class="row">
-                                        <div class="col-12">
-                                            {% include 'components/form_field.html' with field=form.notes label="Notes" icon="fas fa-sticky-note" help_text="Informations complémentaires sur le paiement" %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-actions">
-                                    <a href="{% url 'finance:document_list' %}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-times me-1"></i>Annuler
-                                    </a>
-                                    <button type="submit" class="btn btn-success btn-modern">
-                                        <i class="fas fa-credit-card me-1"></i>Enregistrer le Paiement
-                                    </button>
-                                </div>
-                            </form>
+                        <div class="pf-method-item">
+                            <div class="pf-method-icon" style="background:rgba(99,102,241,0.15);color:#6366f1;">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <span>Virement bancaire</span>
+                        </div>
+                        <div class="pf-method-item">
+                            <div class="pf-method-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">
+                                <i class="fas fa-file-invoice"></i>
+                            </div>
+                            <span>Chèque</span>
+                        </div>
+                        <div class="pf-method-item">
+                            <div class="pf-method-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <span>Carte bancaire</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-4">
-                    <!-- ===== INFORMATIONS DE PAIEMENT ===== -->
-                    <div class="card-modern payment-info-card">
-                        <div class="modern-card-header">
-                            <div class="card-header-content">
-                                <div class="card-title-section">
-                                    <i class="fas fa-info-circle card-icon"></i>
-                                    <h5 class="card-title">Informations</h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modern-card-body">
-                            <div class="info-section">
-                                <h6 class="info-section-title">
-                                    <i class="fas fa-credit-card me-2"></i>Méthodes de paiement acceptées
-                                </h6>
-                                <div class="info-items">
-                                    <div class="info-item">
-                                        <i class="fas fa-money-bill-wave info-icon success"></i>
-                                        <span>Espèces</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="fas fa-university info-icon primary"></i>
-                                        <span>Virement bancaire</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="fas fa-file-invoice info-icon info"></i>
-                                        <span>Chèque</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="fas fa-credit-card info-icon warning"></i>
-                                        <span>Carte bancaire</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="fas fa-ellipsis-h info-icon secondary"></i>
-                                        <span>Autre</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="info-section">
-                                <h6 class="info-section-title">
-                                    <i class="fas fa-file-image me-2"></i>Justificatifs acceptés
-                                </h6>
-                                <div class="info-items">
-                                    <div class="info-item">
-                                        <i class="fas fa-file-image info-icon info"></i>
-                                        <span>Reçus de paiement</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="fas fa-mobile-alt info-icon primary"></i>
-                                        <span>Captures d'écran</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="fas fa-file-invoice info-icon success"></i>
-                                        <span>Photos de chèques</span>
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="fas fa-file-alt info-icon warning"></i>
-                                        <span>Relevés bancaires</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="info-section">
-                                <h6 class="info-section-title">
-                                    <i class="fas fa-image me-2"></i>Formats d'images
-                                </h6>
-                                <div class="format-tags">
-                                    <span class="format-tag jpeg">JPEG</span>
-                                    <span class="format-tag png">PNG</span>
-                                    <span class="format-tag gif">GIF</span>
-                                    <span class="format-tag webp">WebP</span>
-                                </div>
-                            </div>
-                            
-                            <div class="info-section">
-                                <h6 class="info-section-title">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>Limites
-                                </h6>
-                                <div class="limit-items">
-                                    <div class="limit-item">
-                                        <i class="fas fa-weight-hanging me-2"></i>
-                                        <span>Taille max : 5 MB</span>
-                                    </div>
-                                    <div class="limit-item">
-                                        <i class="fas fa-image me-2"></i>
-                                        <span>Images uniquement</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Process Timeline -->
+                <div class="pf-sidebar-card">
+                    <div class="pf-sidebar-header">
+                        <i class="fas fa-route"></i> Processus de Vérification
                     </div>
-
-                    <!-- ===== PROCESSUS DE VÉRIFICATION ===== -->
-                    <div class="card-modern payment-process-card">
-                        <div class="modern-card-header">
-                            <div class="card-header-content">
-                                <div class="card-title-section">
-                                    <i class="fas fa-clock card-icon"></i>
-                                    <h5 class="card-title">Processus de Vérification</h5>
-                                </div>
+                    <div class="pf-timeline">
+                        <div class="pf-tl-item active">
+                            <div class="pf-tl-dot"><i class="fas fa-pen"></i></div>
+                            <div class="pf-tl-connector"></div>
+                            <div class="pf-tl-body">
+                                <h6>Enregistrement</h6>
+                                <p>Vous soumettez votre paiement</p>
                             </div>
                         </div>
-                        <div class="modern-card-body">
-                            <div class="process-timeline">
-                                <div class="timeline-item active">
-                                    <div class="timeline-marker">
-                                        <i class="fas fa-edit"></i>
-                                    </div>
-                                    <div class="timeline-content">
-                                        <h6>Enregistrement</h6>
-                                        <p>Vous enregistrez votre paiement</p>
-                                    </div>
-                                </div>
-                                <div class="timeline-item">
-                                    <div class="timeline-marker">
-                                        <i class="fas fa-search"></i>
-                                    </div>
-                                    <div class="timeline-content">
-                                        <h6>Vérification</h6>
-                                        <p>Le syndic vérifie le justificatif</p>
-                                    </div>
-                                </div>
-                                <div class="timeline-item">
-                                    <div class="timeline-marker">
-                                        <i class="fas fa-check"></i>
-                                    </div>
-                                    <div class="timeline-content">
-                                        <h6>Validation</h6>
-                                        <p>Le paiement est validé</p>
-                                    </div>
-                                </div>
+                        <div class="pf-tl-item">
+                            <div class="pf-tl-dot"><i class="fas fa-search"></i></div>
+                            <div class="pf-tl-connector"></div>
+                            <div class="pf-tl-body">
+                                <h6>Vérification</h6>
+                                <p>Le syndic examine le justificatif</p>
+                            </div>
+                        </div>
+                        <div class="pf-tl-item pf-tl-last">
+                            <div class="pf-tl-dot"><i class="fas fa-check-double"></i></div>
+                            <div class="pf-tl-body">
+                                <h6>Validation</h6>
+                                <p>Le paiement est officiellement validé</p>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
 
 <style>
-/* ===== STYLES PAIEMENT MODERNE ===== */
+    /* ============================================================
+   PAYMENT FORM — PREMIUM DESIGN
+   ============================================================ */
 
-/* Document à payer */
-.payment-document-card {
-    margin-bottom: 2rem;
-    border: 2px solid var(--border-color);
-    background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-secondary) 100%);
-}
-
-.document-info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.document-info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.info-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.info-value {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.amount-highlight {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.05) 100%);
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.amount-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--success);
-}
-
-.document-description {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-}
-
-.description-text {
-    font-style: italic;
-    line-height: 1.6;
-}
-
-/* Formulaire de paiement */
-.payment-form-card {
-    border: 2px solid var(--border-color);
-}
-
-.form-progress {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.progress-step {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--bg-tertiary);
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.875rem;
-    transition: all 0.3s ease;
-}
-
-.progress-step.active {
-    background: var(--primary);
-    color: white;
-}
-
-.progress-line {
-    width: 20px;
-    height: 2px;
-    background: var(--border-color);
-}
-
-.form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.form-section:last-of-type {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.form-section-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-light);
-}
-
-/* Informations de paiement */
-.payment-info-card {
-    margin-bottom: 1.5rem;
-}
-
-.info-section {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.info-section:last-of-type {
-    border-bottom: none;
-    margin-bottom: 0;
-}
-
-.info-section-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.info-items {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.info-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem;
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
-}
-
-.info-item:hover {
-    background: var(--bg-tertiary);
-}
-
-.info-icon {
-    width: 20px;
-    text-align: center;
-}
-
-.info-icon.success { color: var(--success); }
-.info-icon.primary { color: var(--primary); }
-.info-icon.info { color: var(--info); }
-.info-icon.warning { color: var(--warning); }
-.info-icon.secondary { color: var(--secondary); }
-
-.format-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.format-tag {
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.format-tag.jpeg { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
-.format-tag.png { background: rgba(59, 130, 246, 0.1); color: var(--info); }
-.format-tag.gif { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-.format-tag.webp { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-
-.limit-items {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.limit-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-/* Processus de vérification */
-.payment-process-card {
-    border: 2px solid var(--border-color);
-}
-
-.process-timeline {
-    position: relative;
-    padding-left: 2rem;
-}
-
-.process-timeline::before {
-    content: '';
-    position: absolute;
-    left: 1rem;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--border-color);
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 1.5rem;
-    padding-left: 1.5rem;
-}
-
-.timeline-item:last-child {
-    margin-bottom: 0;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -1.5rem;
-    top: 0.25rem;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    background: var(--bg-tertiary);
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    border: 3px solid var(--card-bg);
-    transition: all 0.3s ease;
-}
-
-.timeline-item.active .timeline-marker {
-    background: var(--primary);
-    color: white;
-    transform: scale(1.1);
-}
-
-.timeline-content h6 {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-}
-
-.timeline-content p {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-/* ===== FONCTIONNALITÉS JAVASCRIPT ===== */
-
-/* Aperçu de fichier */
-.file-preview-card {
-    background: var(--card-bg);
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px var(--shadow-color);
-}
-
-.file-preview-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem;
-    background: var(--bg-tertiary);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.file-name {
-    flex: 1;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.btn-remove-file {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 0.25rem;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.btn-remove-file:hover {
-    background: var(--danger-bg);
-    color: var(--danger);
-}
-
-.file-preview-body {
-    padding: 1rem;
-    text-align: center;
-}
-
-.preview-image {
-    max-width: 100%;
-    max-height: 200px;
-    border-radius: 8px;
-    margin-bottom: 0.75rem;
-}
-
-.file-info {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-.file-size, .file-type {
-    padding: 0.25rem 0.75rem;
-    background: var(--bg-tertiary);
-    border-radius: 20px;
-    font-weight: 600;
-}
-
-/* Validation de formulaire */
-.field-error {
-    color: var(--danger);
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.is-invalid {
-    border-color: var(--danger) !important;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
-}
-
-/* Barre de progression */
-.progress-step.completed {
-    background: var(--success);
-    color: white;
-}
-
-/* Notifications */
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem 1.5rem;
-    box-shadow: 0 4px 12px var(--shadow-color);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-}
-
-.notification.show {
-    transform: translateX(0);
-}
-
-.notification-error {
-    border-left: 4px solid var(--danger);
-    color: var(--danger);
-}
-
-.notification-info {
-    border-left: 4px solid var(--info);
-    color: var(--info);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .document-info-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+    /* Wrapper */
+    .pf-wrapper {
+        min-height: 100vh;
+        background: var(--bg-primary, #f8fafc);
     }
-    
-    .form-actions {
+
+    /* ---------- HERO ---------- */
+    .pf-hero {
+        position: relative;
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 100%);
+        padding: 2.5rem 0 3.5rem;
+        margin-bottom: -1.5rem;
+        overflow: hidden;
+    }
+
+    .pf-hero-bg {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.2) 0%, transparent 40%);
+        pointer-events: none;
+    }
+
+    .pf-hero-content {
+        position: relative;
+    }
+
+    .pf-back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        margin-bottom: 1rem;
+        transition: color 0.2s;
+    }
+
+    .pf-back-link:hover {
+        color: #fff;
+    }
+
+    .pf-hero-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .pf-hero-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: #c4b5fd;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .pf-hero-subtitle {
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 0.95rem;
+    }
+
+    /* Steps indicator in hero */
+    .pf-steps-indicator {
+        align-items: center;
+        gap: 0;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+    }
+
+    .pf-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .pf-step-dot {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        transition: all 0.3s;
+    }
+
+    .pf-step.active .pf-step-dot {
+        background: #6366f1;
+        color: #fff;
+        border-color: #818cf8;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+
+    .pf-step span {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .pf-step.active span {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .pf-step-line {
+        width: 40px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.15);
+        margin-top: -16px;
+    }
+
+    /* ---------- CARDS ---------- */
+    .pf-card {
+        background: var(--card-bg, #fff);
+        border-radius: 20px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--border-color, #e2e8f0);
+        overflow: hidden;
+    }
+
+    /* Document card */
+    .pf-doc-card {
+        padding: 0;
+    }
+
+    .pf-doc-badge {
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(135deg, #312e81, #4c1d95);
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 0.65rem 1.25rem;
+        border-radius: 20px 0 16px 0;
+        position: absolute;
+    }
+
+    .pf-doc-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        padding: 3rem 1.75rem 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .pf-doc-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .pf-doc-field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        padding: 1rem;
+        border-right: 1px solid var(--border-color, #e2e8f0);
+    }
+
+    .pf-doc-field:last-child {
+        border-right: none;
+    }
+
+    .pf-doc-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-secondary, #64748b);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .pf-doc-label i {
+        color: #6366f1;
+    }
+
+    .pf-doc-value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-primary, #1e293b);
+    }
+
+    .pf-doc-amount {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.07), rgba(52, 211, 153, 0.03));
+    }
+
+    .pf-amount-big {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #10b981;
+        line-height: 1;
+    }
+
+    .pf-amount-big sup {
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .pf-type-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .pf-doc-desc {
+        margin: 0 1.75rem 1.25rem;
+        padding: 0.75rem 1rem;
+        background: rgba(99, 102, 241, 0.04);
+        border-left: 3px solid #6366f1;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.875rem;
+        color: var(--text-secondary, #64748b);
+    }
+
+    .pf-desc-empty {
+        border-left-color: #e2e8f0;
+        color: #94a3b8;
+        font-style: italic;
+    }
+
+    /* Form card */
+    .pf-form-card {
+        padding: 0;
+    }
+
+    .pf-form-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.04), rgba(139, 92, 246, 0.02));
+    }
+
+    .pf-form-header-icon {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+        flex-shrink: 0;
+    }
+
+    .pf-form-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text-primary, #1e293b);
+        margin: 0;
+    }
+
+    .pf-form-subtitle {
+        font-size: 0.8rem;
+        color: var(--text-secondary, #64748b);
+        margin: 0;
+    }
+
+    /* Form */
+    .pf-form {
+        padding: 2rem;
+    }
+
+    /* Sections */
+    .pf-section {
+        padding-bottom: 1.75rem;
+        margin-bottom: 1.75rem;
+        border-bottom: 1px dashed var(--border-color, #e2e8f0);
+    }
+
+    .pf-section-last {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .pf-section-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .pf-section-num {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 800;
+        box-shadow: 0 3px 8px rgba(99, 102, 241, 0.4);
+        margin-top: 2px;
+    }
+
+    .pf-section-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary, #1e293b);
+        margin: 0;
+    }
+
+    .pf-section-desc {
+        font-size: 0.78rem;
+        color: var(--text-secondary, #64748b);
+        margin: 0;
+    }
+
+    /* Fields */
+    .pf-field-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .pf-label {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-primary, #1e293b);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .pf-label i {
+        color: #6366f1;
+        font-size: 0.8rem;
+    }
+
+    .pf-currency {
+        margin-left: auto;
+        font-size: 0.7rem;
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+        padding: 0.1rem 0.5rem;
+        border-radius: 10px;
+        font-weight: 800;
+    }
+
+    /* Override Django form widgets */
+    .pf-form .form-control,
+    .pf-form input[type="text"],
+    .pf-form input[type="number"],
+    .pf-form input[type="date"],
+    .pf-form input[type="file"],
+    .pf-form select,
+    .pf-form textarea {
+        border: 2px solid var(--border-color, #e2e8f0) !important;
+        border-radius: 12px !important;
+        padding: 0.7rem 1rem !important;
+        font-size: 0.9rem !important;
+        background: var(--bg-secondary, #f8fafc) !important;
+        color: var(--text-primary, #1e293b) !important;
+        transition: all 0.2s !important;
+        box-shadow: none !important;
+        width: 100% !important;
+    }
+
+    .pf-form .form-control:focus,
+    .pf-form input:focus,
+    .pf-form select:focus,
+    .pf-form textarea:focus {
+        border-color: #6366f1 !important;
+        background: var(--card-bg, #fff) !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12) !important;
+        outline: none !important;
+    }
+
+    .pf-form textarea {
+        min-height: 90px;
+        resize: vertical;
+    }
+
+    .pf-form select {
+        appearance: auto;
+        cursor: pointer;
+    }
+
+    .pf-field-hint {
+        font-size: 0.775rem;
+        color: var(--text-secondary, #64748b);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .pf-field-hint i {
+        color: #6366f1;
+    }
+
+    .pf-field-error {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        font-size: 0.8rem;
+        color: #ef4444;
+    }
+
+    .pf-field-error i {
+        font-size: 0.75rem;
+    }
+
+    /* Upload zone */
+    .pf-upload-zone {
+        position: relative;
+        border: 2px dashed #c7d2fe;
+        border-radius: 16px;
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(139, 92, 246, 0.02));
+        cursor: pointer;
+        transition: all 0.25s;
+    }
+
+    .pf-upload-zone:hover {
+        border-color: #6366f1;
+        background: rgba(99, 102, 241, 0.06);
+        transform: translateY(-1px);
+    }
+
+    .pf-upload-zone.drag-over {
+        border-color: #6366f1;
+        background: rgba(99, 102, 241, 0.1);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+    }
+
+    .pf-upload-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100% !important;
+        height: 100%;
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    .pf-upload-icon {
+        font-size: 2.5rem;
+        color: #a5b4fc;
+        margin-bottom: 0.75rem;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-6px);
+        }
+    }
+
+    .pf-upload-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary, #1e293b);
+        margin: 0 0 0.25rem;
+    }
+
+    .pf-upload-sub {
+        font-size: 0.8rem;
+        color: var(--text-secondary, #64748b);
+        margin: 0 0 0.75rem;
+    }
+
+    .pf-upload-formats {
+        display: flex;
+        justify-content: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+    }
+
+    .pf-upload-formats span {
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+    }
+
+    .pf-upload-limit {
+        font-size: 0.72rem;
+        color: #94a3b8;
+    }
+
+    /* Preview */
+    .pf-preview-area {
+        border: 2px solid #6366f1;
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--card-bg, #fff);
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+    }
+
+    .pf-preview-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    }
+
+    .pf-preview-icon {
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    .pf-preview-info {
+        flex: 1;
+        display: flex;
         flex-direction: column;
     }
-    
-    .format-tags {
+
+    .pf-preview-name {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .pf-preview-size {
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .pf-preview-remove {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: #fff;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
         justify-content: center;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: background 0.2s;
     }
-    
-    .notification {
-        right: 10px;
-        left: 10px;
-        transform: translateY(-100%);
+
+    .pf-preview-remove:hover {
+        background: rgba(239, 68, 68, 0.8);
     }
-    
-    .notification.show {
+
+    .pf-preview-img {
+        width: 100%;
+        max-height: 220px;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* Actions */
+    .pf-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color, #e2e8f0);
+    }
+
+    .pf-btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.8rem 1.5rem;
+        border: 2px solid var(--border-color, #e2e8f0);
+        border-radius: 12px;
+        background: transparent;
+        color: var(--text-secondary, #64748b);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .pf-btn-cancel:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .pf-btn-submit {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 2rem;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pf-btn-submit::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .pf-btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+    }
+
+    .pf-btn-submit:hover::before {
+        opacity: 1;
+    }
+
+    .pf-btn-submit:active {
         transform: translateY(0);
     }
-}
+
+    .pf-btn-content,
+    .pf-btn-loader {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .pf-sidebar-card {
+        background: var(--card-bg, #fff);
+        border-radius: 18px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .pf-sidebar-header {
+        padding: 1rem 1.25rem;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.07), rgba(139, 92, 246, 0.04));
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--text-primary, #1e293b);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .pf-sidebar-header i {
+        color: #6366f1;
+    }
+
+    /* Summary card */
+    .pf-summary-card {}
+
+    .pf-summary-body {
+        padding: 1.25rem;
+    }
+
+    .pf-summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        font-size: 0.875rem;
+    }
+
+    .pf-summary-row span {
+        color: var(--text-secondary, #64748b);
+    }
+
+    .pf-summary-row strong {
+        color: var(--text-primary, #1e293b);
+    }
+
+    .pf-summary-amount {
+        color: #6366f1;
+    }
+
+    .pf-summary-divider {
+        height: 1px;
+        background: var(--border-color, #e2e8f0);
+        margin: 0.5rem 0;
+    }
+
+    .pf-summary-total {
+        font-weight: 700;
+    }
+
+    .pf-summary-total span {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-primary, #1e293b);
+    }
+
+    .pf-summary-total strong {
+        font-size: 1.25rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #10b981, #059669);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Methods */
+    .pf-methods-list {
+        padding: 0.75rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+
+    .pf-method-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 10px;
+        transition: background 0.2s;
+        cursor: default;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-primary, #1e293b);
+    }
+
+    .pf-method-item:hover {
+        background: var(--bg-secondary, #f8fafc);
+    }
+
+    .pf-method-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    /* Timeline */
+    .pf-timeline {
+        padding: 1.25rem 1rem;
+    }
+
+    .pf-tl-item {
+        display: grid;
+        grid-template-columns: 36px 16px 1fr;
+        gap: 0 0.75rem;
+        align-items: start;
+        margin-bottom: 0;
+    }
+
+    .pf-tl-last {}
+
+    .pf-tl-dot {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--bg-secondary, #f1f5f9);
+        color: var(--text-secondary, #94a3b8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        border: 2px solid var(--border-color, #e2e8f0);
+        transition: all 0.3s;
+        flex-shrink: 0;
+        z-index: 1;
+    }
+
+    .pf-tl-item.active .pf-tl-dot {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        border-color: #818cf8;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+
+    .pf-tl-connector {
+        width: 2px;
+        background: var(--border-color, #e2e8f0);
+        height: 100%;
+        min-height: 36px;
+        margin: 0 auto;
+        margin-top: 36px;
+        margin-bottom: 0;
+        grid-row: 1 / span 2;
+        position: relative;
+        top: 0;
+        align-self: stretch;
+    }
+
+    .pf-tl-body {
+        padding-bottom: 1.25rem;
+    }
+
+    .pf-tl-body h6 {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--text-primary, #1e293b);
+        margin: 0.4rem 0 0.2rem;
+    }
+
+    .pf-tl-body p {
+        font-size: 0.775rem;
+        color: var(--text-secondary, #64748b);
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .pf-tl-item.active .pf-tl-body h6 {
+        color: #6366f1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .pf-hero {
+            padding: 1.75rem 0 2.5rem;
+        }
+
+        .pf-hero-title {
+            font-size: 1.4rem;
+        }
+
+        .pf-form {
+            padding: 1.25rem;
+        }
+
+        .pf-actions {
+            flex-direction: column;
+        }
+
+        .pf-btn-cancel,
+        .pf-btn-submit {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .pf-doc-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .pf-doc-field {
+            border-right: none;
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
+        }
+    }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // ===== INITIALISATION =====
-    initializePaymentForm();
-    
-    function initializePaymentForm() {
-    // Set default amount to document amount
-    const amountField = document.getElementById('id_amount');
-    if (amountField && !amountField.value) {
-        {% if document %}
-        amountField.value = '{{ document.amount }}';
-        {% elif payment and payment.document %}
-        amountField.value = '{{ payment.document.amount }}';
-        {% endif %}
-    }
-    
-        // Initialize file upload
-        initializeFileUpload();
-        
-        // Initialize form validation
-        initializeFormValidation();
-        
-        // Initialize progress tracking
-        initializeProgressTracking();
-    }
-    
-    function initializeFileUpload() {
-    const fileInput = document.querySelector('input[type="file"]');
-    if (fileInput) {
-        fileInput.addEventListener('change', function(e) {
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // ===== FILE UPLOAD HANDLING =====
+        const fileInput = document.querySelector('#paymentForm input[type="file"]');
+        const uploadZone = document.getElementById('uploadZone');
+        const previewArea = document.getElementById('previewArea');
+        const previewImg = document.getElementById('previewImg');
+        const previewName = document.getElementById('previewName');
+        const previewSize = document.getElementById('previewSize');
+        const removeBtn = document.getElementById('removeFile');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', handleFile);
+        }
+
+        if (uploadZone) {
+            uploadZone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                uploadZone.classList.add('drag-over');
+            });
+            uploadZone.addEventListener('dragleave', function () {
+                uploadZone.classList.remove('drag-over');
+            });
+            uploadZone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                uploadZone.classList.remove('drag-over');
+                if (e.dataTransfer.files[0] && fileInput) {
+                    const dt = new DataTransfer();
+                    dt.items.add(e.dataTransfer.files[0]);
+                    fileInput.files = dt.files;
+                    handleFile({ target: fileInput });
+                }
+            });
+        }
+
+        function handleFile(e) {
             const file = e.target.files[0];
-            if (file) {
-                    validateAndPreviewFile(file, e.target);
-                }
-            });
-        }
-    }
-    
-    function validateAndPreviewFile(file, input) {
-                // Validate file type
-                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                if (!allowedTypes.includes(file.type)) {
-            showNotification('Type de fichier non supporté. Veuillez sélectionner une image.', 'error');
-            input.value = '';
-                    return;
-                }
-                
-                // Validate file size (5MB)
-                if (file.size > 5 * 1024 * 1024) {
-            showNotification('Fichier trop volumineux. Taille maximum : 5MB', 'error');
-            input.value = '';
-                    return;
-                }
-                
-                // Show preview
-        showFilePreview(file);
-    }
-    
-    function showFilePreview(file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    let preview = document.getElementById('imagePreview');
-                    if (!preview) {
-                        preview = document.createElement('div');
-                        preview.id = 'imagePreview';
-                preview.className = 'file-preview mt-3';
-                const fileInput = document.querySelector('input[type="file"]');
-                        fileInput.parentNode.appendChild(preview);
-                    }
-            
-                    preview.innerHTML = `
-                <div class="file-preview-card">
-                    <div class="file-preview-header">
-                        <i class="fas fa-image"></i>
-                        <span class="file-name">${file.name}</span>
-                        <button type="button" class="btn-remove-file" onclick="removeFile()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="file-preview-body">
-                        <img src="${e.target.result}" alt="Aperçu" class="preview-image">
-                        <div class="file-info">
-                            <span class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                            <span class="file-type">${file.type.split('/')[1].toUpperCase()}</span>
-                        </div>
-                    </div>
-                        </div>
-                    `;
-                };
-                reader.readAsDataURL(file);
+            if (!file) return;
+
+            const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowed.includes(file.type)) {
+                showToast('Type de fichier non supporté. Images uniquement (JPEG, PNG, GIF, WebP)', 'error');
+                e.target.value = ''; return;
             }
-    
-    function removeFile() {
-        const fileInput = document.querySelector('input[type="file"]');
-        const preview = document.getElementById('imagePreview');
-        
-        if (fileInput) fileInput.value = '';
-        if (preview) preview.remove();
-    }
-    
-    function initializeFormValidation() {
-        const form = document.querySelector('.payment-form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                if (!validateForm()) {
-                    e.preventDefault();
-                }
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Fichier trop volumineux. Maximum 5 MB autorisé.', 'error');
+                e.target.value = ''; return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                previewImg.src = ev.target.result;
+                previewName.textContent = file.name;
+                previewSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                uploadZone.classList.add('d-none');
+                previewArea.classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function () {
+                if (fileInput) fileInput.value = '';
+                previewImg.src = '';
+                uploadZone.classList.remove('d-none');
+                previewArea.classList.add('d-none');
             });
         }
-    }
-    
-    function validateForm() {
-        const amountField = document.getElementById('id_amount');
-        const paymentMethodField = document.getElementById('id_payment_method');
-        const paymentDateField = document.getElementById('id_payment_date');
-        
-        let isValid = true;
-        
-        // Validate amount
-        if (!amountField.value || parseFloat(amountField.value) <= 0) {
-            showFieldError(amountField, 'Le montant doit être supérieur à 0');
-            isValid = false;
-        } else {
-            clearFieldError(amountField);
-        }
-        
-        // Validate payment method
-        if (!paymentMethodField.value) {
-            showFieldError(paymentMethodField, 'Veuillez sélectionner une méthode de paiement');
-            isValid = false;
-        } else {
-            clearFieldError(paymentMethodField);
-        }
-        
-        // Validate payment date
-        if (!paymentDateField.value) {
-            showFieldError(paymentDateField, 'Veuillez sélectionner une date de paiement');
-            isValid = false;
-        } else {
-            clearFieldError(paymentDateField);
-        }
-        
-        return isValid;
-    }
-    
-    function showFieldError(field, message) {
-        clearFieldError(field);
-        
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'field-error';
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>${message}`;
-        
-        field.parentNode.appendChild(errorDiv);
-        field.classList.add('is-invalid');
-    }
-    
-    function clearFieldError(field) {
-        const errorDiv = field.parentNode.querySelector('.field-error');
-        if (errorDiv) {
-            errorDiv.remove();
-        }
-        field.classList.remove('is-invalid');
-    }
-    
-    function initializeProgressTracking() {
-        const form = document.querySelector('.payment-form');
-        if (form) {
-            const inputs = form.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                input.addEventListener('input', updateProgress);
-                input.addEventListener('change', updateProgress);
+
+        // ===== LIVE AMOUNT SUMMARY =====
+        const amountInput = document.getElementById('id_amount');
+        const summaryAmount = document.getElementById('summaryAmount');
+        if (amountInput && summaryAmount) {
+            amountInput.addEventListener('input', function () {
+                const val = parseFloat(this.value) || 0;
+                summaryAmount.textContent = val.toFixed(2) + ' DH';
             });
         }
-    }
-    
-    function updateProgress() {
-        const form = document.querySelector('.payment-form');
-        const inputs = form.querySelectorAll('input[required], select[required]');
-        const filledInputs = Array.from(inputs).filter(input => input.value.trim() !== '');
-        
-        const progress = (filledInputs.length / inputs.length) * 100;
-        updateProgressBar(progress);
-    }
-    
-    function updateProgressBar(progress) {
-        // Update progress steps based on completion
-        const steps = document.querySelectorAll('.progress-step');
-        if (steps.length >= 3) {
-            if (progress >= 100) {
-                steps[0].classList.add('completed');
-                steps[1].classList.add('active');
-                steps[2].classList.add('active');
-            } else if (progress >= 50) {
-                steps[0].classList.add('completed');
-                steps[1].classList.add('active');
+
+        // ===== DEFAULT DATE =====
+        const dateInput = document.getElementById('id_payment_date');
+        if (dateInput && !dateInput.value) {
+            const today = new Date();
+            dateInput.value = today.toISOString().split('T')[0];
+        }
+
+        // ===== DEFAULT AMOUNT =====
+        if (amountInput && !amountInput.value) {
+            {% if document %}
+            amountInput.value = '{{ document.amount }}';
+            {% elif payment and payment.document %}
+            amountInput.value = '{{ payment.document.amount }}';
+            {% endif %}
+            if (summaryAmount && amountInput.value) {
+                summaryAmount.textContent = parseFloat(amountInput.value).toFixed(2) + ' DH';
             }
         }
-    }
-    
-    function showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-            <span>${message}</span>
-        `;
-        
-        // Add to page
-        document.body.appendChild(notification);
-        
-        // Show notification
-        setTimeout(() => notification.classList.add('show'), 100);
-        
-        // Remove notification
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-    
-    // Make removeFile globally available
-    window.removeFile = removeFile;
-});
+
+        // ===== FORM SUBMIT =====
+        const form = document.getElementById('paymentForm');
+        const submitBtn = document.getElementById('submitBtn');
+        if (form && submitBtn) {
+            form.addEventListener('submit', function () {
+                submitBtn.querySelector('.pf-btn-content').classList.add('d-none');
+                submitBtn.querySelector('.pf-btn-loader').classList.remove('d-none');
+                submitBtn.disabled = true;
+            });
+        }
+
+        // ===== TOAST =====
+        function showToast(msg, type = 'info') {
+            const t = document.createElement('div');
+            t.className = 'pf-toast pf-toast-' + type;
+            t.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i> ${msg}`;
+            document.body.appendChild(t);
+            setTimeout(() => t.classList.add('show'), 50);
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 350); }, 3500);
+        }
+    });
 </script>
+
+<style>
+    .pf-toast {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        padding: 0.9rem 1.4rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        transform: translateY(20px) scale(0.96);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 9999;
+        max-width: 360px;
+    }
+
+    .pf-toast.show {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .pf-toast-error {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .pf-toast-info {
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+    }
+</style>
+
 {% endblock %}

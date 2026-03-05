@@ -1,230 +1,1340 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mon Tableau de Bord - Résident{% endblock %}
+{% block title %}Mon Tableau de Bord - SyndicPro{% endblock %}
 
 {% block content %}
-<!-- ===== EN-TÊTE DE PAGE ===== -->
-{% include 'components/page_header.html' with title="Mon Tableau de Bord" subtitle="Vue d'ensemble" icon="fas fa-home" %}
+<div class="rd-wrapper">
 
-<div class="container">
-    <!-- ===== MÉTRIQUES PRINCIPALES ===== -->
-    <section class="metrics-section mb-4">
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <div class="stats-card-modern {% if status.balance <= 0 %}stats-success{% else %}stats-warning{% endif %}">
-                    <div class="stats-card-content">
-                        <div class="stats-card-header">
-                            <div class="stats-icon">
-                                <i class="fas fa-{% if status.balance <= 0 %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
-                            </div>
-                        </div>
-                        <div class="stats-card-body">
-                            <h3 class="stats-value">{{ status.balance|floatformat:2 }} DH</h3>
-                            <p class="stats-label">
-                                {% if status.balance <= 0 %}
-                                    Solde créditeur
-                                {% else %}
-                                    Montant dû
-                                {% endif %}
-                            </p>
-                        </div>
+    <!-- ===== HERO HEADER ===== -->
+    <div class="rd-hero">
+        <div class="rd-hero-bg"></div>
+        <div class="container-fluid px-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div class="rd-hero-content">
+                    <div class="rd-hero-greeting">
+                        <i class="fas fa-sun rd-greeting-icon"></i>
+                        Bonjour, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong> 👋
                     </div>
+                    <h1 class="rd-hero-title">
+                        <span class="rd-hero-icon-wrap"><i class="fas fa-home"></i></span>
+                        Mon Tableau de Bord
+                    </h1>
+                    <p class="rd-hero-sub">Vue d'ensemble de votre espace résident</p>
                 </div>
-            </div>
-            <div class="col-md-6 mb-3">
-                <div class="stats-card-modern stats-info">
-                    <div class="stats-card-content">
-                        <div class="stats-card-header">
-                            <div class="stats-icon">
-                                <i class="fas fa-file-invoice"></i>
-                            </div>
-                        </div>
-                        <div class="stats-card-body">
-                            <h3 class="stats-value">{{ status.total_due|floatformat:2 }} DH</h3>
-                            <p class="stats-label">Total des documents</p>
+
+                <!-- Status badge -->
+                <div class="rd-status-badge {% if status.balance <= 0 %}rd-status-ok{% else %}rd-status-due{% endif %}">
+                    <div class="rd-status-icon">
+                        <i
+                            class="fas fa-{% if status.balance <= 0 %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                    </div>
+                    <div>
+                        <div class="rd-status-label">Situation financière</div>
+                        <div class="rd-status-value">
+                            {% if status.balance <= 0 %} À jour ✓ {% else %} {{ status.balance|floatformat:2 }} DH due
+                                {% endif %} </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- ===== DOCUMENTS ===== -->
-    <section class="documents-section mb-4">
-        <div class="card-modern">
-            <div class="card-header-modern">
-                <h5 class="mb-0">
-                    <i class="fas fa-file-alt me-2"></i>Mes Documents
-                </h5>
-                <a href="{% url 'finance:document_list' %}" class="btn btn-sm btn-outline-light">
-                    <i class="fas fa-external-link-alt me-1"></i>Voir tout
+        <div class="container-fluid px-4 pb-5">
+
+            <!-- ===== ALERT BANNER ===== -->
+            {% if status.balance > 0 %}
+            <div
+                class="rd-alert {% if status.status_category == 'critical' %}rd-alert-critical{% elif status.status_category == 'overdue' %}rd-alert-overdue{% else %}rd-alert-pending{% endif %}">
+                <div class="rd-alert-icon">
+                    <i
+                        class="fas fa-{% if status.status_category == 'critical' %}fire{% elif status.status_category == 'overdue' %}clock{% else %}bell{% endif %}"></i>
+                </div>
+                <div class="rd-alert-body">
+                    <strong>
+                        {% if status.status_category == 'critical' %}Situation critique —{% elif status.status_category
+                        == 'overdue' %}Paiement en retard —{% else %}Paiement en attente —{% endif %}
+                    </strong>
+                    Vous avez un solde dû de <strong>{{ status.balance|floatformat:2 }} DH</strong>.
+                    {% if status.status_category == 'critical' %}
+                    Veuillez régulariser votre situation immédiatement.
+                    {% elif status.status_category == 'overdue' %}
+                    Merci de procéder au paiement rapidement.
+                    {% else %}
+                    Merci de régler avant la date d'échéance.
+                    {% endif %}
+                </div>
+                <a href="{% url 'finance:document_list' %}" class="rd-alert-cta">
+                    Régler maintenant <i class="fas fa-arrow-right ms-1"></i>
                 </a>
             </div>
-            <div class="card-body-modern">
-                {% if documents %}
-                    <div class="table-responsive">
-                        <table class="table table-modern">
-                            <thead>
-                                <tr>
-                                    <th>Document</th>
-                                    <th>Date</th>
-                                    <th>Montant</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for document in documents|slice:":5" %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-file-invoice text-primary me-2"></i>
-                                            <div>
-                                                <strong>{{ document.title }}</strong>
-                                                {% if document.description %}
-                                                    <br><small class="text-muted">{{ document.description|truncatechars:50 }}</small>
+            {% endif %}
+
+            <div class="row g-4">
+
+                <!-- ===== MAIN COLUMN ===== -->
+                <div class="col-xl-8 col-lg-7">
+
+                    <!-- Metric cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <div
+                                class="rd-metric-card rd-metric-{% if status.balance <= 0 %}green{% else %}amber{% endif %}">
+                                <div class="rd-metric-icon">
+                                    <i
+                                        class="fas fa-{% if status.balance <= 0 %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                                </div>
+                                <div class="rd-metric-body">
+                                    <div class="rd-metric-value">{{ status.balance|floatformat:2 }} <span>DH</span>
+                                    </div>
+                                    <div class="rd-metric-label">{% if status.balance <= 0 %}Solde créditeur{% else
+                                            %}Montant dû{% endif %}</div>
+                                    </div>
+                                    <div class="rd-metric-glow"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="rd-metric-card rd-metric-blue">
+                                    <div class="rd-metric-icon">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </div>
+                                    <div class="rd-metric-body">
+                                        <div class="rd-metric-value">{{ status.total_due|floatformat:2 }}
+                                            <span>DH</span></div>
+                                        <div class="rd-metric-label">Total des documents</div>
+                                    </div>
+                                    <div class="rd-metric-glow"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="rd-metric-card rd-metric-violet">
+                                    <div class="rd-metric-icon">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div class="rd-metric-body">
+                                        <div class="rd-metric-value">{{ documents|length }} <span>doc{{
+                                                documents|length|pluralize:"s" }}</span></div>
+                                        <div class="rd-metric-label">Documents actifs</div>
+                                    </div>
+                                    <div class="rd-metric-glow"></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="rd-metric-card rd-metric-teal">
+                                    <div class="rd-metric-icon">
+                                        <i class="fas fa-check-double"></i>
+                                    </div>
+                                    <div class="rd-metric-body">
+                                        <div class="rd-metric-value">{{ status.total_paid|floatformat:2 }}
+                                            <span>DH</span></div>
+                                        <div class="rd-metric-label">Total payé</div>
+                                    </div>
+                                    <div class="rd-metric-glow"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documents table card -->
+                        <div class="rd-card">
+                            <div class="rd-card-header">
+                                <div class="rd-card-header-left">
+                                    <div class="rd-card-icon"
+                                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6);">
+                                        <i class="fas fa-file-alt"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="rd-card-title">Mes Documents</h5>
+                                        <p class="rd-card-subtitle">{{ documents|length }} document{{
+                                            documents|length|pluralize:"s" }} actif{{ documents|length|pluralize:"s" }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <a href="{% url 'finance:document_list' %}" class="rd-link-btn">
+                                    Voir tout <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+
+                            <div class="rd-card-body">
+                                {% if documents %}
+                                <div class="rd-doc-list">
+                                    {% for document in documents|slice:":6" %}
+                                    <div
+                                        class="rd-doc-row {% if document.is_paid %}rd-doc-paid{% elif document.is_overdue %}rd-doc-overdue{% else %}rd-doc-pending{% endif %}">
+                                        <div class="rd-doc-left">
+                                            <div class="rd-doc-icon">
+                                                {% if document.is_paid %}
+                                                <i class="fas fa-check-circle"></i>
+                                                {% elif document.is_overdue %}
+                                                <i class="fas fa-exclamation-circle"></i>
+                                                {% else %}
+                                                <i class="fas fa-file-invoice"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="rd-doc-info">
+                                                <span class="rd-doc-title">{{ document.title }}</span>
+                                                <span class="rd-doc-date"><i class="far fa-calendar-alt"></i> {{
+                                                    document.date|date:"d/m/Y" }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="rd-doc-right">
+                                            <span class="rd-doc-amount">{{ document.amount|floatformat:2 }} DH</span>
+                                            <span
+                                                class="rd-doc-badge {% if document.is_paid %}rd-badge-paid{% elif document.is_overdue %}rd-badge-overdue{% else %}rd-badge-pending{% endif %}">
+                                                {% if document.is_paid %}Payé{% elif document.is_overdue %}En retard{%
+                                                else %}En attente{% endif %}
+                                            </span>
+                                            <div class="rd-doc-actions">
+                                                <a href="{% url 'finance:document_detail' document.pk %}"
+                                                    class="rd-action-btn rd-action-view" title="Voir">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% if not document.is_paid %}
+                                                <a href="{% url 'finance:payment_create' document.pk %}"
+                                                    class="rd-action-btn rd-action-pay" title="Payer">
+                                                    <i class="fas fa-credit-card"></i>
+                                                </a>
                                                 {% endif %}
                                             </div>
                                         </div>
-                                    </td>
-                                    <td>{{ document.date|date:"d/m/Y" }}</td>
-                                    <td><strong>{{ document.amount|floatformat:2 }} DH</strong></td>
-                                    <td>
-                                        {% if document.is_paid %}
-                                            <span class="badge bg-success">Payé</span>
-                                        {% elif document.status == 'critical' %}
-                                            <span class="badge bg-danger">Critique</span>
-                                        {% elif document.status == 'overdue' %}
-                                            <span class="badge bg-warning">En retard</span>
-                                        {% else %}
-                                            <span class="badge bg-info">En attente</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'finance:document_detail' document.pk %}" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        {% if not document.is_paid %}
-                                            <a href="{% url 'finance:payment_create' document.pk %}" class="btn btn-sm btn-success">
-                                                <i class="fas fa-credit-card"></i>
-                                            </a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% if documents|length > 5 %}
-                        <div class="text-center mt-3">
-                            <a href="{% url 'finance:document_list' %}" class="btn btn-outline-primary">
-                                Voir tous les documents ({{ documents|length }})
-                            </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% if documents|length > 6 %}
+                                <div class="rd-show-more">
+                                    <a href="{% url 'finance:document_list' %}" class="rd-show-more-btn">
+                                        <i class="fas fa-list me-1"></i> Voir tous les {{ documents|length }} documents
+                                    </a>
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <div class="rd-empty">
+                                    <div class="rd-empty-icon"><i class="fas fa-folder-open"></i></div>
+                                    <h6>Aucun document</h6>
+                                    <p>Vous n'avez pas encore de documents à afficher.</p>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
-                    {% endif %}
-                {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                        <h5>Aucun document</h5>
-                        <p class="text-muted">Vous n'avez pas encore de documents.</p>
+
+                        <!-- Recent payments -->
+                        {% if recent_payments %}
+                        <div class="rd-card mt-4">
+                            <div class="rd-card-header">
+                                <div class="rd-card-header-left">
+                                    <div class="rd-card-icon"
+                                        style="background:linear-gradient(135deg,#10b981,#059669);">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="rd-card-title">Paiements Récents</h5>
+                                        <p class="rd-card-subtitle">Vos dernières transactions</p>
+                                    </div>
+                                </div>
+                                <a href="{% url 'finance:payment_list' %}" class="rd-link-btn">
+                                    Voir tout <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                            <div class="rd-card-body">
+                                <div class="rd-pay-list">
+                                    {% for payment in recent_payments %}
+                                    <div class="rd-pay-row">
+                                        <div
+                                            class="rd-pay-icon {% if payment.is_verified %}rd-pay-verified{% else %}rd-pay-pending{% endif %}">
+                                            <i
+                                                class="fas fa-{% if payment.is_verified %}check{% else %}clock{% endif %}"></i>
+                                        </div>
+                                        <div class="rd-pay-info">
+                                            <span class="rd-pay-doc">{{ payment.document.title }}</span>
+                                            <span class="rd-pay-date">{{ payment.payment_date|date:"d/m/Y" }} · {{
+                                                payment.get_payment_method_display }}</span>
+                                        </div>
+                                        <div class="rd-pay-right">
+                                            <span class="rd-pay-amount">{{ payment.amount|floatformat:2 }} DH</span>
+                                            <span
+                                                class="rd-pay-badge {% if payment.is_verified %}rd-badge-paid{% else %}rd-badge-pending{% endif %}">
+                                                {% if payment.is_verified %}Vérifié{% else %}En attente{% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
                     </div>
-                {% endif %}
+
+                    <!-- ===== SIDEBAR ===== -->
+                    <div class="col-xl-4 col-lg-5">
+
+                        <!-- Quick Actions -->
+                        <div class="rd-sidebar-card mb-4">
+                            <div class="rd-sidebar-header">
+                                <i class="fas fa-bolt"></i> Actions Rapides
+                            </div>
+                            <div class="rd-quick-actions">
+                                <a href="{% url 'finance:document_list' %}" class="rd-quick-btn"
+                                    style="--qa-color:#6366f1;">
+                                    <div class="rd-quick-icon"><i class="fas fa-file-alt"></i></div>
+                                    <span>Mes Documents</span>
+                                    <i class="fas fa-chevron-right rd-quick-arrow"></i>
+                                </a>
+                                <a href="{% url 'finance:payment_list' %}" class="rd-quick-btn"
+                                    style="--qa-color:#10b981;">
+                                    <div class="rd-quick-icon"><i class="fas fa-receipt"></i></div>
+                                    <span>Mes Paiements</span>
+                                    <i class="fas fa-chevron-right rd-quick-arrow"></i>
+                                </a>
+                                <a href="{% url 'finance:notification_list' %}" class="rd-quick-btn"
+                                    style="--qa-color:#f59e0b;">
+                                    <div class="rd-quick-icon"><i class="fas fa-bell"></i></div>
+                                    <span>Notifications</span>
+                                    <i class="fas fa-chevron-right rd-quick-arrow"></i>
+                                </a>
+                                <a href="{% url 'finance:report_create' %}" class="rd-quick-btn"
+                                    style="--qa-color:#3b82f6;">
+                                    <div class="rd-quick-icon"><i class="fas fa-flag"></i></div>
+                                    <span>Nouveau Rapport</span>
+                                    <i class="fas fa-chevron-right rd-quick-arrow"></i>
+                                </a>
+                                <a href="{% url 'finance:calendar' %}" class="rd-quick-btn" style="--qa-color:#8b5cf6;">
+                                    <div class="rd-quick-icon"><i class="fas fa-calendar-alt"></i></div>
+                                    <span>Calendrier</span>
+                                    <i class="fas fa-chevron-right rd-quick-arrow"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Notifications preview -->
+                        {% if notifications %}
+                        <div class="rd-sidebar-card mb-4">
+                            <div class="rd-sidebar-header">
+                                <i class="fas fa-bell"></i> Notifications Récentes
+                            </div>
+                            <div class="rd-notif-list">
+                                {% for notif in notifications|slice:":4" %}
+                                <div class="rd-notif-item {% if not notif.is_read %}rd-notif-unread{% endif %}">
+                                    <div class="rd-notif-dot {% if not notif.is_read %}rd-notif-dot-active{% endif %}">
+                                    </div>
+                                    <div class="rd-notif-body">
+                                        <span class="rd-notif-title">{{ notif.title }}</span>
+                                        <span class="rd-notif-time">{{ notif.created_at|timesince }} ago</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                <a href="{% url 'finance:notification_list' %}" class="rd-notif-more">
+                                    Toutes les notifications <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Financial summary -->
+                        <div class="rd-sidebar-card mb-4">
+                            <div class="rd-sidebar-header">
+                                <i class="fas fa-chart-pie"></i> Résumé Financier
+                            </div>
+                            <div class="rd-fin-body">
+                                <div class="rd-fin-row">
+                                    <span><i class="fas fa-file-invoice text-primary"></i> Total facturé</span>
+                                    <strong>{{ status.total_due|floatformat:2 }} DH</strong>
+                                </div>
+                                <div class="rd-fin-row">
+                                    <span><i class="fas fa-check-circle text-success"></i> Total payé</span>
+                                    <strong class="text-success">{{ status.total_paid|floatformat:2 }} DH</strong>
+                                </div>
+                                <div class="rd-fin-divider"></div>
+                                <div class="rd-fin-row rd-fin-total">
+                                    <span>Solde</span>
+                                    <strong
+                                        class="{% if status.balance <= 0 %}rd-positive{% else %}rd-negative{% endif %}">
+                                        {{ status.balance|floatformat:2 }} DH
+                                    </strong>
+                                </div>
+                                <!-- Progress bar -->
+                                {% if status.total_due > 0 %}
+                                <div class="rd-progress-wrap mt-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="text-muted">Taux de paiement</small>
+                                        <small class="fw-bold" id="payRate">—</small>
+                                    </div>
+                                    <div class="rd-progress-bar">
+                                        <div class="rd-progress-fill"
+                                            style="width:{% widthratio status.total_paid status.total_due 100 %}%">
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Tips card -->
+                        <div class="rd-tips-card">
+                            <div class="rd-tips-icon"><i class="fas fa-lightbulb"></i></div>
+                            <h6 class="rd-tips-title">Conseil</h6>
+                            <p class="rd-tips-text">Pensez à toujours joindre un justificatif lors de vos paiements pour
+                                accélérer la vérification par le syndic.</p>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
 
-    <!-- ===== ALERTE STATUT ===== -->
-    {% if status.balance > 0 %}
-    <section class="alert-section">
-        <div class="alert-modern alert-{% if status.status_category == 'critical' %}danger{% elif status.status_category == 'overdue' %}warning{% else %}info{% endif %}">
-            <i class="fas fa-{% if status.status_category == 'critical' %}exclamation-circle{% elif status.status_category == 'overdue' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
-            <div class="flex-grow-1">
-                <p class="mb-0">
-                    Vous devez <strong>{{ status.balance|floatformat:2 }} DH</strong>.
-                    {% if status.status_category == 'critical' %}
-                        Veuillez régulariser votre situation au plus vite.
-                    {% elif status.status_category == 'overdue' %}
-                        Merci de procéder au paiement.
-                    {% else %}
-                        Merci de procéder au paiement dans les délais.
-                    {% endif %}
-                </p>
-            </div>
-        </div>
-    </section>
-    {% endif %}
-</div>
+        <style>
+            /* ============================================================
+   RESIDENT DASHBOARD — PREMIUM DESIGN
+   ============================================================ */
+            .rd-wrapper {
+                min-height: 100vh;
+                background: var(--bg-primary, #f8fafc);
+            }
 
-<style>
-/* Styles minimaux pour les cartes de statistiques */
-.stats-card-modern {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    overflow: hidden;
-    position: relative;
-}
+            /* HERO */
+            .rd-hero {
+                position: relative;
+                background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%);
+                padding: 2.5rem 0 3.5rem;
+                margin-bottom: -1.5rem;
+                overflow: hidden;
+            }
 
-.stats-card-modern:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-}
+            .rd-hero-bg {
+                position: absolute;
+                inset: 0;
+                background:
+                    radial-gradient(ellipse at 15% 60%, rgba(99, 102, 241, 0.35) 0%, transparent 55%),
+                    radial-gradient(ellipse at 85% 10%, rgba(139, 92, 246, 0.25) 0%, transparent 45%),
+                    radial-gradient(ellipse at 50% 100%, rgba(167, 139, 250, 0.15) 0%, transparent 50%);
+                pointer-events: none;
+            }
 
-.stats-card-modern::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-}
+            .rd-hero-content {
+                position: relative;
+            }
 
-.stats-success::before { background: linear-gradient(90deg, #10b981, #059669); }
-.stats-warning::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
-.stats-info::before { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+            .rd-hero-greeting {
+                font-size: 0.875rem;
+                color: rgba(255, 255, 255, 0.7);
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
 
-.stats-card-content {
-    padding: 24px;
-}
+            .rd-greeting-icon {
+                color: #fbbf24;
+            }
 
-.stats-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
+            .rd-hero-title {
+                font-size: 2rem;
+                font-weight: 800;
+                color: #fff;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 0.4rem;
+            }
 
-.stats-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: white;
-}
+            .rd-hero-icon-wrap {
+                width: 48px;
+                height: 48px;
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(10px);
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+                color: #c4b5fd;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
 
-.stats-success .stats-icon { background: linear-gradient(135deg, #10b981, #059669); }
-.stats-warning .stats-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
-.stats-info .stats-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+            .rd-hero-sub {
+                color: rgba(255, 255, 255, 0.6);
+                font-size: 0.9rem;
+            }
 
-.stats-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1f2937;
-    margin: 0 0 8px 0;
-    line-height: 1.2;
-}
+            /* Status badge in hero */
+            .rd-status-badge {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 1rem 1.5rem;
+                border-radius: 16px;
+                backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                position: relative;
+            }
 
-.stats-label {
-    font-size: 14px;
-    color: #6b7280;
-    margin: 0;
-    font-weight: 500;
-}
-</style>
-{% endblock %}
+            .rd-status-ok {
+                background: rgba(16, 185, 129, 0.2);
+            }
+
+            .rd-status-due {
+                background: rgba(245, 158, 11, 0.2);
+            }
+
+            .rd-status-icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+            }
+
+            .rd-status-ok .rd-status-icon {
+                background: rgba(16, 185, 129, 0.3);
+                color: #6ee7b7;
+            }
+
+            .rd-status-due .rd-status-icon {
+                background: rgba(245, 158, 11, 0.3);
+                color: #fcd34d;
+            }
+
+            .rd-status-label {
+                font-size: 0.72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            .rd-status-value {
+                font-size: 1rem;
+                font-weight: 800;
+                color: #fff;
+            }
+
+            /* ALERT */
+            .rd-alert {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                padding: 1rem 1.5rem;
+                border-radius: 14px;
+                margin: 1.5rem 0;
+                border: 1px solid;
+                flex-wrap: wrap;
+            }
+
+            .rd-alert-critical {
+                background: #fef2f2;
+                border-color: #fecaca;
+                color: #991b1b;
+            }
+
+            .rd-alert-overdue {
+                background: #fffbeb;
+                border-color: #fde68a;
+                color: #92400e;
+            }
+
+            .rd-alert-pending {
+                background: #eff6ff;
+                border-color: #bfdbfe;
+                color: #1e40af;
+            }
+
+            .rd-alert-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.1rem;
+                flex-shrink: 0;
+            }
+
+            .rd-alert-critical .rd-alert-icon {
+                background: #fee2e2;
+                color: #dc2626;
+            }
+
+            .rd-alert-overdue .rd-alert-icon {
+                background: #fef3c7;
+                color: #d97706;
+            }
+
+            .rd-alert-pending .rd-alert-icon {
+                background: #dbeafe;
+                color: #2563eb;
+            }
+
+            .rd-alert-body {
+                flex: 1;
+                font-size: 0.875rem;
+            }
+
+            .rd-alert-cta {
+                padding: 0.5rem 1.1rem;
+                border-radius: 10px;
+                font-size: 0.8rem;
+                font-weight: 700;
+                text-decoration: none;
+                white-space: nowrap;
+                background: currentColor;
+                background: rgba(0, 0, 0, 0.1);
+                color: inherit;
+                transition: all 0.2s;
+            }
+
+            .rd-alert-cta:hover {
+                background: rgba(0, 0, 0, 0.15);
+                color: inherit;
+            }
+
+            /* METRIC CARDS */
+            .rd-metric-card {
+                border-radius: 18px;
+                padding: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                position: relative;
+                overflow: hidden;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                transition: transform 0.25s, box-shadow 0.25s;
+            }
+
+            .rd-metric-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+            }
+
+            .rd-metric-green {
+                background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            }
+
+            .rd-metric-amber {
+                background: linear-gradient(135deg, #fef3c7, #fde68a);
+            }
+
+            .rd-metric-blue {
+                background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            }
+
+            .rd-metric-violet {
+                background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            }
+
+            .rd-metric-teal {
+                background: linear-gradient(135deg, #ccfbf1, #99f6e4);
+            }
+
+            .rd-metric-icon {
+                width: 52px;
+                height: 52px;
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.3rem;
+                flex-shrink: 0;
+                background: rgba(255, 255, 255, 0.5);
+            }
+
+            .rd-metric-green .rd-metric-icon {
+                color: #065f46;
+            }
+
+            .rd-metric-amber .rd-metric-icon {
+                color: #92400e;
+            }
+
+            .rd-metric-blue .rd-metric-icon {
+                color: #1e40af;
+            }
+
+            .rd-metric-violet .rd-metric-icon {
+                color: #4c1d95;
+            }
+
+            .rd-metric-teal .rd-metric-icon {
+                color: #134e4a;
+            }
+
+            .rd-metric-value {
+                font-size: 1.5rem;
+                font-weight: 800;
+                line-height: 1.1;
+                color: rgba(0, 0, 0, 0.8);
+            }
+
+            .rd-metric-value span {
+                font-size: 0.8rem;
+                font-weight: 600;
+                opacity: 0.6;
+            }
+
+            .rd-metric-label {
+                font-size: 0.78rem;
+                font-weight: 600;
+                opacity: 0.7;
+                margin-top: 0.2rem;
+            }
+
+            .rd-metric-glow {
+                position: absolute;
+                right: -20px;
+                bottom: -20px;
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.25);
+            }
+
+            /* MAIN CARD */
+            .rd-card {
+                background: var(--card-bg, #fff);
+                border-radius: 20px;
+                border: 1px solid var(--border-color, #e2e8f0);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+                overflow: hidden;
+            }
+
+            .rd-card-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 1.25rem 1.5rem;
+                border-bottom: 1px solid var(--border-color, #e2e8f0);
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.04), rgba(139, 92, 246, 0.02));
+            }
+
+            .rd-card-header-left {
+                display: flex;
+                align-items: center;
+                gap: 0.85rem;
+            }
+
+            .rd-card-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 11px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+                color: #fff;
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            }
+
+            .rd-card-title {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: var(--text-primary, #1e293b);
+                margin: 0;
+            }
+
+            .rd-card-subtitle {
+                font-size: 0.75rem;
+                color: var(--text-secondary, #64748b);
+                margin: 0;
+            }
+
+            .rd-link-btn {
+                font-size: 0.8rem;
+                font-weight: 700;
+                color: #6366f1;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+                padding: 0.4rem 0.9rem;
+                border-radius: 8px;
+                background: rgba(99, 102, 241, 0.08);
+                transition: all 0.2s;
+            }
+
+            .rd-link-btn:hover {
+                background: rgba(99, 102, 241, 0.15);
+                color: #4f46e5;
+            }
+
+            .rd-card-body {
+                padding: 0;
+            }
+
+            /* Document rows */
+            .rd-doc-list {}
+
+            .rd-doc-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 1rem 1.5rem;
+                gap: 1rem;
+                border-bottom: 1px solid var(--border-color, #e2e8f0);
+                transition: background 0.15s;
+            }
+
+            .rd-doc-row:last-child {
+                border-bottom: none;
+            }
+
+            .rd-doc-row:hover {
+                background: var(--bg-secondary, #f8fafc);
+            }
+
+            .rd-doc-left {
+                display: flex;
+                align-items: center;
+                gap: 0.85rem;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .rd-doc-icon {
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+                flex-shrink: 0;
+            }
+
+            .rd-doc-paid .rd-doc-icon {
+                background: rgba(16, 185, 129, 0.12);
+                color: #10b981;
+            }
+
+            .rd-doc-overdue .rd-doc-icon {
+                background: rgba(239, 68, 68, 0.12);
+                color: #ef4444;
+            }
+
+            .rd-doc-pending .rd-doc-icon {
+                background: rgba(99, 102, 241, 0.1);
+                color: #6366f1;
+            }
+
+            .rd-doc-info {
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+            }
+
+            .rd-doc-title {
+                font-size: 0.875rem;
+                font-weight: 600;
+                color: var(--text-primary, #1e293b);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .rd-doc-date {
+                font-size: 0.72rem;
+                color: var(--text-secondary, #94a3b8);
+                display: flex;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+            .rd-doc-right {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                flex-shrink: 0;
+            }
+
+            .rd-doc-amount {
+                font-size: 0.9rem;
+                font-weight: 800;
+                color: var(--text-primary, #1e293b);
+            }
+
+            .rd-doc-badge {
+                padding: 0.2rem 0.65rem;
+                border-radius: 999px;
+                font-size: 0.7rem;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+
+            .rd-badge-paid {
+                background: rgba(16, 185, 129, 0.12);
+                color: #059669;
+            }
+
+            .rd-badge-overdue {
+                background: rgba(239, 68, 68, 0.1);
+                color: #dc2626;
+            }
+
+            .rd-badge-pending {
+                background: rgba(245, 158, 11, 0.12);
+                color: #d97706;
+            }
+
+            .rd-doc-actions {
+                display: flex;
+                gap: 0.35rem;
+            }
+
+            .rd-action-btn {
+                width: 30px;
+                height: 30px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+
+            .rd-action-view {
+                background: rgba(99, 102, 241, 0.1);
+                color: #6366f1;
+            }
+
+            .rd-action-view:hover {
+                background: #6366f1;
+                color: #fff;
+            }
+
+            .rd-action-pay {
+                background: rgba(16, 185, 129, 0.1);
+                color: #10b981;
+            }
+
+            .rd-action-pay:hover {
+                background: #10b981;
+                color: #fff;
+            }
+
+            .rd-show-more {
+                padding: 1rem 1.5rem;
+                text-align: center;
+                border-top: 1px dashed var(--border-color, #e2e8f0);
+            }
+
+            .rd-show-more-btn {
+                font-size: 0.82rem;
+                font-weight: 700;
+                color: #6366f1;
+                text-decoration: none;
+                padding: 0.5rem 1.25rem;
+                border: 2px solid rgba(99, 102, 241, 0.2);
+                border-radius: 10px;
+                transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .rd-show-more-btn:hover {
+                background: rgba(99, 102, 241, 0.07);
+                color: #4f46e5;
+            }
+
+            .rd-empty {
+                padding: 3rem 1.5rem;
+                text-align: center;
+                color: var(--text-secondary, #94a3b8);
+            }
+
+            .rd-empty-icon {
+                font-size: 2.5rem;
+                margin-bottom: 0.75rem;
+                opacity: 0.4;
+            }
+
+            .rd-empty h6 {
+                color: var(--text-primary, #1e293b);
+                font-size: 1rem;
+            }
+
+            .rd-empty p {
+                font-size: 0.875rem;
+                margin: 0;
+            }
+
+            /* Payments list */
+            .rd-pay-list {}
+
+            .rd-pay-row {
+                display: flex;
+                align-items: center;
+                gap: 0.85rem;
+                padding: 0.85rem 1.5rem;
+                border-bottom: 1px solid var(--border-color, #e2e8f0);
+            }
+
+            .rd-pay-row:last-child {
+                border-bottom: none;
+            }
+
+            .rd-pay-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8rem;
+                flex-shrink: 0;
+            }
+
+            .rd-pay-verified {
+                background: rgba(16, 185, 129, 0.15);
+                color: #10b981;
+            }
+
+            .rd-pay-pending {
+                background: rgba(245, 158, 11, 0.15);
+                color: #f59e0b;
+            }
+
+            .rd-pay-info {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+            }
+
+            .rd-pay-doc {
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: var(--text-primary, #1e293b);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .rd-pay-date {
+                font-size: 0.72rem;
+                color: var(--text-secondary, #94a3b8);
+            }
+
+            .rd-pay-right {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 0.2rem;
+                flex-shrink: 0;
+            }
+
+            .rd-pay-amount {
+                font-size: 0.875rem;
+                font-weight: 800;
+                color: var(--text-primary, #1e293b);
+            }
+
+            .rd-pay-badge {
+                padding: 0.15rem 0.55rem;
+                border-radius: 999px;
+                font-size: 0.65rem;
+                font-weight: 700;
+            }
+
+            /* SIDEBAR */
+            .rd-sidebar-card {
+                background: var(--card-bg, #fff);
+                border-radius: 18px;
+                border: 1px solid var(--border-color, #e2e8f0);
+                overflow: hidden;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            }
+
+            .rd-sidebar-header {
+                padding: 0.9rem 1.25rem;
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(139, 92, 246, 0.03));
+                border-bottom: 1px solid var(--border-color, #e2e8f0);
+                font-size: 0.78rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.6px;
+                color: var(--text-primary, #1e293b);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .rd-sidebar-header i {
+                color: #6366f1;
+            }
+
+            /* Quick actions */
+            .rd-quick-actions {
+                padding: 0.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.1rem;
+            }
+
+            .rd-quick-btn {
+                display: flex;
+                align-items: center;
+                gap: 0.85rem;
+                padding: 0.75rem 0.85rem;
+                border-radius: 12px;
+                text-decoration: none;
+                color: var(--text-primary, #1e293b);
+                font-size: 0.875rem;
+                font-weight: 600;
+                transition: all 0.2s;
+            }
+
+            .rd-quick-btn:hover {
+                background: rgba(0, 0, 0, 0.04);
+                color: var(--qa-color);
+                transform: translateX(3px);
+            }
+
+            .rd-quick-icon {
+                width: 34px;
+                height: 34px;
+                border-radius: 9px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.85rem;
+                background: color-mix(in srgb, var(--qa-color) 15%, transparent);
+                color: var(--qa-color);
+                flex-shrink: 0;
+                transition: all 0.2s;
+            }
+
+            .rd-quick-btn:hover .rd-quick-icon {
+                background: var(--qa-color);
+                color: #fff;
+            }
+
+            .rd-quick-arrow {
+                margin-left: auto;
+                font-size: 0.65rem;
+                opacity: 0.4;
+                transition: all 0.2s;
+            }
+
+            .rd-quick-btn:hover .rd-quick-arrow {
+                opacity: 1;
+                transform: translateX(2px);
+            }
+
+            /* Notifications */
+            .rd-notif-list {
+                padding: 0.5rem 0;
+            }
+
+            .rd-notif-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 0.75rem;
+                padding: 0.65rem 1.25rem;
+                transition: background 0.15s;
+            }
+
+            .rd-notif-item:hover {
+                background: var(--bg-secondary, #f8fafc);
+            }
+
+            .rd-notif-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--border-color, #e2e8f0);
+                flex-shrink: 0;
+                margin-top: 5px;
+            }
+
+            .rd-notif-dot-active {
+                background: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            }
+
+            .rd-notif-body {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .rd-notif-title {
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: var(--text-primary, #1e293b);
+            }
+
+            .rd-notif-time {
+                font-size: 0.7rem;
+                color: var(--text-secondary, #94a3b8);
+            }
+
+            .rd-notif-unread .rd-notif-title {
+                color: #4f46e5;
+            }
+
+            .rd-notif-more {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.7rem 1.25rem;
+                font-size: 0.78rem;
+                font-weight: 700;
+                color: #6366f1;
+                text-decoration: none;
+                border-top: 1px solid var(--border-color, #e2e8f0);
+                transition: background 0.15s;
+            }
+
+            .rd-notif-more:hover {
+                background: rgba(99, 102, 241, 0.05);
+                color: #4f46e5;
+            }
+
+            /* Financial summary */
+            .rd-fin-body {
+                padding: 1.1rem 1.25rem;
+            }
+
+            .rd-fin-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.45rem 0;
+                font-size: 0.875rem;
+            }
+
+            .rd-fin-row span {
+                color: var(--text-secondary, #64748b);
+                display: flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+
+            .rd-fin-row strong {
+                font-weight: 700;
+                color: var(--text-primary, #1e293b);
+            }
+
+            .rd-fin-divider {
+                height: 1px;
+                background: var(--border-color, #e2e8f0);
+                margin: 0.4rem 0;
+            }
+
+            .rd-fin-total {
+                font-weight: 700;
+            }
+
+            .rd-fin-total span {
+                font-size: 0.9rem;
+                font-weight: 700;
+                color: var(--text-primary, #1e293b);
+            }
+
+            .rd-positive {
+                color: #10b981 !important;
+                font-size: 1.1rem;
+            }
+
+            .rd-negative {
+                color: #ef4444 !important;
+                font-size: 1.1rem;
+            }
+
+            .rd-progress-bar {
+                height: 8px;
+                background: var(--border-color, #e2e8f0);
+                border-radius: 999px;
+                overflow: hidden;
+            }
+
+            .rd-progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #6366f1, #10b981);
+                border-radius: 999px;
+                transition: width 1s ease;
+            }
+
+            /* Tips card */
+            .rd-tips-card {
+                background: linear-gradient(135deg, #312e81, #4c1d95);
+                border-radius: 18px;
+                padding: 1.5rem;
+                text-align: center;
+                color: #fff;
+            }
+
+            .rd-tips-icon {
+                width: 48px;
+                height: 48px;
+                margin: 0 auto 0.75rem;
+                background: rgba(255, 255, 255, 0.15);
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.3rem;
+                color: #fbbf24;
+            }
+
+            .rd-tips-title {
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+                font-size: 0.95rem;
+            }
+
+            .rd-tips-text {
+                font-size: 0.8rem;
+                opacity: 0.75;
+                margin: 0;
+                line-height: 1.6;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .rd-hero {
+                    padding: 1.75rem 0 2.5rem;
+                }
+
+                .rd-hero-title {
+                    font-size: 1.4rem;
+                }
+
+                .rd-metric-card {
+                    flex-direction: column;
+                    text-align: center;
+                }
+
+                .rd-doc-badge,
+                .rd-doc-date {
+                    display: none;
+                }
+            }
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Animate progress bar
+                const fill = document.querySelector('.rd-progress-fill');
+                if (fill) {
+                    const w = fill.style.width;
+                    fill.style.width = '0';
+                    setTimeout(() => { fill.style.width = w; }, 200);
+                    // Show rate
+                    const rate = document.getElementById('payRate');
+                    if (rate) rate.textContent = Math.round(parseFloat(w)) + '%';
+                }
+
+                // Staggered card animation
+                document.querySelectorAll('.rd-metric-card').forEach((card, i) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100 + i * 80);
+                });
+            });
+        </script>
+        {% endblock %}
