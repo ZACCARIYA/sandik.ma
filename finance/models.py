@@ -107,6 +107,11 @@ class ResidentReport(models.Model):
         ordering = ["-created_at"]
         verbose_name = "Rapport de résident"
         verbose_name_plural = "Rapports de résidents"
+        indexes = [
+            models.Index(fields=["resident", "status"]),
+            models.Index(fields=["status", "created_at"]),
+            models.Index(fields=["category"]),
+        ]
 
     def __str__(self):
         return f"{self.title} - {self.resident.username}"
@@ -167,6 +172,12 @@ class Document(models.Model):
 
     class Meta:
         ordering = ['-date', '-created_at']
+        indexes = [
+            models.Index(fields=['resident', 'is_paid']),
+            models.Index(fields=['resident', 'is_archived']),
+            models.Index(fields=['date']),
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
         return f"{self.title} - {self.resident.username} - {self.amount} DH"
@@ -286,6 +297,12 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["notification_type"]),
+            models.Index(fields=["priority"]),
+            models.Index(fields=["is_active", "created_at"]),
+            models.Index(fields=["is_read", "is_active"]),
+        ]
 
     def __str__(self):
         return f"{self.title} - {self.get_notification_type_display()}"
@@ -324,6 +341,11 @@ class Payment(models.Model):
 
     class Meta:
         ordering = ['-payment_date']
+        indexes = [
+            models.Index(fields=['document', 'payment_date']),
+            models.Index(fields=['payment_date']),
+            models.Index(fields=['is_verified']),
+        ]
 
     def __str__(self):
         return f"Paiement {self.document.title} - {self.amount} DH - {self.payment_date}"
@@ -361,6 +383,11 @@ class Depense(models.Model):
         ordering = ['-date_depense', '-created_at']
         verbose_name = "Dépense"
         verbose_name_plural = "Dépenses"
+        indexes = [
+            models.Index(fields=['date_depense']),
+            models.Index(fields=['categorie']),
+            models.Index(fields=['ajoute_par']),
+        ]
 
     def __str__(self):
         return f"{self.titre} - {self.montant} DH - {self.date_depense}"
@@ -406,14 +433,14 @@ class ResidentStatus(models.Model):
 
     def update_totals(self):
         """Update totals from documents and payments"""
-        # Calculate total due from unpaid documents
-        unpaid_docs = self.resident.documents.filter(is_paid=False)
-        self.total_due = sum(doc.amount for doc in unpaid_docs)
-        
-        # Calculate total paid from all payments
-        all_payments = Payment.objects.filter(document__resident=self.resident)
-        self.total_paid = sum(payment.amount for payment in all_payments)
-        
+        # Aggregate in SQL to avoid Python loops and extra memory usage.
+        self.total_due = self.resident.documents.filter(is_paid=False).aggregate(
+            total=models.Sum('amount')
+        )['total'] or Decimal('0')
+        self.total_paid = Payment.objects.filter(document__resident=self.resident).aggregate(
+            total=models.Sum('amount')
+        )['total'] or Decimal('0')
+
         self.save()
 
 

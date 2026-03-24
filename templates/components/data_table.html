@@ -1,7 +1,6 @@
 <!-- ===== COMPOSANT TABLEAU DE DONNÉES ===== -->
-
 <div class="table-responsive">
-    <table class="table-modern">
+    <table class="table table-modern align-middle">
         {% if headers %}
         <thead>
             <tr>
@@ -41,7 +40,7 @@
                     {% elif cell.type == 'actions' %}
                     <div class="d-flex gap-1">
                         {% for action in cell.actions %}
-                        <a href="{{ action.url }}" class="btn-modern btn-outline btn-sm" title="{{ action.title }}">
+                        <a href="{{ action.url }}" class="btn btn-outline-primary btn-sm" title="{{ action.title }}">
                             <i class="{{ action.icon }}"></i>
                         </a>
                         {% endfor %}
@@ -64,15 +63,3 @@
         </tbody>
     </table>
 </div>
-
-<style>
-.btn-sm {
-    padding: var(--spacing-1) var(--spacing-2);
-    font-size: var(--font-size-xs);
-}
-
-.table-responsive {
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-}
-</style>

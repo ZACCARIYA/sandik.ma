@@ -3,238 +3,349 @@
 {% block title %}Gestion des Résidents - SyndicPro{% endblock %}
 
 {% block content %}
-<!-- ===== EN-TÊTE DE PAGE ===== -->
-{% include 'components/page_header.html' with title="Gestion des Résidents" subtitle="Gérer les résidents et leurs informations" icon="fas fa-users" actions=page_actions|default:None %}
+<div class="container-fluid">
+    {% include 'components/page_header.html' with title='Gestion des Résidents' subtitle='Pilotage des profils, risques de recouvrement et opérations résidentielles' icon='fas fa-users' actions=page_actions|default:None %}
 
-<div class="container">
-    <!-- ===== STATISTIQUES ===== -->
-    <section class="metrics-section mb-4">
-        <div class="row">
-            <div class="col-lg-3 col-md-6 mb-4">
-                {% include 'components/stats_card.html' with value=total_residents label="Total Résidents" icon="fas fa-users" color="primary" %}
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                {% include 'components/stats_card.html' with value=residents_with_apartment label="Avec Appartement" icon="fas fa-building" color="info" %}
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                {% include 'components/stats_card.html' with value=recent_residents label="Nouveaux (30j)" icon="fas fa-user-plus" color="success" %}
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4">
-                {% include 'components/stats_card.html' with value=active_residents label="Actifs" icon="fas fa-check-circle" color="success" %}
-            </div>
+    <section class="row g-3 mb-4 sp-fade-up">
+        <div class="col-6 col-xl-2">
+            {% include 'components/stats_card.html' with value=total_residents label='Total' icon='fas fa-users' color='primary' %}
+        </div>
+        <div class="col-6 col-xl-2">
+            {% include 'components/stats_card.html' with value=active_residents label='Actifs' icon='fas fa-user-check' color='success' %}
+        </div>
+        <div class="col-6 col-xl-2">
+            {% include 'components/stats_card.html' with value=residents_with_apartment label='Avec Appartement' icon='fas fa-building' color='info' %}
+        </div>
+        <div class="col-6 col-xl-2">
+            {% include 'components/stats_card.html' with value=recent_residents label='Nouveaux (30j)' icon='fas fa-user-plus' color='warning' %}
+        </div>
+        <div class="col-6 col-xl-2">
+            {% if filtered_balance > 0 %}
+            {% include 'components/stats_card.html' with value=filtered_balance|floatformat:2 label='Solde dû (DH)' icon='fas fa-triangle-exclamation' color='danger' %}
+            {% else %}
+            {% include 'components/stats_card.html' with value='0.00' label='Solde dû (DH)' icon='fas fa-check-circle' color='success' %}
+            {% endif %}
+        </div>
+        <div class="col-6 col-xl-2">
+            {% include 'components/stats_card.html' with value=filtered_collection_rate label='Taux recouvrement %' icon='fas fa-chart-line' color='primary' %}
         </div>
     </section>
 
-    <!-- ===== LISTE DES RÉSIDENTS ===== -->
-    <div class="card-modern">
-        <div class="card-header-modern">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <h5 class="mb-0">
-                    <i class="fas fa-list me-2"></i>Liste des Résidents
-                </h5>
-                <div class="search-box">
+    <section class="card-modern mb-4 sp-fade-up">
+        <div class="card-body-modern">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h6 class="mb-1"><i class="fas fa-filter me-2 text-primary"></i>Filtres intelligents</h6>
+                    <p class="small text-muted mb-0">Recherchez rapidement un résident et segmentez les comptes.</p>
+                </div>
+                <span class="badge text-bg-light border px-3 py-2">{{ filtered_count }} résultat{{ filtered_count|pluralize:'s' }}</span>
+            </div>
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-12 col-lg-6">
+                    <label for="q" class="form-label">Recherche</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0" placeholder="Rechercher un résident..." id="searchInput">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input id="q" name="q" type="text" class="form-control" placeholder="Nom, email, téléphone, appartement" value="{{ search_query }}">
                     </div>
                 </div>
-            </div>
+                <div class="col-6 col-lg-2">
+                    <label for="active" class="form-label">Compte</label>
+                    <select id="active" name="active" class="form-select">
+                        <option value="all" {% if selected_active == 'all' %}selected{% endif %}>Tous</option>
+                        <option value="active" {% if selected_active == 'active' %}selected{% endif %}>Actifs</option>
+                        <option value="inactive" {% if selected_active == 'inactive' %}selected{% endif %}>Inactifs</option>
+                    </select>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label for="apartment" class="form-label">Appartement</label>
+                    <select id="apartment" name="apartment" class="form-select">
+                        <option value="all" {% if selected_apartment == 'all' %}selected{% endif %}>Tous</option>
+                        <option value="with" {% if selected_apartment == 'with' %}selected{% endif %}>Avec</option>
+                        <option value="without" {% if selected_apartment == 'without' %}selected{% endif %}>Sans</option>
+                    </select>
+                </div>
+                <div class="col-6 col-lg-1 d-grid">
+                    <button type="submit" class="btn btn-primary">Filtrer</button>
+                </div>
+                <div class="col-6 col-lg-1 d-grid">
+                    <a href="{% url 'finance:resident_management' %}" class="btn btn-outline-primary">Reset</a>
+                </div>
+            </form>
         </div>
-        <div class="card-body-modern">
-            {% if residents %}
-                <div class="table-responsive">
-                    <table class="table table-modern" id="residentsTable">
-                        <thead>
-                            <tr>
-                                <th>Nom d'utilisateur</th>
-                                <th>Nom complet</th>
-                                <th>Email</th>
-                                <th>Appartement</th>
-                                <th>Téléphone</th>
-                                <th>Statut</th>
-                                <th>Créé par</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for resident in residents %}
-                                <tr class="resident-row">
+    </section>
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-8">
+            <section class="card-modern sp-fade-up">
+                <div class="card-header-modern d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Table des Résidents</h5>
+                    <a href="{% url 'finance:resident_create' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i>Ajouter
+                    </a>
+                </div>
+                <div class="card-body-modern">
+                    {% if residents %}
+                    <div class="table-responsive">
+                        <table class="table table-modern align-middle rm3-table">
+                            <thead>
+                                <tr>
+                                    <th>Résident</th>
+                                    <th>Contact</th>
+                                    <th>Appartement</th>
+                                    <th>Statut financier</th>
+                                    <th>Solde</th>
+                                    <th>Compte</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for resident in residents %}
+                                <tr>
                                     <td>
-                                        <div class="table-cell user-info">
-                                            <div class="user-avatar bg-primary">
-                                                {{ resident.username|first|upper }}
-                                            </div>
-                                            <div class="user-details">
-                                                <h6 class="user-title">{{ resident.username }}</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="rm3-avatar">{{ resident.username|first|upper }}</span>
+                                            <div>
+                                                <p class="fw-semibold mb-0">{{ resident.get_full_name|default:resident.username }}</p>
+                                                <p class="small text-muted mb-0">@{{ resident.username }}</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="text-dark">{{ resident.get_full_name|default:"Non renseigné" }}</span>
-                                    </td>
-                                    <td>
-                                        {% if resident.email %}
-                                            <a href="mailto:{{ resident.email }}" class="text-primary text-decoration-none">
-                                                <i class="fas fa-envelope me-1"></i>{{ resident.email|truncatechars:25 }}
-                                            </a>
-                                        {% else %}
-                                            <span class="text-muted">Non renseigné</span>
-                                        {% endif %}
+                                        <div class="small">
+                                            {% if resident.email %}
+                                            <a href="mailto:{{ resident.email }}" class="text-decoration-none">{{ resident.email }}</a>
+                                            {% else %}
+                                            <span class="text-muted">Email non renseigné</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="small text-muted">
+                                            {% if resident.phone %}
+                                            <a href="tel:{{ resident.phone }}" class="text-decoration-none">{{ resident.phone }}</a>
+                                            {% else %}
+                                            Téléphone non renseigné
+                                            {% endif %}
+                                        </div>
                                     </td>
                                     <td>
                                         {% if resident.apartment %}
-                                            <span class="badge bg-info">
-                                                <i class="fas fa-building me-1"></i>{{ resident.apartment }}
-                                            </span>
+                                        <span class="badge text-bg-info"><i class="fas fa-building me-1"></i>{{ resident.apartment }}</span>
                                         {% else %}
-                                            <span class="text-muted">Non renseigné</span>
+                                        <span class="text-muted">Non affecté</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if resident.phone %}
-                                            <a href="tel:{{ resident.phone }}" class="text-primary text-decoration-none">
-                                                <i class="fas fa-phone me-1"></i>{{ resident.phone }}
-                                            </a>
+                                        {% if resident.fin_status == 'up_to_date' %}
+                                        <span class="status-badge status-paid"><i class="fas fa-check-circle me-1"></i>{{ resident.fin_status_label }}</span>
+                                        {% elif resident.fin_status == 'pending' %}
+                                        <span class="status-badge status-pending"><i class="fas fa-clock me-1"></i>{{ resident.fin_status_label }}</span>
+                                        {% elif resident.fin_status == 'overdue' %}
+                                        <span class="status-badge status-late"><i class="fas fa-hourglass-half me-1"></i>{{ resident.fin_status_label }}</span>
                                         {% else %}
-                                            <span class="text-muted">Non renseigné</span>
+                                        <span class="status-badge status-critical"><i class="fas fa-triangle-exclamation me-1"></i>{{ resident.fin_status_label }}</span>
+                                        {% endif %}
+                                        <div class="small text-muted mt-1">
+                                            Dû: {{ resident.fin_due|floatformat:2 }} DH · Payé: {{ resident.fin_paid|floatformat:2 }} DH
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if resident.fin_balance > 0 %}
+                                        <span class="fw-semibold text-danger">{{ resident.fin_balance|floatformat:2 }} DH</span>
+                                        {% else %}
+                                        <span class="fw-semibold text-success">À jour</span>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if resident.is_active %}
-                                            <span class="status-badge status-paid">
-                                                <i class="fas fa-check-circle me-1"></i>Actif
-                                            </span>
+                                        <span class="badge text-bg-success"><i class="fas fa-check me-1"></i>Actif</span>
                                         {% else %}
-                                            <span class="status-badge status-critical">
-                                                <i class="fas fa-times-circle me-1"></i>Inactif
-                                            </span>
+                                        <span class="badge text-bg-secondary"><i class="fas fa-ban me-1"></i>Inactif</span>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        {% if resident.created_by %}
-                                            <small class="text-muted">
-                                                <i class="fas fa-user-tie me-1"></i>
-                                                {{ resident.created_by.get_full_name|default:resident.created_by.username|truncatechars:15 }}
-                                            </small>
-                                        {% else %}
-                                            <span class="text-muted">Système</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="table-actions">
-                                            <a href="{% url 'finance:resident_detail' resident.pk %}" class="action-btn view-btn" title="Voir">
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-2">
+                                            <a href="{% url 'finance:resident_detail' resident.pk %}" class="btn btn-sm btn-outline-primary" title="Voir">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{% url 'finance:resident_update' resident.pk %}" class="action-btn edit-btn" title="Modifier">
-                                                <i class="fas fa-edit"></i>
+                                            <a href="{% url 'finance:resident_update' resident.pk %}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                                <i class="fas fa-pen"></i>
+                                            </a>
+                                            <a href="{% url 'finance:notification_create' %}?resident_id={{ resident.id }}" class="btn btn-sm btn-outline-warning" title="Notifier">
+                                                <i class="fas fa-bell"></i>
                                             </a>
                                         </div>
                                     </td>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            
-                <!-- Pagination -->
-                {% if is_paginated %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if is_paginated %}
                     <nav aria-label="Pagination des résidents" class="mt-4">
-                        <ul class="pagination justify-content-center">
+                        <ul class="pagination justify-content-center mb-0">
                             {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page=1">
-                                        <i class="fas fa-angle-double-left"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
-                                        <i class="fas fa-angle-left"></i>
-                                    </a>
-                                </li>
+                            <li class="page-item"><a class="page-link" href="?page=1{% if querystring %}&{{ querystring }}{% endif %}"><i class="fas fa-angle-double-left"></i></a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}"><i class="fas fa-angle-left"></i></a></li>
                             {% endif %}
-                            
-                            <li class="page-item active">
-                                <span class="page-link">
-                                    Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
-                                </span>
-                            </li>
-                            
+                            <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
                             {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
-                                        <i class="fas fa-angle-right"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
-                                        <i class="fas fa-angle-double-right"></i>
-                                    </a>
-                                </li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}"><i class="fas fa-angle-right"></i></a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if querystring %}&{{ querystring }}{% endif %}"><i class="fas fa-angle-double-right"></i></a></li>
                             {% endif %}
                         </ul>
                     </nav>
-                {% endif %}
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-users"></i>
+                    {% endif %}
+                    {% else %}
+                    <div class="empty-state py-5 text-center">
+                        <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                        <h5>Aucun résident trouvé</h5>
+                        <p class="text-muted">Ajustez les filtres ou ajoutez un nouveau profil résident.</p>
+                        <a href="{% url 'finance:resident_create' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Ajouter un résident</a>
                     </div>
-                    <h3>Aucun résident trouvé</h3>
-                    <p>Il n'y a actuellement aucun résident dans le système.</p>
-                    <a href="{% url 'finance:resident_create' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Ajouter le premier résident
-                    </a>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </section>
+        </div>
+
+        <div class="col-12 col-xl-4">
+            <section class="card-modern mb-4 sp-fade-up">
+                <div class="card-body-modern">
+                    <h6 class="mb-3"><i class="fas fa-chart-pie me-2 text-primary"></i>Distribution des statuts</h6>
+                    <div class="chart-wrapper" style="min-height: 220px;">
+                        <canvas id="residentStatusChart"></canvas>
+                    </div>
+                    <div class="row g-2 mt-3">
+                        <div class="col-6"><div class="small text-muted">A jour</div><div class="fw-semibold">{{ status_breakdown.up_to_date }}</div></div>
+                        <div class="col-6"><div class="small text-muted">En attente</div><div class="fw-semibold">{{ status_breakdown.pending }}</div></div>
+                        <div class="col-6"><div class="small text-muted">En retard</div><div class="fw-semibold">{{ status_breakdown.overdue }}</div></div>
+                        <div class="col-6"><div class="small text-muted">Critique</div><div class="fw-semibold text-danger">{{ status_breakdown.critical }}</div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card-modern mb-4 sp-fade-up">
+                <div class="card-body-modern">
+                    <h6 class="mb-3"><i class="fas fa-triangle-exclamation me-2 text-danger"></i>Top débiteurs</h6>
+                    {% if top_debtors %}
+                    <div class="d-grid gap-3">
+                        {% for debtor in top_debtors %}
+                        <div class="rm3-debtor-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div>
+                                    <div class="fw-semibold small">{{ debtor.resident.get_full_name|default:debtor.resident.username }}</div>
+                                    <div class="text-muted" style="font-size:.75rem;">{% if debtor.resident.apartment %}Apt {{ debtor.resident.apartment }}{% else %}Appartement non assigné{% endif %}</div>
+                                </div>
+                                <div class="fw-semibold text-danger">{{ debtor.balance|floatformat:2 }} DH</div>
+                            </div>
+                            <div class="progress" style="height:8px;">
+                                <div class="progress-bar bg-danger" style="width: {{ debtor.progress|floatformat:0 }}%;"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
+                        <p class="mb-0">Aucun solde critique sur cette sélection.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="card-modern sp-fade-up">
+                <div class="card-body-modern">
+                    <h6 class="mb-3"><i class="fas fa-bolt me-2 text-warning"></i>Actions rapides</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'finance:resident_create' %}" class="btn btn-primary text-start"><i class="fas fa-user-plus me-2"></i>Créer un résident</a>
+                        <a href="{% url 'finance:notification_create' %}" class="btn btn-outline-primary text-start"><i class="fas fa-paper-plane me-2"></i>Envoyer une notification</a>
+                        <a href="{% url 'finance:overdue_dashboard' %}" class="btn btn-outline-primary text-start"><i class="fas fa-file-invoice-dollar me-2"></i>Suivre les impayés</a>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-// Search functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function() {
-            const searchTerm = this.value.toLowerCase();
-            const tableRows = document.querySelectorAll('#residentsTable tbody tr');
-            let visibleCount = 0;
-            
-            tableRows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            
-            // Show/hide no results message
-            let noResultsMsg = document.getElementById('noResultsMsg');
-            if (visibleCount === 0 && searchTerm.length > 0) {
-                if (!noResultsMsg) {
-                    noResultsMsg = document.createElement('tr');
-                    noResultsMsg.id = 'noResultsMsg';
-                    noResultsMsg.innerHTML = `
-                        <td colspan="8" class="text-center py-5">
-                            <div class="text-muted">
-                                <i class="fas fa-search fa-3x mb-3 opacity-50"></i>
-                                <p class="mb-0">Aucun résident trouvé pour "${searchTerm}"</p>
-                            </div>
-                        </td>
-                    `;
-                    document.querySelector('#residentsTable tbody').appendChild(noResultsMsg);
-                }
-            } else if (noResultsMsg) {
-                noResultsMsg.remove();
-            }
-        });
+{% block extra_css %}
+<style>
+.rm3-table thead th {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+
+.rm3-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex: 0 0 auto;
+}
+
+.rm3-debtor-item {
+    border: 1px solid var(--sp-neutral-200);
+    border-radius: 12px;
+    padding: 0.75rem;
+    background: var(--sp-neutral-25);
+}
+
+[data-theme="dark"] .rm3-debtor-item {
+    border-color: #1f2937;
+    background: #0f172a;
+}
+
+@media (max-width: 767.98px) {
+    .rm3-table th,
+    .rm3-table td {
+        font-size: 0.8rem;
     }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusData = {{ status_chart_json|safe }};
+    const canvas = document.getElementById('residentStatusChart');
+
+    if (!canvas || !statusData.length) return;
+
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textColor = dark ? '#94a3b8' : '#64748b';
+
+    new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: statusData.map(item => item.label),
+            datasets: [{
+                data: statusData.map(item => item.value),
+                backgroundColor: ['#16a34a', '#d97706', '#f59e0b', '#dc2626'],
+                borderWidth: 2,
+                borderColor: dark ? '#0f172a' : '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: textColor, usePointStyle: true, padding: 12 }
+                }
+            }
+        }
+    });
 });
 </script>
 {% endblock %}

@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, View, TemplateView
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
@@ -9,10 +8,8 @@ from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.db import IntegrityError
-from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django import forms
 from decimal import Decimal
@@ -30,21 +27,6 @@ from .services.dashboard_service import build_syndic_dashboard_context
 >>>>>>> Stashed changes
 
 User = get_user_model()
-
-
-def role_required(allowed_roles):
-    """Decorator to check user roles for class-based views"""
-    def decorator(view_func):
-        def wrapper(self, request, *args, **kwargs):
-            if not request.user.is_authenticated:
-                messages.warning(request, "Veuillez vous connecter pour accéder à cette page.")
-                return redirect('finance:login')
-            if request.user.role not in allowed_roles:
-                messages.error(request, "Accès non autorisé.")
-                return redirect('finance:home')
-            return view_func(self, request, *args, **kwargs)
-        return wrapper
-    return decorator
 
 
 class HomeView(TemplateView):
@@ -90,135 +72,7 @@ class SyndicDashboardView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        # Get all residents with their status
-        residents = User.objects.filter(role='RESIDENT').prefetch_related('status')
-        
-        # Update status for all residents
-        for resident in residents:
-            status, created = ResidentStatus.objects.get_or_create(resident=resident)
-            status.update_totals()
-        
-        # Group residents by status
-        up_to_date = []
-        pending = []
-        overdue = []
-        critical = []
-        
-        for resident in residents:
-            if hasattr(resident, 'status'):
-                status_category = resident.status.status_category
-                if status_category == 'up_to_date':
-                    up_to_date.append(resident)
-                elif status_category == 'pending':
-                    pending.append(resident)
-                elif status_category == 'overdue':
-                    overdue.append(resident)
-                else:  # critical
-                    critical.append(resident)
-        
-        # Statistics principales
-        total_residents = residents.count()
-        total_due = sum(r.status.total_due for r in residents if hasattr(r, 'status'))
-        total_paid = sum(r.status.total_paid for r in residents if hasattr(r, 'status'))
-        
-        # Statistiques avancées
-        from django.utils import timezone
-        today = timezone.now().date()
-        current_month = today.replace(day=1)
-        
-        # Documents ce mois
-        documents_this_month = Document.objects.filter(
-            created_at__gte=current_month,
-            is_archived=False
-        ).count()
-        
-        # Paiements ce mois
-        payments_this_month = Payment.objects.filter(
-            payment_date__gte=current_month
-        ).aggregate(total=Sum('amount'))['total'] or 0
-        
-        # Dépenses ce mois
-        expenses_this_month = Depense.objects.filter(
-            date_depense__gte=current_month
-        ).aggregate(total=Sum('montant'))['total'] or 0
-        
-        # Nouveaux résidents ce mois
-        recent_residents = User.objects.filter(
-            role='RESIDENT',
-            date_joined__gte=current_month
-        ).count()
-        
-        # Documents en retard
-        overdue_documents = Document.objects.filter(
-            is_paid=False,
-            is_archived=False
-        )
-        overdue_count = sum(1 for doc in overdue_documents if doc.is_overdue)
-        
-        # Notifications non lues
-        unread_notifications = Notification.objects.filter(
-            is_read=False,
-            is_active=True,
-            recipients=self.request.user
-        ).count()
-        
-        # Recent activities
-        recent_documents = Document.objects.select_related('resident').order_by('-created_at')[:5]
-        recent_notifications = Notification.objects.filter(is_active=True).order_by('-created_at')[:5]
-        recent_reports = ResidentReport.objects.select_related('resident').order_by('-created_at')[:8]
-        recent_payments = Payment.objects.select_related('document__resident').order_by('-payment_date')[:5]
-        
-        # Évolution mensuelle des paiements (6 derniers mois)
-        monthly_payments = []
-        for i in range(6):
-            month_start = (today.replace(day=1) - timezone.timedelta(days=30*i)).replace(day=1)
-            month_end = (month_start.replace(day=28) + timezone.timedelta(days=4)).replace(day=1) - timezone.timedelta(days=1)
-            
-            month_total = Payment.objects.filter(
-                payment_date__gte=month_start,
-                payment_date__lte=month_end
-            ).aggregate(total=Sum('amount'))['total'] or 0
-            
-            monthly_payments.append({
-                'month': month_start.strftime('%b %Y'),
-                'amount': float(month_total)
-            })
-        
-        monthly_payments.reverse()  # Ordre chronologique
-        
-        # Sérialiser les données pour JavaScript
-        import json
-        context['monthly_payments_json'] = json.dumps(monthly_payments)
-        
-        # URLs pour les actions rapides (utiliser reverse pour obtenir les URLs réelles)
-        context.update({
-            'up_to_date': up_to_date,
-            'pending': pending,
-            'overdue': overdue,
-            'critical': critical,
-            'total_residents': total_residents,
-            'total_due': total_due,
-            'total_paid': total_paid,
-            'recent_residents': recent_residents,
-            'documents_this_month': documents_this_month,
-            'payments_this_month': payments_this_month,
-            'expenses_this_month': expenses_this_month,
-            'overdue_count': overdue_count,
-            'unread_notifications': unread_notifications,
-            'recent_documents': recent_documents,
-            'recent_notifications': recent_notifications,
-            'recent_reports': recent_reports,
-            'recent_payments': recent_payments,
-            'monthly_payments': monthly_payments,
-            # URLs pour les actions rapides
-            'document_create_url': reverse('finance:document_create'),
-            'depense_create_url': reverse('finance:depense_create'),
-            'notification_create_url': reverse('finance:notification_create'),
-            'resident_create_url': reverse('finance:resident_create'),
-            'overdue_dashboard_url': reverse('finance:overdue_dashboard'),
-            'event_create_url': reverse('finance:event_create'),
-        })
+        context.update(build_syndic_dashboard_context(self.request))
         return context
 
 
@@ -314,7 +168,42 @@ class ResidentManagementView(ListView):
         return super().dispatch(request, *args, **kwargs)
     
     def get_queryset(self):
-        return User.objects.filter(role='RESIDENT').select_related('created_by').prefetch_related('status').order_by('username')
+        queryset = User.objects.filter(role='RESIDENT').select_related('created_by', 'status').order_by('username')
+
+        search_query = self.request.GET.get('q', '').strip()
+        active_filter = self.request.GET.get('active', 'all').strip()
+        apartment_filter = self.request.GET.get('apartment', 'all').strip()
+
+        if search_query:
+            queryset = queryset.filter(
+                Q(username__icontains=search_query) |
+                Q(first_name__icontains=search_query) |
+                Q(last_name__icontains=search_query) |
+                Q(email__icontains=search_query) |
+                Q(phone__icontains=search_query) |
+                Q(apartment__icontains=search_query)
+            )
+
+        if active_filter == 'active':
+            queryset = queryset.filter(is_active=True)
+        elif active_filter == 'inactive':
+            queryset = queryset.filter(is_active=False)
+
+        if apartment_filter == 'with':
+            queryset = queryset.exclude(apartment__isnull=True).exclude(apartment='')
+        elif apartment_filter == 'without':
+            queryset = queryset.filter(Q(apartment__isnull=True) | Q(apartment=''))
+
+        return queryset
+
+    def _status_category_from_balance(self, balance):
+        if balance <= 0:
+            return 'up_to_date'
+        if balance <= 100:
+            return 'pending'
+        if balance <= 500:
+            return 'overdue'
+        return 'critical'
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -354,6 +243,97 @@ class ResidentManagementView(ListView):
             role='RESIDENT',
             is_active=True
         ).count()
+
+        filtered_queryset = self.get_queryset()
+        page_residents = list(context.get('residents', []))
+
+        status_labels = {
+            'up_to_date': 'A jour',
+            'pending': 'En attente',
+            'overdue': 'En retard',
+            'critical': 'Critique',
+        }
+        status_counts = {
+            'up_to_date': 0,
+            'pending': 0,
+            'overdue': 0,
+            'critical': 0,
+        }
+
+        filtered_total_due = Decimal('0')
+        filtered_total_paid = Decimal('0')
+        top_debtors = []
+
+        def resolve_status(resident):
+            try:
+                return resident.status
+            except ResidentStatus.DoesNotExist:
+                return None
+
+        for resident in filtered_queryset:
+            status_obj = resolve_status(resident)
+            due = status_obj.total_due if status_obj else Decimal('0')
+            paid = status_obj.total_paid if status_obj else Decimal('0')
+            balance = due - paid
+            category = self._status_category_from_balance(balance)
+
+            filtered_total_due += due
+            filtered_total_paid += paid
+            status_counts[category] += 1
+
+            if balance > 0:
+                top_debtors.append({
+                    'resident': resident,
+                    'balance': balance,
+                    'category': category,
+                })
+
+        for resident in page_residents:
+            status_obj = resolve_status(resident)
+            due = status_obj.total_due if status_obj else Decimal('0')
+            paid = status_obj.total_paid if status_obj else Decimal('0')
+            balance = due - paid
+            category = self._status_category_from_balance(balance)
+            resident.fin_due = due
+            resident.fin_paid = paid
+            resident.fin_balance = balance
+            resident.fin_status = category
+            resident.fin_status_label = status_labels[category]
+
+        top_debtors = sorted(top_debtors, key=lambda item: item['balance'], reverse=True)[:6]
+        max_debtor_balance = top_debtors[0]['balance'] if top_debtors else Decimal('0')
+        if max_debtor_balance > 0:
+            for item in top_debtors:
+                item['progress'] = float((item['balance'] / max_debtor_balance) * 100)
+        else:
+            for item in top_debtors:
+                item['progress'] = 0.0
+
+        filtered_exposure = filtered_total_due + filtered_total_paid
+        filtered_collection_rate = round((filtered_total_paid / filtered_exposure) * 100, 1) if filtered_exposure > 0 else 0
+        filtered_balance = filtered_total_due - filtered_total_paid
+
+        query_params = self.request.GET.copy()
+        query_params.pop('page', None)
+
+        context['residents'] = page_residents
+        context['filtered_count'] = filtered_queryset.count()
+        context['filtered_total_due'] = filtered_total_due
+        context['filtered_total_paid'] = filtered_total_paid
+        context['filtered_balance'] = filtered_balance
+        context['filtered_collection_rate'] = filtered_collection_rate
+        context['status_breakdown'] = status_counts
+        context['status_chart_json'] = json.dumps([
+            {'label': 'A jour', 'value': status_counts['up_to_date']},
+            {'label': 'En attente', 'value': status_counts['pending']},
+            {'label': 'En retard', 'value': status_counts['overdue']},
+            {'label': 'Critique', 'value': status_counts['critical']},
+        ])
+        context['top_debtors'] = top_debtors
+        context['querystring'] = query_params.urlencode()
+        context['search_query'] = self.request.GET.get('q', '').strip()
+        context['selected_active'] = self.request.GET.get('active', 'all').strip()
+        context['selected_apartment'] = self.request.GET.get('apartment', 'all').strip()
         
         return context
 
@@ -990,13 +970,129 @@ class NotificationListView(ListView):
     def get_queryset(self):
         if not self.request.user.is_authenticated:
             return Notification.objects.none()
+
+        queryset = (
+            Notification.objects
+            .select_related('sender')
+            .prefetch_related('recipients')
+            .filter(is_active=True)
+        )
+
         if self.request.user.role == 'RESIDENT':
-            return Notification.objects.filter(recipients=self.request.user, is_active=True).order_by('-created_at')
-        return Notification.objects.filter(is_active=True).order_by('-created_at')
+            queryset = queryset.filter(recipients=self.request.user)
+
+        search_query = self.request.GET.get('q', '').strip()
+        notification_type = self.request.GET.get('notification_type', 'all').strip()
+        priority = self.request.GET.get('priority', 'all').strip()
+        status = self.request.GET.get('status', 'all').strip()
+        date_from = self.request.GET.get('date_from', '').strip()
+        date_to = self.request.GET.get('date_to', '').strip()
+
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) |
+                Q(message__icontains=search_query) |
+                Q(sender__username__icontains=search_query) |
+                Q(sender__first_name__icontains=search_query) |
+                Q(sender__last_name__icontains=search_query)
+            )
+
+        if notification_type and notification_type != 'all':
+            queryset = queryset.filter(notification_type=notification_type)
+
+        if priority and priority != 'all':
+            queryset = queryset.filter(priority=priority)
+
+        if status == 'read':
+            queryset = queryset.filter(is_read=True)
+        elif status == 'unread':
+            queryset = queryset.filter(is_read=False)
+
+        if date_from:
+            queryset = queryset.filter(created_at__date__gte=date_from)
+
+        if date_to:
+            queryset = queryset.filter(created_at__date__lte=date_to)
+
+        return queryset.order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['is_resident_view'] = (self.request.user.is_authenticated and self.request.user.role == 'RESIDENT')
+        is_resident_view = (self.request.user.is_authenticated and self.request.user.role == 'RESIDENT')
+        notifications_queryset = self.get_queryset()
+        today = timezone.now().date()
+
+        total_notifications = notifications_queryset.count()
+        unread_notifications = notifications_queryset.filter(is_read=False).count()
+        high_priority_notifications = notifications_queryset.filter(priority__in=['HIGH', 'URGENT']).count()
+        today_notifications = notifications_queryset.filter(created_at__date=today).count()
+
+        priority_summary = list(
+            notifications_queryset
+            .values('priority')
+            .annotate(total=Count('id'))
+            .order_by('-total')
+        )
+        type_summary = list(
+            notifications_queryset
+            .values('notification_type')
+            .annotate(total=Count('id'))
+            .order_by('-total')
+        )
+
+        priority_map = dict(Notification.PRIORITY_LEVELS)
+        type_map = dict(Notification.NOTIFICATION_TYPES)
+
+        priority_chart_data = [
+            {
+                'label': priority_map.get(item['priority'], item['priority']),
+                'value': item['total'],
+            }
+            for item in priority_summary
+        ]
+        type_chart_data = [
+            {
+                'label': type_map.get(item['notification_type'], item['notification_type']),
+                'value': item['total'],
+            }
+            for item in type_summary
+        ]
+
+        query_params = self.request.GET.copy()
+        query_params.pop('page', None)
+
+        context.update({
+            'is_resident_view': is_resident_view,
+            'total_notifications': total_notifications,
+            'unread_notifications': unread_notifications,
+            'high_priority_notifications': high_priority_notifications,
+            'today_notifications': today_notifications,
+            'read_rate': round(((total_notifications - unread_notifications) / total_notifications) * 100, 1) if total_notifications else 0,
+            'notification_type_choices': Notification.NOTIFICATION_TYPES,
+            'priority_choices': Notification.PRIORITY_LEVELS,
+            'priority_summary': priority_chart_data,
+            'type_summary': type_chart_data,
+            'priority_summary_json': json.dumps(priority_chart_data),
+            'type_summary_json': json.dumps(type_chart_data),
+            'selected_q': self.request.GET.get('q', '').strip(),
+            'selected_type': self.request.GET.get('notification_type', 'all').strip(),
+            'selected_priority': self.request.GET.get('priority', 'all').strip(),
+            'selected_status': self.request.GET.get('status', 'all').strip(),
+            'selected_date_from': self.request.GET.get('date_from', '').strip(),
+            'selected_date_to': self.request.GET.get('date_to', '').strip(),
+            'querystring': query_params.urlencode(),
+        })
+
+        if not is_resident_view:
+            context['page_actions'] = [
+                {
+                    'label': 'Nouvelle Notification',
+                    'url': reverse_lazy('finance:notification_create'),
+                    'icon': 'fas fa-plus',
+                    'type': 'primary'
+                }
+            ]
+
         return context
 
 
@@ -2164,90 +2260,6 @@ class RunOverdueDetectionView(View):
             
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-
-
-# ===== VUE DE TEST POUR LES COMPOSANTS =====
-class TestComponentsView(TemplateView):
-    """Vue de test pour vérifier le fonctionnement des composants"""
-    template_name = 'test_components.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Actions pour les cartes
-        context['card_actions'] = [
-            {
-                'label': 'Voir Détails',
-                'url': '#',
-                'icon': 'fas fa-eye',
-                'type': 'primary'
-            },
-            {
-                'label': 'Modifier',
-                'url': '#',
-                'icon': 'fas fa-edit',
-                'type': 'warning'
-            }
-        ]
-        
-        # Actions pour l'en-tête
-        context['header_actions'] = [
-            {
-                'label': 'Nouveau',
-                'url': '#',
-                'icon': 'fas fa-plus',
-                'type': 'success'
-            },
-            {
-                'label': 'Exporter',
-                'url': '#',
-                'icon': 'fas fa-download',
-                'type': 'info'
-            }
-        ]
-        
-        # En-têtes de tableau
-        context['table_headers'] = [
-            {'label': 'Nom', 'icon': 'fas fa-user', 'sortable': True},
-            {'label': 'Email', 'icon': 'fas fa-envelope', 'sortable': True},
-            {'label': 'Statut', 'icon': 'fas fa-check-circle', 'sortable': False},
-            {'label': 'Actions', 'icon': 'fas fa-cog', 'sortable': False}
-        ]
-        
-        # Données de tableau
-        context['table_rows'] = [
-            {
-                'cells': [
-                    {'value': 'Jean Dupont'},
-                    {'value': 'jean@example.com'},
-                    {'type': 'badge', 'value': 'Actif', 'color': 'success'},
-                    {
-                        'type': 'actions',
-                        'actions': [
-                            {'url': '#', 'icon': 'fas fa-eye', 'title': 'Voir'},
-                            {'url': '#', 'icon': 'fas fa-edit', 'title': 'Modifier'}
-                        ]
-                    }
-                ]
-            },
-            {
-                'cells': [
-                    {'value': 'Marie Martin'},
-                    {'value': 'marie@example.com'},
-                    {'type': 'badge', 'value': 'Inactif', 'color': 'warning'},
-                    {
-                        'type': 'actions',
-                        'actions': [
-                            {'url': '#', 'icon': 'fas fa-eye', 'title': 'Voir'},
-                            {'url': '#', 'icon': 'fas fa-edit', 'title': 'Modifier'}
-                        ]
-                    }
-                ]
-            }
-        ]
-        
-        return context
-
 
 class UserProfileView(TemplateView):
     """User profile page - authenticated users only"""

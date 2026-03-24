@@ -670,69 +670,32 @@
             </div>
             {% endif %}
 
-            <div class="row g-4">
-
-                <!-- ===== MAIN COLUMN ===== -->
-                <div class="col-xl-8 col-lg-7">
-
-                    <!-- Metric cards -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-sm-6">
-                            <div
-                                class="rd-metric-card rd-metric-{% if status.balance <= 0 %}green{% else %}amber{% endif %}">
-                                <div class="rd-metric-icon">
-                                    <i
-                                        class="fas fa-{% if status.balance <= 0 %}check-circle{% else %}exclamation-circle{% endif %}"></i>
-                                </div>
-                                <div class="rd-metric-body">
-                                    <div class="rd-metric-value">{{ status.balance|floatformat:2 }} <span>DH</span>
-                                    </div>
-                                    <div class="rd-metric-label">{% if status.balance <= 0 %}Solde créditeur{% else
-                                            %}Montant dû{% endif %}</div>
-                                    </div>
-                                    <div class="rd-metric-glow"></div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="rd-metric-card rd-metric-blue">
-                                    <div class="rd-metric-icon">
-                                        <i class="fas fa-file-invoice-dollar"></i>
-                                    </div>
-                                    <div class="rd-metric-body">
-                                        <div class="rd-metric-value">{{ status.total_due|floatformat:2 }}
-                                            <span>DH</span></div>
-                                        <div class="rd-metric-label">Total des documents</div>
-                                    </div>
-                                    <div class="rd-metric-glow"></div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="rd-metric-card rd-metric-violet">
-                                    <div class="rd-metric-icon">
-                                        <i class="fas fa-file-alt"></i>
-                                    </div>
-                                    <div class="rd-metric-body">
-                                        <div class="rd-metric-value">{{ documents|length }} <span>doc{{
-                                                documents|length|pluralize:"s" }}</span></div>
-                                        <div class="rd-metric-label">Documents actifs</div>
-                                    </div>
-                                    <div class="rd-metric-glow"></div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="rd-metric-card rd-metric-teal">
-                                    <div class="rd-metric-icon">
-                                        <i class="fas fa-check-double"></i>
-                                    </div>
-                                    <div class="rd-metric-body">
-                                        <div class="rd-metric-value">{{ status.total_paid|floatformat:2 }}
-                                            <span>DH</span></div>
-                                        <div class="rd-metric-label">Total payé</div>
-                                    </div>
-                                    <div class="rd-metric-glow"></div>
-                                </div>
-                            </div>
-                        </div>
+        <div class="row g-3 rsd-kpi-row">
+            <div class="col-6 col-xl-3">
+                <article class="rsd-kpi-card tone-primary">
+                    <p>Solde</p>
+                    <h3>{{ status.balance|floatformat:2 }} <span>DH</span></h3>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="rsd-kpi-card tone-info">
+                    <p>Total facture</p>
+                    <h3>{{ status.total_due|floatformat:2 }} <span>DH</span></h3>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="rsd-kpi-card tone-success">
+                    <p>Total paye</p>
+                    <h3>{{ status.total_paid|floatformat:2 }} <span>DH</span></h3>
+                </article>
+            </div>
+            <div class="col-6 col-xl-3">
+                <article class="rsd-kpi-card tone-violet">
+                    <p>Documents</p>
+                    <h3>{{ documents|length }} <span>actifs</span></h3>
+                </article>
+            </div>
+        </div>
 
                         <!-- Documents table card -->
                         <div class="rd-card">

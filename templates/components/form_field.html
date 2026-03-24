@@ -10,7 +10,7 @@
     {% endif %}
     
     {% if field.field.widget.input_type == 'select' %}
-        <select id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-select" {% if required %}required{% endif %}>
+        <select id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-select {% if field.errors %}is-invalid{% endif %}" {% if required %}required{% endif %}>
             {% for choice in field.field.choices %}
             <option value="{{ choice.0 }}" {% if choice.0 == field.value %}selected{% endif %}>
                 {{ choice.1 }}
@@ -18,7 +18,7 @@
             {% endfor %}
         </select>
     {% elif field.field.widget.input_type == 'textarea' %}
-        <textarea id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-control" 
+        <textarea id="{{ field.id_for_label }}" name="{{ field.name }}" class="form-control {% if field.errors %}is-invalid{% endif %}" 
                   {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
                   {% if required %}required{% endif %}
                   rows="{{ rows|default:3 }}">{{ field.value|default:'' }}</textarea>
@@ -34,16 +34,16 @@
         <input type="{{ field.field.widget.input_type|default:'text' }}" 
                id="{{ field.id_for_label }}" 
                name="{{ field.name }}" 
-               class="form-control"
+               class="form-control {% if field.errors %}is-invalid{% endif %}"
                value="{{ field.value|default:'' }}"
                {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
                {% if required %}required{% endif %}>
     {% endif %}
     
     {% if field.errors %}
-    <div class="text-danger mt-2">
+    <div class="invalid-feedback d-block">
         {% for error in field.errors %}
-        <small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small>
+        <small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small><br>
         {% endfor %}
     </div>
     {% endif %}

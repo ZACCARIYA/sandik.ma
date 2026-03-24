@@ -1,0 +1,25 @@
+{% autoescape off %}
+Ticket Created - Confirmation
+
+Hello {{ recipient.get_full_name }},
+
+Your ticket has been successfully created and submitted to our support team.
+
+Ticket Details:
+- Ticket ID: #{{ ticket.id }}
+- Title: {{ ticket.title }}
+- Status: {{ ticket.get_status_display }}
+- Priority: {{ ticket.get_priority_display }}
+- Created: {{ ticket.created_at|date:"M d, Y H:i" }}
+
+Your ticket will be reviewed and assigned to our support team shortly.
+You can track the progress of your ticket at:
+{{ action_url }}
+
+In the meantime, if you need to add more information or attachments, you can add a message to your ticket directly in the system.
+
+Thank you for reporting this issue. We appreciate your patience as we work to resolve it.
+
+Best regards,
+Snadik.ma Support Team
+{% endautoescape %}

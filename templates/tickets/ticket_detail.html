@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Ticket #{{ ticket.id }} - Snadik.ma{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ticket-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .ticket-title {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .ticket-meta {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item label {
+        display: block;
+        font-size: 0.875rem;
+        opacity: 0.8;
+        text-transform: uppercase;
+    }
+    
+    .meta-item strong {
+        display: block;
+        font-size: 1.125rem;
+    }
+    
+    .ticket-status-badge,
+    .ticket-priority-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        font-weight: 500;
+    }
+    
+    .status-open { background-color: #dc3545; color: white; }
+    .status-in_progress { background-color: #0dcaf0; color: white; }
+    .status-resolved { background-color: #198754; color: white; }
+    .status-closed { background-color: #6c757d; color: white; }
+    
+    .priority-urgent { background-color: #dc3545; color: white; }
+    .priority-high { background-color: #fd7e14; color: white; }
+    .priority-medium { background-color: #ffc107; color: #333; }
+    .priority-low { background-color: #28a745; color: white; }
+    
+    .messages-container {
+        max-height: 600px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .message {
+        background-color: white;
+        border-left: 4px solid #667eea;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 0.25rem;
+    }
+    
+    .message.internal {
+        border-left-color: #dc3545;
+        background-color: #fff5f5;
+    }
+    
+    .message.system {
+        border-left-color: #6c757d;
+        background-color: #f8f9fa;
+        font-style: italic;
+        color: #666;
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .message-author {
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .message-time {
+        color: #999;
+    }
+    
+    .message-badge {
+        display: inline-block;
+        background-color: #dc3545;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        margin-left: 0.5rem;
+    }
+    
+    .message-body {
+        color: #333;
+        line-height: 1.6;
+        word-wrap: break-word;
+    }
+    
+    .attachments {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .attachment-item {
+        background-color: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 0.25rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .attachment-icon {
+        font-size: 1.5rem;
+    }
+    
+    .attachment-info {
+        flex: 1;
+    }
+    
+    .attachment-name {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .attachment-size {
+        font-size: 0.875rem;
+        color: #999;
+    }
+    
+    .sidebar-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .sidebar-title {
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #667eea;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        color: #666;
+        font-size: 0.875rem;
+    }
+    
+    .info-value {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .action-button {
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-messages {
+        text-align: center;
+        padding: 2rem;
+        color: #999;
+    }
+    
+    .timeline-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.875rem;
+    }
+    
+    .timeline-item:last-child {
+        border-bottom: none;
+    }
+    
+    .timeline-action {
+        color: #666;
+    }
+    
+    .timeline-time {
+        color: #999;
+        float: right;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'tickets:list' %}">Tickets</a></li>
+            <li class="breadcrumb-item active">Ticket #{{ ticket.id }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Ticket Header -->
+    <div class="ticket-header">
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="ticket-title">{{ ticket.title }}</h1>
+                <div class="ticket-meta">
+                    <div class="meta-item">
+                        <label>Status</label>
+                        <span class="ticket-status-badge status-{{ ticket.status }}">
+                            {{ ticket.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Priority</label>
+                        <span class="ticket-priority-badge priority-{{ ticket.priority }}">
+                            {{ ticket.get_priority_display }}
+                        </span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Created</label>
+                        <strong>{{ ticket.created_at|date:"M d, Y H:i" }}</strong>
+                    </div>
+                    {% if ticket.resolved_at %}
+                    <div class="meta-item">
+                        <label>Resolved</label>
+                        <strong>{{ ticket.resolved_at|date:"M d, Y H:i" }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if can_edit %}
+                <a href="{% url 'tickets:list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Main Content (Messages) -->
+        <div class="col-md-8">
+            <!-- Description -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Description</h5>
+                    <p class="card-text text-pre-wrap" style="white-space: pre-wrap;">{{ ticket.description }}</p>
+                </div>
+            </div>
+            
+            <!-- Messages Section -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-dots"></i> Messages ({{ messages.count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    <div class="messages-container">
+                        {% for message in messages %}
+                        <div class="message {% if message.is_internal %}internal{% endif %}">
+                            <div class="message-header">
+                                <div>
+                                    <span class="message-author">
+                                        {{ message.author.get_full_name|default:message.author.username }}
+                                    </span>
+                                    {% if message.author.role != 'RESIDENT' %}
+                                    <span class="badge bg-info">Staff</span>
+                                    {% endif %}
+                                    {% if message.is_internal %}
+                                    <span class="message-badge">Internal Note</span>
+                                    {% endif %}
+                                </div>
+                                <span class="message-time">{{ message.created_at|date:"M d, H:i" }}</span>
+                            </div>
+                            <div class="message-body">{{ message.message }}</div>
+                            
+                            {% if message.attachments.all %}
+                            <div class="attachments">
+                                {% for attachment in message.attachments.all %}
+                                <div class="attachment-item">
+                                    <div class="attachment-icon">
+                                        {% if attachment.is_image %}
+                                            📷
+                                        {% else %}
+                                            📎
+                                        {% endif %}
+                                    </div>
+                                    <div class="attachment-info">
+                                        <div class="attachment-name">
+                                            <a href="{{ attachment.file.url }}" target="_blank">
+                                                {{ attachment.file_name }}
+                                            </a>
+                                        </div>
+                                        <div class="attachment-size">{{ attachment.get_file_size_display }}</div>
+                                    </div>
+                                    <a href="{{ attachment.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                        Download
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-messages">
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Add Message Form -->
+                    <hr>
+                    <form method="post" action="{% url 'tickets:add_message' ticket.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Your Message</label>
+                            <textarea 
+                                class="form-control" 
+                                id="message" 
+                                name="message" 
+                                rows="3" 
+                                required
+                                placeholder="Describe your work, updates, or response..."
+                            ></textarea>
+                        </div>
+                        
+                        {% if user.role != 'RESIDENT' %}
+                        <div class="form-check mb-3">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                id="is_internal" 
+                                name="is_internal"
+                            >
+                            <label class="form-check-label" for="is_internal">
+                                Internal Note (not visible to resident)
+                            </label>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="attachments" class="form-label">Attachments (optional)</label>
+                            <input 
+                                type="file" 
+                                class="form-control" 
+                                id="attachments" 
+                                name="file"
+                                accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.txt"
+                                multiple
+                            >
+                            <small class="form-text text-muted">
+                                Supported: PDF, JPG, PNG, GIF, DOC, DOCX, TXT (Max 10MB each)
+                            </small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Ticket Info -->
+            <div class="sidebar-card">
+                <h6 class="sidebar-title">Ticket Information</h6>
+                
+                <div class="info-row">
+                    <span class="info-label">Ticket ID</span>
+                    <span class="info-value">#{{ ticket.id }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Category</span>
+                    <span class="info-value">{{ ticket.category.name_en|default:"N/A" }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Apartment</span>
+                    <span class="info-value">{{ ticket.apartment|default:"N/A" }}</span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">Resident</span>
+                    <span class="info-value">{{ ticket.resident.get_full_name }}</span>
+                </div>
+                
+                {% if ticket.assigned_to %}
+                <div class="info-row">
+                    <span class="info-label">Assigned To</span>
+                    <span class="info-value">{{ ticket.assigned_to.get_full_name }}</span>
+                </div>
+                {% endif %}
+                
+                {% if ticket.sla_due_date %}
+                <div class="info-row">
+                    <span class="info-label">SLA Due</span>
+                    <span class="info-value">
+                        {{ ticket.sla_due_date|date:"M d, H:i" }}
+                        {% if ticket.sla_breached %}
+                        <span class="badge bg-danger">Breached</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Actions -->
+            {% if can_edit or can_assign or can_change_status %}
+            <div class="sidebar-card">
+                <h6 class="sidebar-title">Actions</h6>
+                
+                {% if can_change_status %}
+                <form method="post" action="{% url 'tickets:update_status' ticket.id %}" class="mb-3">
+                    {% csrf_token %}
+                    <label for="status" class="form-label form-label-sm">Change Status</label>
+                    <div class="input-group input-group-sm">
+                        <select class="form-select form-select-sm" id="status" name="status">
+                            {% for value, label in statuses %}
+                            <option value="{{ value }}" {% if value == ticket.status %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                    </div>
+                </form>
+                {% endif %}
+                
+                {% if can_assign %}
+                <form method="post" action="{% url 'tickets:assign' ticket.id %}" class="mb-3">
+                    {% csrf_token %}
+                    <label for="admin" class="form-label form-label-sm">Assign To</label>
+                    <div class="input-group input-group-sm">
+                        <select class="form-select form-select-sm" id="admin" name="admin_id">
+                            <option value="">Unassigned</option>
+                            {% for admin in available_admins %}
+                            <option value="{{ admin.id }}">{{ admin.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Assign</button>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- Activity Log -->
+            <div class="sidebar-card">
+                <h6 class="sidebar-title">Activity Log</h6>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    {% for log in activity_log %}
+                    <div class="timeline-item">
+                        <strong>{{ log.get_action_display }}</strong>
+                        <div class="timeline-action">{{ log.description }}</div>
+                        <div class="timeline-time">{{ log.created_at|date:"M d, H:i" }}</div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No activity yet</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Attachments -->
+            {% if ticket.attachments.all %}
+            <div class="sidebar-card">
+                <h6 class="sidebar-title">Attachments</h6>
+                {% for attachment in ticket.attachments.all %}
+                <div class="attachment-item">
+                    <div class="attachment-icon">
+                        {% if attachment.is_image %}
+                            📷
+                        {% else %}
+                            📎
+                        {% endif %}
+                    </div>
+                    <div class="attachment-info">
+                        <div class="attachment-name">
+                            <a href="{{ attachment.file.url }}" target="_blank" class="text-decoration-none">
+                                {{ attachment.file_name }}
+                            </a>
+                        </div>
+                        <div class="attachment-size">{{ attachment.get_file_size_display }}</div>
+                    </div>
+                    <a href="{{ attachment.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                        View
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
