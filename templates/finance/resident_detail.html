@@ -4,59 +4,80 @@
 {% block title %}Détails du résident - Syndic{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-user me-2"></i>{{ resident.get_full_name|default:resident.username }}
-                </h1>
-                <div class="btn-group">
-                    <a href="{% url 'finance:resident_management' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-1"></i>Retour
+<div class="container-fluid">
+    {% include 'components/page_header.html' with title=resident.get_full_name|default:resident.username subtitle='Profil résident, contact et statut de compte' icon='fas fa-user' actions=page_actions|default:None %}
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-8">
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <i class="fas fa-id-card me-2"></i>
+                    <h5 class="mb-0">Informations principales</h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label mb-1">Nom complet</label>
+                            <div class="fw-semibold">{{ resident.get_full_name|default:resident.username }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label mb-1">Nom d'utilisateur</label>
+                            <div class="fw-semibold">@{{ resident.username }}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label mb-1">Email</label>
+                            <div>{% if resident.email %}<a href="mailto:{{ resident.email }}" class="text-decoration-none">{{ resident.email }}</a>{% else %}<span class="text-muted">Non renseigné</span>{% endif %}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label mb-1">Téléphone</label>
+                            <div>{% if resident.phone %}<a href="tel:{{ resident.phone }}" class="text-decoration-none">{{ resident.phone }}</a>{% else %}<span class="text-muted">Non renseigné</span>{% endif %}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label mb-1">Appartement</label>
+                            <div>{% if resident.apartment %}<span class="badge text-bg-info">{{ resident.apartment }}</span>{% else %}<span class="text-muted">Non affecté</span>{% endif %}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label mb-1">Statut</label>
+                            <div>
+                                {% if resident.is_active %}
+                                <span class="status-badge status-paid"><i class="fas fa-check-circle me-1"></i>Actif</span>
+                                {% else %}
+                                <span class="status-badge status-critical"><i class="fas fa-ban me-1"></i>Inactif</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label mb-1">Adresse</label>
+                            <div>{% if resident.address %}{{ resident.address }}{% else %}<span class="text-muted">Non renseignée</span>{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-4">
+            <div class="card-modern mb-4">
+                <div class="card-header-modern">
+                    <i class="fas fa-bolt me-2"></i>
+                    <h6 class="mb-0">Actions rapides</h6>
+                </div>
+                <div class="card-body-modern d-grid gap-2">
+                    <a href="{% url 'finance:resident_management' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                    </a>
+                    <a href="{% url 'finance:resident_update' resident.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-pen me-1"></i>Modifier le profil
                     </a>
                     <a href="{% url 'finance:notification_create' %}?resident_id={{ resident.id }}" class="btn btn-primary">
-                        <i class="fas fa-envelope me-1"></i>Nouveau message
+                        <i class="fas fa-paper-plane me-1"></i>Envoyer notification
                     </a>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <strong>Nom d'utilisateur :</strong>
-                            <div>{{ resident.username }}</div>
-                        </div>
-                        <div class="col-md-4">
-                            <strong>Email :</strong>
-                            <div>{{ resident.email|default:'—' }}</div>
-                        </div>
-                        <div class="col-md-4">
-                            <strong>Téléphone :</strong>
-                            <div>{{ resident.phone|default:'—' }}</div>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <strong>Appartement :</strong>
-                            <div>{{ resident.apartment|default:'—' }}</div>
-                        </div>
-                        <div class="col-md-4">
-                            <strong>Adresse :</strong>
-                            <div>{{ resident.address|default:'—' }}</div>
-                        </div>
-                        <div class="col-md-4">
-                            <strong>Statut :</strong>
-                            <div>
-                                {% if resident.is_active %}
-                                    <span class="badge bg-success">Actif</span>
-                                {% else %}
-                                    <span class="badge bg-danger">Inactif</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
+            <div class="card-modern">
+                <div class="card-body-modern">
+                    <h6 class="mb-2">Conseil UX</h6>
+                    <p class="small text-muted mb-0">Utilisez les notifications contextualisées (paiement, document, rappel) pour réduire les retards et augmenter le taux de recouvrement.</p>
                 </div>
             </div>
         </div>

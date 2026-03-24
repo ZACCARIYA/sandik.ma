@@ -1,6 +1,6 @@
 <!-- ===== COMPOSANT CARTE DE STATUT RÉSIDENT ===== -->
 <div class="col-md-3 mb-4">
-    <div class="card-modern {% if border_class %}{{ border_class }}{% endif %}">
+    <div class="card-modern {% if border_class %}{{ border_class }}{% endif %} h-100">
         <div class="card-header-modern">
             {% if icon %}<i class="{{ icon }} me-2"></i>{% endif %}
             <h5 class="mb-0">{{ title }}</h5>
@@ -8,8 +8,8 @@
         </div>
         <div class="card-body-modern">
             {% for resident in residents|slice:":5" %}
-            <div class="resident-item">
-                <div class="resident-avatar {{ avatar_class }}">
+            <div class="resident-item d-flex align-items-center gap-2 py-2 border-bottom">
+                <div class="resident-avatar {{ avatar_class }} d-inline-flex align-items-center justify-content-center rounded-circle" style="width:34px;height:34px;">
                     {{ resident.get_full_name.0|default:resident.username.0|upper }}
                 </div>
                 <div class="resident-info">

@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tickets Dashboard - Snadik.ma{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-left: 4px solid;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: transform 0.3s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .stat-card.stat-open { border-left-color: #dc3545; }
+    .stat-card.stat-in-progress { border-left-color: #0dcaf0; }
+    .stat-card.stat-resolved { border-left-color: #198754; }
+    .stat-card.stat-urgent { border-left-color: #fd7e14; }
+    .stat-card.stat-total { border-left-color: #667eea; }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .section-title {
+        font-weight: 600;
+        color: #333;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #667eea;
+        margin-bottom: 1.5rem;
+    }
+    
+    .ticket-widget {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s;
+    }
+    
+    .ticket-widget:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    }
+    
+    .ticket-widget-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .ticket-widget-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+        color: #666;
+    }
+    
+    .ticket-priority-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .priority-urgent { background-color: #dc3545; color: white; }
+    .priority-high { background-color: #fd7e14; color: white; }
+    .priority-medium { background-color: #ffc107; color: #333; }
+    .priority-low { background-color: #28a745; color: white; }
+    
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+    }
+    
+    .empty-state-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="mb-2">Tickets Dashboard</h1>
+                <p class="mb-0 opacity-75">Overview of ticket system status and activity</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'tickets:list' %}" class="btn btn-light">
+                    <i class="bi bi-list-ul"></i> View All Tickets
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Row -->
+    {% if stats %}
+    <div class="row mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card stat-total">
+                <div class="stat-number">{{ stats.total_tickets }}</div>
+                <div class="stat-label">Total Tickets</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card stat-open">
+                <div class="stat-number">{{ stats.open_tickets }}</div>
+                <div class="stat-label">Open</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card stat-in-progress">
+                <div class="stat-number">{{ stats.in_progress_tickets }}</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card stat-resolved">
+                <div class="stat-number">{{ stats.resolved_tickets }}</div>
+                <div class="stat-label">Resolved</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card stat-urgent">
+                <div class="stat-number">{{ stats.urgent_tickets }}</div>
+                <div class="stat-label">Urgent</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card stat-urgent">
+                <div class="stat-number">{{ stats.overdue_sla_tickets }}</div>
+                <div class="stat-label">SLA Breached</div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card stat-closed">
+                <div class="stat-number">{{ stats.closed_tickets }}</div>
+                <div class="stat-label">Closed</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        <!-- Recent Tickets -->
+        <div class="col-md-6">
+            <h4 class="section-title">Recent Tickets</h4>
+            
+            {% if recent_tickets %}
+            <div>
+                {% for ticket in recent_tickets %}
+                <div class="ticket-widget">
+                    <div class="ticket-widget-title">
+                        <a href="{% url 'tickets:detail' ticket.id %}" class="text-decoration-none">
+                            #{{ ticket.id }} - {{ ticket.title|truncatewords:8 }}
+                        </a>
+                    </div>
+                    <div class="ticket-widget-meta">
+                        <div>
+                            <span class="ticket-priority-badge priority-{{ ticket.priority }}">
+                                {{ ticket.get_priority_display }}
+                            </span>
+                        </div>
+                        <div>
+                            <small>{{ ticket.resident.get_full_name }}</small>
+                        </div>
+                        <div>
+                            <small class="text-muted">{{ ticket.created_at|date:"M d" }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p class="text-muted">No recent tickets</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Attention Needed -->
+        <div class="col-md-6">
+            <h4 class="section-title">
+                <span class="badge bg-danger">⚠️</span> Needs Attention
+            </h4>
+            
+            {% if attention_needed %}
+            <div>
+                {% for ticket in attention_needed %}
+                <div class="ticket-widget">
+                    <div class="ticket-widget-title">
+                        <a href="{% url 'tickets:detail' ticket.id %}" class="text-decoration-none">
+                            #{{ ticket.id }} - {{ ticket.title|truncatewords:8 }}
+                        </a>
+                    </div>
+                    <div class="ticket-widget-meta">
+                        <div>
+                            <span class="ticket-priority-badge priority-{{ ticket.priority }}">
+                                {{ ticket.get_priority_display }}
+                            </span>
+                        </div>
+                        <div>
+                            {% if ticket.sla_breached %}
+                                <span class="badge bg-danger">SLA Breached</span>
+                            {% else %}
+                                <span class="badge bg-warning">{{ ticket.get_status_display }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">✨</div>
+                <p class="text-muted">All tickets are on track!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

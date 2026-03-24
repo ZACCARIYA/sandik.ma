@@ -4,346 +4,410 @@
 {% block title %}Connexion - SyndicPro{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <div class="login-card">
-                    <div class="login-header">
-                        <div class="login-logo animate-pulse">
-                            <img src="{% static 'images/logos/logo.svg' %}" alt="SyndicPro" class="logo-main">
-                        </div>
-                        <h2 class="text-gradient">Connexion</h2>
-                        <p>Accédez à votre espace de gestion</p>
-                    </div>
-                    
-                    <!-- Messages d'erreur/succès -->
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert-modern alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-4" role="alert">
-                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                    
-                    <form method="post" class="login-form">
+<section class="auth-login-page">
+    <span class="auth-orb auth-orb-one" aria-hidden="true"></span>
+    <span class="auth-orb auth-orb-two" aria-hidden="true"></span>
+
+    <div class="container-fluid px-3 px-md-4">
+        <div class="row justify-content-center align-items-stretch g-4 auth-login-grid">
+            <div class="col-lg-5 d-none d-lg-block">
+                <aside class="auth-brand-card h-100">
+                    <img src="{% static 'images/logos/logo.svg' %}" alt="SyndicPro" class="auth-brand-logo">
+                    <p class="auth-kicker">Plateforme syndic</p>
+                    <h1>Pilotez votre copropriete avec plus de clarte.</h1>
+                    <p class="auth-lead">Un espace unique pour suivre residents, paiements, depenses, notifications et documents en toute simplicite.</p>
+
+                    <ul class="auth-value-list list-unstyled mb-0">
+                        <li><i class="fas fa-chart-line"></i> Encaissements et depenses en temps reel</li>
+                        <li><i class="fas fa-file-signature"></i> Documents et relances centralises</li>
+                        <li><i class="fas fa-shield-alt"></i> Traite par role: syndic, admin, resident</li>
+                    </ul>
+                </aside>
+            </div>
+
+            <div class="col-12 col-md-9 col-lg-5 col-xl-4">
+                <section class="auth-form-card">
+                    <header class="auth-form-header">
+                        <h2>Connexion</h2>
+                        <p>Accedez a votre tableau de bord SyndicPro.</p>
+                    </header>
+
+                    <form method="post" class="auth-form" id="loginForm" novalidate>
                         {% csrf_token %}
-                        
-                        <div class="form-group">
-                            <label for="username">Nom d'utilisateur</label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="username" 
-                                   name="username" 
-                                   required 
-                                   placeholder="Votre nom d'utilisateur">
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nom d'utilisateur</label>
+                            <div class="auth-input-wrap">
+                                <i class="fas fa-user auth-input-icon" aria-hidden="true"></i>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="username"
+                                    name="username"
+                                    autocomplete="username"
+                                    placeholder="Ex: syndic.azizi"
+                                    required
+                                >
+                            </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="password">Mot de passe</label>
-                            <input type="password" 
-                                   class="form-control" 
-                                   id="password" 
-                                   name="password" 
-                                   required 
-                                   placeholder="Votre mot de passe">
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <div class="auth-input-wrap">
+                                <i class="fas fa-lock auth-input-icon" aria-hidden="true"></i>
+                                <input
+                                    type="password"
+                                    class="form-control"
+                                    id="password"
+                                    name="password"
+                                    autocomplete="current-password"
+                                    placeholder="Votre mot de passe"
+                                    required
+                                >
+                                <button
+                                    type="button"
+                                    class="auth-password-toggle"
+                                    id="togglePassword"
+                                    aria-label="Afficher le mot de passe"
+                                >
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100">
-                            Se connecter
+
+                        <div class="d-flex align-items-center justify-content-between mb-4 auth-meta-row">
+                            <div class="form-check m-0">
+                                <input class="form-check-input" type="checkbox" value="1" id="rememberMe" name="remember_me">
+                                <label class="form-check-label" for="rememberMe">Se souvenir de moi</label>
+                            </div>
+                            <small class="text-muted">Besoin d'aide ? Contactez le syndic.</small>
+                        </div>
+
+                        <button type="submit" class="btn auth-submit-btn w-100" id="loginSubmitBtn">
+                            <span class="btn-label">Se connecter</span>
                         </button>
-                        
-                        <div class="text-center mt-4">
-                            <p class="text-muted">
-                                Vous n'avez pas de compte ? 
-                                <a href="{% url 'finance:register' %}" class="text-primary fw-bold">S'inscrire</a>
-                            </p>
-                        </div>
+
+                        <p class="auth-register-hint text-center mb-0">
+                            Nouveau resident ?
+                            <a href="{% url 'finance:register' %}" class="fw-semibold">Creer un compte</a>
+                        </p>
                     </form>
-                    
-                </div>
+                </section>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-/* ===== STYLES MODERNES POUR PAGE DE CONNEXION ===== */
-
-.login-container {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    background-size: 400% 400%;
-    animation: gradient-shift 15s ease infinite;
-    padding: 2rem 0;
+.auth-login-page {
+    position: relative;
+    min-height: calc(100vh - var(--navbar-height));
     display: flex;
     align-items: center;
-    position: relative;
+    padding: 2.5rem 0 2rem;
     overflow: hidden;
+    background:
+        radial-gradient(circle at 12% 15%, rgba(37, 99, 235, 0.20), transparent 36%),
+        radial-gradient(circle at 88% 0%, rgba(14, 165, 233, 0.22), transparent 34%),
+        linear-gradient(160deg, #f4f8ff 0%, #eef5ff 48%, #f8fbff 100%);
 }
 
-.login-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
-    pointer-events: none;
-}
-
-.login-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 24px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255, 255, 255, 0.3);
-    padding: 3rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+.auth-login-grid {
     position: relative;
     z-index: 1;
-    animation: slideInUp 0.8s ease-out;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
-.login-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255, 255, 255, 0.4);
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes gradient-shift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-.login-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-}
-
-.login-logo {
-    margin-bottom: 1.5rem;
-    animation: float 3s ease-in-out infinite;
-}
-
-.login-logo img {
-    width: 80px;
-    height: 80px;
-    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
-    transition: transform 0.3s ease;
-}
-
-.login-logo:hover img {
-    transform: scale(1.1) rotate(5deg);
-}
-
-.login-header h2 {
-    color: #2d3748;
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-}
-
-.login-header .text-gradient {
-    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.login-header p {
-    color: #718096;
-    font-size: 1.1rem;
-    margin: 0;
-    font-weight: 500;
-}
-
-.login-form .form-group {
-    margin-bottom: 1.8rem;
-    position: relative;
-}
-
-.login-form label {
-    display: block;
-    margin-bottom: 0.8rem;
-    color: #2d3748;
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.login-form .form-control {
-    width: 100%;
-    padding: 1rem 1.2rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #f7fafc;
-    font-weight: 500;
-    color: #2d3748;
-    position: relative;
-}
-
-.login-form .form-control:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 4px 12px rgba(102, 126, 234, 0.1);
-    background: white;
-    transform: translateY(-3px) scale(1.01);
-}
-
-.login-form .form-control::placeholder {
-    color: #a0aec0;
-    font-weight: 400;
-}
-
-.login-form .btn {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border-radius: 16px;
-    margin-top: 1.5rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border: none;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-}
-
-.login-form .btn::before {
-    content: '';
+.auth-orb {
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-}
-
-.login-form .btn:hover::before {
-    left: 100%;
-}
-
-.login-form .btn:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.5);
-    background: linear-gradient(135deg, #764ba2, #667eea);
-}
-
-.login-form .btn:active {
-    transform: translateY(-1px);
-}
-
-/* Effet de particules flottantes */
-.login-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(255,255,255,0.05) 0%, transparent 50%);
-    animation: float 6s ease-in-out infinite;
+    border-radius: 999px;
+    filter: blur(1px);
     pointer-events: none;
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+.auth-orb-one {
+    width: 280px;
+    height: 280px;
+    background: rgba(37, 99, 235, 0.18);
+    top: 5%;
+    left: -90px;
 }
 
-/* Animation des champs au focus */
-.login-form .form-group {
-    transition: transform 0.3s ease;
+.auth-orb-two {
+    width: 220px;
+    height: 220px;
+    background: rgba(14, 165, 233, 0.16);
+    bottom: 4%;
+    right: -60px;
 }
 
-.login-form .form-group:focus-within {
+.auth-brand-card,
+.auth-form-card {
+    border-radius: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.10);
+}
+
+.auth-brand-card {
+    background: linear-gradient(145deg, #0f3a8a 0%, #1348ae 52%, #0f9bca 100%);
+    color: #eaf3ff;
+    padding: 2.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.auth-brand-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 0.45rem;
+}
+
+.auth-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-size: 0.75rem;
+    opacity: 0.82;
+    margin: 0;
+}
+
+.auth-brand-card h1 {
+    font-size: clamp(1.55rem, 1.8vw, 2rem);
+    line-height: 1.2;
+    margin: 0;
+    font-weight: 750;
+}
+
+.auth-lead {
+    margin: 0;
+    color: rgba(234, 243, 255, 0.9);
+    line-height: 1.6;
+}
+
+.auth-value-list {
+    margin-top: 0.35rem;
+    display: grid;
+    gap: 0.7rem;
+}
+
+.auth-value-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: rgba(234, 243, 255, 0.97);
+    font-size: 0.93rem;
+}
+
+.auth-value-list i {
+    width: 1.15rem;
+    text-align: center;
+}
+
+.auth-form-card {
+    background: rgba(255, 255, 255, 0.94);
+    padding: 2rem;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.auth-form-card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 24px 55px rgba(15, 23, 42, 0.13);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .login-container {
-        padding: 1rem 0;
-    }
-    
-    .login-card {
-        padding: 2rem;
-        margin: 1rem;
-    }
-    
-    .login-header h2 {
-        font-size: 1.8rem;
-    }
-    
-    .login-form .form-control {
-        padding: 0.9rem 1rem;
-    }
-    
-    .login-form .btn {
-        padding: 0.9rem 1.5rem;
-        font-size: 1rem;
-    }
+.auth-form-header {
+    margin-bottom: 1.35rem;
 }
 
-@media (max-width: 576px) {
-    .login-card {
+.auth-form-header h2 {
+    margin: 0;
+    font-size: 1.65rem;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.auth-form-header p {
+    margin: 0.4rem 0 0;
+    color: #64748b;
+}
+
+.auth-form .form-label {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.45rem;
+}
+
+.auth-input-wrap {
+    position: relative;
+}
+
+.auth-input-icon {
+    position: absolute;
+    left: 0.95rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.auth-form .form-control {
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    height: 48px;
+    padding-left: 2.55rem;
+    padding-right: 2.8rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-form .form-control::placeholder {
+    color: #94a3b8;
+}
+
+.auth-form .form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.auth-password-toggle {
+    position: absolute;
+    right: 0.55rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #64748b;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.auth-password-toggle:hover,
+.auth-password-toggle:focus {
+    background: #e2e8f0;
+    color: #0f172a;
+    outline: none;
+}
+
+.auth-meta-row {
+    font-size: 0.9rem;
+}
+
+.auth-meta-row .form-check-label {
+    color: #475569;
+}
+
+.auth-submit-btn {
+    height: 48px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 650;
+    font-size: 0.98rem;
+    background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(29, 78, 216, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.auth-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(29, 78, 216, 0.33);
+    filter: brightness(1.02);
+    color: #fff;
+}
+
+.auth-submit-btn:disabled {
+    opacity: 0.92;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.auth-register-hint {
+    margin-top: 1rem;
+    color: #64748b;
+    font-size: 0.93rem;
+}
+
+.auth-register-hint a {
+    color: #1d4ed8;
+    text-decoration: none;
+}
+
+.auth-register-hint a:hover {
+    text-decoration: underline;
+}
+
+[data-theme="dark"] .auth-login-page {
+    background:
+        radial-gradient(circle at 12% 15%, rgba(37, 99, 235, 0.22), transparent 36%),
+        radial-gradient(circle at 88% 0%, rgba(14, 165, 233, 0.2), transparent 34%),
+        linear-gradient(170deg, #0b1220 0%, #0f172a 50%, #0b1220 100%);
+}
+
+[data-theme="dark"] .auth-form-card {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: rgba(71, 85, 105, 0.5);
+}
+
+[data-theme="dark"] .auth-form-header h2,
+[data-theme="dark"] .auth-form .form-label {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .auth-form-header p,
+[data-theme="dark"] .auth-meta-row .form-check-label,
+[data-theme="dark"] .auth-register-hint {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .auth-form .form-control {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .auth-password-toggle {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .auth-password-toggle:hover,
+[data-theme="dark"] .auth-password-toggle:focus {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+@media (max-width: 991.98px) {
+    .auth-login-page {
+        padding-top: 1.6rem;
+        padding-bottom: 1.6rem;
+    }
+
+    .auth-form-card {
         padding: 1.5rem;
-        margin: 0.5rem;
     }
-    
-    .login-header h2 {
-        font-size: 1.6rem;
+}
+
+@media (max-width: 575.98px) {
+    .auth-form-card {
+        padding: 1.25rem;
+        border-radius: 18px;
     }
-    
-    .login-form .form-control {
-        padding: 0.8rem;
+
+    .auth-form-header h2 {
+        font-size: 1.45rem;
     }
-    
-    .login-form .btn {
-        padding: 0.8rem 1.2rem;
+
+    .auth-meta-row {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.55rem;
     }
 }
 </style>
@@ -351,122 +415,27 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Animation d'entrée de la carte
-    const loginCard = document.querySelector('.login-card');
-    if (loginCard) {
-        loginCard.style.opacity = '0';
-        loginCard.style.transform = 'translateY(50px)';
-        
-        setTimeout(() => {
-            loginCard.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-            loginCard.style.opacity = '1';
-            loginCard.style.transform = 'translateY(0)';
-        }, 100);
-    }
-    
-    // Animation des champs au focus
-    document.querySelectorAll('.form-control').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.style.transform = 'translateY(-2px)';
-            this.parentElement.style.transition = 'transform 0.3s ease';
-        });
-        
-        input.addEventListener('blur', function() {
-            this.parentElement.style.transform = 'translateY(0)';
-        });
-        
-        // Animation de validation en temps réel
-        input.addEventListener('input', function() {
-            if (this.value.length > 0) {
-                this.style.borderColor = '#48bb78';
-                this.style.boxShadow = '0 0 0 4px rgba(72, 187, 120, 0.1)';
-            } else {
-                this.style.borderColor = '#e2e8f0';
-                this.style.boxShadow = 'none';
-            }
-        });
-    });
-    
-    // Animation du bouton au survol
-    const loginBtn = document.querySelector('.btn');
-    if (loginBtn) {
-        loginBtn.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-3px) scale(1.02)';
-        });
-        
-        loginBtn.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-        
-        // Animation de clic
-        loginBtn.addEventListener('mousedown', function() {
-            this.style.transform = 'translateY(-1px) scale(0.98)';
-        });
-        
-        loginBtn.addEventListener('mouseup', function() {
-            this.style.transform = 'translateY(-3px) scale(1.02)';
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleButton = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('loginSubmitBtn');
+
+    if (toggleButton && passwordInput) {
+        toggleButton.addEventListener('click', function () {
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            this.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+            this.setAttribute('aria-label', isHidden ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
         });
     }
-    
-    // Effet de particules au clic
-    document.addEventListener('click', function(e) {
-        const particle = document.createElement('div');
-        particle.style.position = 'fixed';
-        particle.style.left = e.clientX + 'px';
-        particle.style.top = e.clientY + 'px';
-        particle.style.width = '4px';
-        particle.style.height = '4px';
-        particle.style.background = 'rgba(102, 126, 234, 0.8)';
-        particle.style.borderRadius = '50%';
-        particle.style.pointerEvents = 'none';
-        particle.style.zIndex = '9999';
-        particle.style.animation = 'particle 0.6s ease-out forwards';
-        
-        document.body.appendChild(particle);
-        
-        setTimeout(() => {
-            document.body.removeChild(particle);
-        }, 600);
-    });
-    
-    // Animation de validation du formulaire
-    const form = document.querySelector('.login-form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const btn = this.querySelector('.btn');
-            const originalText = btn.innerHTML;
-            
-            // Animation de chargement
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Connexion...';
-            btn.disabled = true;
-            btn.style.transform = 'scale(0.95)';
-            
-            // Simuler un délai de connexion
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                btn.style.transform = 'scale(1)';
-            }, 2000);
+
+    if (loginForm && submitBtn) {
+        loginForm.addEventListener('submit', function () {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Connexion en cours...';
         });
     }
 });
-
-// CSS pour l'animation des particules
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes particle {
-        0% {
-            transform: scale(0) translateY(0);
-            opacity: 1;
-        }
-        100% {
-            transform: scale(1) translateY(-100px);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
 </script>
 {% endblock %}
-

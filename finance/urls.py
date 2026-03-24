@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from . import chatbot_views
 from . import api_views
 
 app_name = 'finance'
@@ -13,9 +12,6 @@ urlpatterns = [
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('profile/', views.UserProfileView.as_view(), name='user_profile'),
     path('settings/', views.SettingsView.as_view(), name='settings'),
-    
-    # Test components (development only)
-    path('test-components/', views.TestComponentsView.as_view(), name='test_components'),
     
     # Dashboards
     path('syndic-dashboard/', views.SyndicDashboardView.as_view(), name='syndic_dashboard'),
@@ -78,12 +74,6 @@ urlpatterns = [
     path('impayes/<int:resident_id>/historique/', views.ResidentPaymentHistoryView.as_view(), name='resident_payment_history'),
     path('impayes/<int:document_id>/rappel/', views.SendReminderView.as_view(), name='send_reminder'),
     path('api/run-overdue-detection/', views.RunOverdueDetectionView.as_view(), name='run_overdue_detection'),
-    
-    # Chatbot / Assistant virtuel
-    path('assistant/', chatbot_views.ChatbotView.as_view(), name='chatbot'),
-    path('api/chatbot/message/', chatbot_views.ChatbotMessageAPI.as_view(), name='chatbot_message_api'),
-    path('assistant/faq/', chatbot_views.ChatbotFAQManagementView.as_view(), name='chatbot_faq_management'),
-    path('assistant/faq/create/', chatbot_views.ChatbotFAQCreateView.as_view(), name='chatbot_faq_create'),
     
     # API endpoints
     path('api/navigation-stats/', api_views.NavigationStatsAPI.as_view(), name='navigation_stats_api'),

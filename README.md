@@ -41,16 +41,16 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. **Configuration de la base de données**
+4. **Configuration de l'environnement**
 Créer un fichier `.env` basé sur `.env.example` :
 ```env
-DJANGO_SECRET_KEY=your-secret-key
-DB_ENGINE=django.db.backends.mysql
+DJANGO_ENV=dev
+DJANGO_DEBUG=true
+DJANGO_SECRET_KEY=replace-with-a-long-random-secret-key
+ALLOWED_HOSTS=localhost,127.0.0.1,testserver
+
+DB_ENGINE=django.db.backends.sqlite3
 DB_NAME=syndic_db
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_HOST=localhost
-DB_PORT=3306
 ```
 
 5. **Migrations**
@@ -86,14 +86,22 @@ python manage.py runserver
 ## Structure du projet
 
 ```
-syndic/
-├── accounts/          # Gestion des utilisateurs
-├── finance/           # Gestion financière
+sandik.ma/
+├── accounts/          # Authentification, rôles, profils
+├── residents/         # Domaine résidents (extraction progressive)
+├── finance/           # Paiements, dépenses, tableaux de bord
+├── documents/         # Domaine documents (extraction progressive)
+├── notifications/     # Domaine notifications (extraction progressive)
 ├── templates/         # Templates HTML
 ├── static/            # Fichiers statiques
-├── syndic/            # Configuration Django
-└── manage.py          # Script de gestion Django
+├── syndic/settings/   # base.py, dev.py, prod.py
+└── manage.py
 ```
+
+### Profils de settings
+
+- `DJANGO_ENV=dev` charge `syndic/settings/dev.py`
+- `DJANGO_ENV=prod` charge `syndic/settings/prod.py`
 
 ## Technologies
 

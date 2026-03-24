@@ -29,6 +29,10 @@ class User(AbstractUser):
                 violation_error_message="Un résident existe déjà pour cet appartement."
             )
         ]
+        indexes = [
+            models.Index(fields=['role']),
+            models.Index(fields=['is_active', 'role']),
+        ]
 
     def __str__(self) -> str:
         full = self.get_full_name().strip() or self.username

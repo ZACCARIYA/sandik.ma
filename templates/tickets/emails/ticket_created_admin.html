@@ -1,0 +1,25 @@
+{% autoescape off %}
+New Ticket Created
+
+Hello {{ recipient.get_full_name }},
+
+A new ticket has been created in the system and requires attention.
+
+Ticket Details:
+- Ticket ID: #{{ ticket.id }}
+- Title: {{ ticket.title }}
+- Description: {{ ticket.description|truncatewords:50 }}
+- Reported by: {{ ticket.resident.get_full_name }}
+- Apartment: {{ ticket.apartment }}
+- Priority: {{ ticket.get_priority_display }}
+- Category: {{ ticket.category.name_en }}
+- Created: {{ ticket.created_at|date:"M d, Y H:i" }}
+
+Please review the ticket to determine if it needs to be assigned, and take any necessary action.
+
+View full ticket details:
+{{ action_url }}
+
+Best regards,
+Snadik.ma System
+{% endautoescape %}

@@ -23,12 +23,13 @@
         rel="stylesheet">
     <link href="{% static 'css/app.css' %}?v={{ timestamp|default:'8.0' }}" rel="stylesheet">
     <link href="{% static 'css/dist.css' %}" rel="stylesheet">
+    <link href="{% static 'css/saas-system.css' %}?v=1.2" rel="stylesheet">
 
     <!-- ===== CSS ADDITIONNEL ===== -->
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="main-container {% if user.is_authenticated %}layout-sidebar{% endif %}">
+<body class="main-container saas-shell {% if user.is_authenticated %}layout-sidebar{% endif %}">
     {% if user.is_authenticated %}
     <!-- ===== LAYOUT AVEC SIDEBAR ===== -->
     <div class="app-wrapper">
@@ -69,10 +70,6 @@
                 <a href="{% url 'finance:calendar' %}" class="sidebar-nav-item">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Calendrier</span>
-                </a>
-                <a href="{% url 'finance:chatbot' %}" class="sidebar-nav-item">
-                    <i class="fas fa-robot"></i>
-                    <span>Assistant</span>
                 </a>
                 {% else %}
                 <!-- Navigation Syndic/Admin -->
@@ -159,13 +156,47 @@
                 <div class="header-right">
                     <div class="header-search">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Rechercher..." class="header-search-input">
+                        <input type="text" placeholder="Rechercher résidents, documents, paiements..." class="header-search-input">
                     </div>
-                    <div class="header-notifications">
-                        <button class="header-icon-btn" id="notificationsBtn">
+                    <div class="header-notifications dropdown">
+                        <button class="header-icon-btn" id="notificationsBtn" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-bell"></i>
                             <span class="header-badge">0</span>
                         </button>
+                        <div class="dropdown-menu dropdown-menu-end p-0" style="min-width: 300px;">
+                            <div class="p-3 border-bottom">
+                                <h6 class="mb-1">Centre de notifications</h6>
+                                <p class="small text-muted mb-0">Vue rapide des alertes critiques</p>
+                            </div>
+                            <div class="p-2">
+                                <a href="{% url 'finance:notification_list' %}" class="dropdown-item d-flex justify-content-between align-items-center py-2">
+                                    <span><i class="fas fa-bell me-2 text-primary"></i>Notifications non lues</span>
+                                    <span class="badge text-bg-light border" id="notifBadgeUnread">0</span>
+                                </a>
+                                {% if user.role in 'SYNDIC,SUPERADMIN' %}
+                                <a href="{% url 'finance:overdue_dashboard' %}" class="dropdown-item d-flex justify-content-between align-items-center py-2">
+                                    <span><i class="fas fa-triangle-exclamation me-2 text-danger"></i>Impayés</span>
+                                    <span class="badge text-bg-light border" id="notifBadgeOverdue">0</span>
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'finance:document_list' %}" class="dropdown-item d-flex justify-content-between align-items-center py-2">
+                                    <span><i class="fas fa-file-invoice me-2 text-info"></i>Documents</span>
+                                    <span class="badge text-bg-light border" id="notifBadgeDocs">0</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="header-profile dropdown">
+                        <button class="header-icon-btn" data-bs-toggle="dropdown" aria-expanded="false" title="Compte">
+                            <i class="fas fa-user-circle"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><h6 class="dropdown-header">{{ user.get_full_name|default:user.username }}</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'finance:user_profile' %}"><i class="fas fa-user me-2"></i>Mon profil</a></li>
+                            <li><a class="dropdown-item" href="{% url 'finance:settings' %}"><i class="fas fa-cog me-2"></i>Paramètres</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'finance:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+                        </ul>
                     </div>
                 </div>
             </header>
@@ -225,34 +256,8 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- ===== FOOTER ===== -->
-    <footer class="app-footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-copyright">
-                    <i class="fas fa-copyright me-1"></i>
-                    <span>2025 SyndicPro - Système de Gestion de Syndic</span>
-                </div>
-                <div class="footer-links">
-                    <a href="#" class="footer-link">
-                        <i class="fas fa-question-circle me-1"></i>Aide
-                    </a>
-                    <span class="footer-separator">|</span>
-                    <a href="#" class="footer-link">
-                        <i class="fas fa-envelope me-1"></i>Contact
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
     <!-- ===== BOUTONS FLOTTANTS ===== -->
     {% if user.is_authenticated %}
-    <!-- Assistant virtuel (tous utilisateurs) -->
-    <a href="{% url 'finance:chatbot' %}" class="chatbot-fab" title="Assistant virtuel">
-        <i class="fas fa-robot"></i>
-    </a>
-
     <!-- Actions rapides (syndics seulement) -->
     {% if user.role in 'SUPERADMIN,SYNDIC' %}
     <button class="fab" onclick="showQuickActions()" title="Actions rapides">
@@ -266,6 +271,9 @@
         data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
         data-role="{% if user.is_authenticated %}{{ user.role }}{% endif %}">
     </div>
+
+    <!-- ===== TOAST REGION ===== -->
+    <div id="spToastRegion" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;"></div>
 
     <!-- ===== SCRIPTS ===== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -375,6 +383,9 @@
 
             // ===== MOBILE NAVIGATION ENHANCEMENTS =====
             enhanceMobileNavigation();
+
+            // ===== CONFIRMATION DIALOGS GLOBAUX =====
+            initializeConfirmActions();
         });
 
         // ===== FONCTIONS NAVIGATION SYNDIC =====
@@ -401,9 +412,14 @@
                     const headerBadge = document.querySelector('.header-badge');
                     if (headerBadge) {
                         const total = (data.unread_notifications || 0) + (data.overdue_count || 0);
-                        headerBadge.textContent = total > 0 ? total : '';
-                        headerBadge.style.display = total > 0 ? 'block' : 'none';
+                        headerBadge.textContent = total > 0 ? total : '0';
+                        headerBadge.style.display = 'inline-flex';
                     }
+
+                    // Compteurs du menu de notifications
+                    updateBadge('notifBadgeUnread', data.unread_notifications || 0);
+                    updateBadge('notifBadgeOverdue', data.overdue_count || 0);
+                    updateBadge('notifBadgeDocs', data.total_documents || 0);
                 })
                 .catch(error => {
                     console.log('Erreur mise à jour badges:', error);
@@ -707,6 +723,51 @@
                 chart.update();
             });
         }
+
+        function initializeConfirmActions() {
+            document.addEventListener('click', function (event) {
+                const trigger = event.target.closest('[data-confirm]');
+                if (!trigger) return;
+                const message = trigger.getAttribute('data-confirm') || 'Êtes-vous sûr de vouloir continuer ?';
+                if (!window.confirm(message)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            const region = document.getElementById('spToastRegion');
+            if (!region) return;
+
+            const toneMap = {
+                success: 'text-bg-success',
+                danger: 'text-bg-danger',
+                error: 'text-bg-danger',
+                warning: 'text-bg-warning',
+                info: 'text-bg-primary'
+            };
+            const tone = toneMap[type] || toneMap.info;
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center border-0 ${tone}`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fermer"></button>
+                </div>
+            `;
+            region.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast, { delay: 4000 });
+            bsToast.show();
+            toast.addEventListener('hidden.bs.toast', () => toast.remove());
+        }
+
+        window.SaaSUX = {
+            toast: showToast
+        };
     </script>
 
     <!-- ===== STYLES ADDITIONNELS ===== -->
@@ -806,7 +867,5 @@
     <!-- ===== JAVASCRIPT ADDITIONNEL ===== -->
     {% block extra_js %}{% endblock %}
 </body>
-
-</html>
 
 </html>

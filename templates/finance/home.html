@@ -4,175 +4,629 @@
 {% block title %}Accueil{% endblock %}
 
 {% block content %}
-<!-- ===== HERO SECTION ===== -->
-<section class="hero-section">
-    <div class="container">
-        <div class="row align-items-center min-vh-50">
-            <div class="col-md-6">
-                <h1 class="hero-title text-primary mb-4">
-                    Bienvenue sur <strong>SyndicPro</strong>
+<section class="lp-hero">
+    <span class="lp-orb lp-orb-one" aria-hidden="true"></span>
+    <span class="lp-orb lp-orb-two" aria-hidden="true"></span>
+
+    <div class="container lp-shell">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6">
+                <div class="lp-badge">
+                    <i class="fas fa-building-shield"></i>
+                    Solution syndic nouvelle generation
+                </div>
+
+                <h1 class="lp-title">
+                    Gere ta copropriete avec
+                    <span>clarte, vitesse et controle.</span>
                 </h1>
-                <p class="hero-subtitle text-muted mb-5">
-                    La solution moderne et complète pour la gestion de votre copropriété.
-                    Simplifiez vos tâches quotidiennes avec notre interface intuitive.
+
+                <p class="lp-subtitle">
+                    SyndicPro centralise residents, paiements, depenses, documents et notifications dans un seul espace moderne.
                 </p>
-                
-                {% if user.is_authenticated %}
-                    {% if user.role == 'RESIDENT' %}
-                    <div class="d-flex gap-3 flex-wrap">
-                        <a href="{% url 'finance:resident_dashboard' %}" class="btn-modern btn-primary">
+
+                <div class="lp-actions">
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'RESIDENT' %}
+                        <a href="{% url 'finance:resident_dashboard' %}" class="btn lp-btn-primary">
                             <i class="fas fa-home"></i>
                             Mon Espace
                         </a>
-                        <a href="{% url 'finance:document_list' %}" class="btn-modern btn-outline">
-                            <i class="fas fa-file-alt"></i>
+                        <a href="{% url 'finance:document_list' %}" class="btn lp-btn-secondary">
+                            <i class="fas fa-file-lines"></i>
                             Mes Documents
                         </a>
-                    </div>
-                    {% else %}
-                    <div class="d-flex gap-3 flex-wrap">
-                        <a href="{% url 'finance:syndic_dashboard' %}" class="btn-modern btn-primary">
-                            <i class="fas fa-tachometer-alt"></i>
+                        {% else %}
+                        <a href="{% url 'finance:syndic_dashboard' %}" class="btn lp-btn-primary">
+                            <i class="fas fa-chart-line"></i>
                             Tableau de Bord
                         </a>
-                        <a href="{% url 'finance:resident_management' %}" class="btn-modern btn-outline">
+                        <a href="{% url 'finance:resident_management' %}" class="btn lp-btn-secondary">
                             <i class="fas fa-users"></i>
-                            Gérer Résidents
+                            Gerer Residents
                         </a>
-                    </div>
-                    {% endif %}
-                {% else %}
-                <div class="d-flex gap-3 flex-wrap">
-                    <a href="{% url 'finance:login' %}" class="btn-modern btn-primary">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Se Connecter
+                        {% endif %}
+                    {% else %}
+                    <a href="{% url 'finance:login' %}" class="btn lp-btn-primary">
+                        <i class="fas fa-right-to-bracket"></i>
+                        Se connecter
                     </a>
+                    <a href="{% url 'finance:register' %}" class="btn lp-btn-secondary">
+                        <i class="fas fa-user-plus"></i>
+                        Creer un compte
+                    </a>
+                    {% endif %}
                 </div>
-                {% endif %}
+
+                <div class="lp-meta-grid">
+                    <div class="lp-meta-item">
+                        <strong>Finance</strong>
+                        <span>Suivi des encaissements et depenses</span>
+                    </div>
+                    <div class="lp-meta-item">
+                        <strong>Documents</strong>
+                        <span>Generation et partage centralises</span>
+                    </div>
+                    <div class="lp-meta-item">
+                        <strong>Notifications</strong>
+                        <span>Relances et communication ciblee</span>
+                    </div>
+                </div>
             </div>
-            
-            <div class="col-md-6 text-center">
-                <div class="hero-illustration">
-                    <i class="fas fa-building fa-10x text-primary opacity-75"></i>
-                </div>
+
+            <div class="col-lg-6">
+                <aside class="lp-visual-card">
+                    <div class="lp-visual-head">
+                        <p>Vue operationnelle</p>
+                        <span>Temps reel</span>
+                    </div>
+
+                    <div class="lp-kpi-grid">
+                        <article class="lp-kpi-card">
+                            <small>Paiements mensuels</small>
+                            <h3>84 200 DH</h3>
+                            <span class="up"><i class="fas fa-arrow-up"></i> +12.4%</span>
+                        </article>
+                        <article class="lp-kpi-card">
+                            <small>Depenses mensuelles</small>
+                            <h3>51 480 DH</h3>
+                            <span class="neutral"><i class="fas fa-minus"></i> Stable</span>
+                        </article>
+                    </div>
+
+                    <div class="lp-progress-wrap">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small>Taux de recouvrement</small>
+                            <strong>78%</strong>
+                        </div>
+                        <div class="lp-progress-bar">
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <ul class="lp-alert-list list-unstyled mb-0">
+                        <li>
+                            <i class="fas fa-circle-check"></i>
+                            21 paiements verifies aujourd'hui
+                        </li>
+                        <li>
+                            <i class="fas fa-triangle-exclamation"></i>
+                            4 dossiers impayes a suivre
+                        </li>
+                        <li>
+                            <i class="fas fa-file-circle-plus"></i>
+                            9 nouveaux documents partages
+                        </li>
+                    </ul>
+                </aside>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ===== FONCTIONNALITÉS ===== -->
-{% if not user.is_authenticated %}
-<section class="features-section py-5">
+<section class="lp-features">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="text-primary">Fonctionnalités Principales</h2>
-            <p class="text-muted">Tout ce dont vous avez besoin pour gérer votre copropriété</p>
+        <div class="lp-section-head text-center">
+            <p class="lp-section-kicker">Fonctionnalites</p>
+            <h2>Une base solide pour la gestion syndic</h2>
+            <p>Une interface claire, des actions rapides, et des donnees exploitables.</p>
         </div>
 
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                {% include 'components/card.html' with title="Gestion des Résidents" content="Gérez facilement tous vos résidents, leurs informations et leurs paiements." icon="fas fa-users" %}
+        <div class="row g-4">
+            <div class="col-md-6 col-xl-3">
+                <article class="lp-feature-card">
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <h3>Residents</h3>
+                    <p>Gestion des profils, statuts, historiques et suivi de lots.</p>
+                </article>
             </div>
-            <div class="col-md-4 mb-4">
-                {% include 'components/card.html' with title="Documents et Factures" content="Créez et gérez tous vos documents administratifs en toute simplicité." icon="fas fa-file-alt" %}
+            <div class="col-md-6 col-xl-3">
+                <article class="lp-feature-card">
+                    <div class="icon"><i class="fas fa-wallet"></i></div>
+                    <h3>Finance</h3>
+                    <p>Paiements, depenses, impayes et vision mensuelle instantanee.</p>
+                </article>
             </div>
-            <div class="col-md-4 mb-4">
-                {% include 'components/card.html' with title="Suivi des Paiements" content="Suivez les paiements en temps réel avec des alertes automatiques." icon="fas fa-credit-card" %}
+            <div class="col-md-6 col-xl-3">
+                <article class="lp-feature-card">
+                    <div class="icon"><i class="fas fa-file-invoice"></i></div>
+                    <h3>Documents</h3>
+                    <p>Factures, rappels, PDFs et espace documentaire structure.</p>
+                </article>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <article class="lp-feature-card">
+                    <div class="icon"><i class="fas fa-bell"></i></div>
+                    <h3>Notifications</h3>
+                    <p>Communications ciblees avec priorites et suivi de lecture.</p>
+                </article>
             </div>
         </div>
     </div>
 </section>
-{% endif %}
 
-<!-- ===== STATISTIQUES (UTILISATEURS CONNECTÉS) ===== -->
-{% if user.is_authenticated %}
-<section class="stats-section py-5">
+<section class="lp-flow">
     <div class="container">
-        <h3 class="text-center text-primary mb-5">Aperçu Rapide</h3>
-
-        <div class="row">
-            {% if user.role == 'RESIDENT' %}
-                <!-- Statistiques résident -->
-                <div class="col-md-4 mb-4">
-                    {% include 'components/stats_card.html' with value=user.documents.count label="Mes Documents" icon="fas fa-file-alt" color="primary" %}
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="lp-step-card">
+                    <span>01</span>
+                    <h4>Centraliser les donnees</h4>
+                    <p>Residents, documents, paiements et depenses dans un seul flux.</p>
                 </div>
-                <div class="col-md-4 mb-4">
-                    {% include 'components/stats_card.html' with value=user.received_notifications.count label="Notifications" icon="fas fa-bell" color="warning" %}
+            </div>
+            <div class="col-md-4">
+                <div class="lp-step-card">
+                    <span>02</span>
+                    <h4>Analyser rapidement</h4>
+                    <p>KPIs, tendances et alertes pour identifier les priorites.</p>
                 </div>
-                <div class="col-md-4 mb-4">
-                    {% include 'components/stats_card.html' with value=user.resident_reports.count label="Mes Rapports" icon="fas fa-smile" color="success" %}
+            </div>
+            <div class="col-md-4">
+                <div class="lp-step-card">
+                    <span>03</span>
+                    <h4>Executer les actions</h4>
+                    <p>Relances, notifications et suivi avec retour immediat.</p>
                 </div>
-            {% else %}
-                <!-- Statistiques syndic -->
-                <div class="col-md-3 mb-4">
-                    {% include 'components/stats_card.html' with value=total_residents|default:0 label="Résidents" icon="fas fa-users" color="primary" %}
-                </div>
-                <div class="col-md-3 mb-4">
-                    {% include 'components/stats_card.html' with value=total_documents|default:0 label="Documents" icon="fas fa-file-alt" color="info" %}
-                </div>
-                <div class="col-md-3 mb-4">
-                    {% include 'components/stats_card.html' with value=total_notifications|default:0 label="Notifications" icon="fas fa-bell" color="warning" %}
-                </div>
-                <div class="col-md-3 mb-4">
-                    {% include 'components/stats_card.html' with value=total_reports|default:0 label="Rapports" icon="fas fa-smile" color="success" %}
-                </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </section>
-{% endif %}
 {% endblock %}
 
 {% block extra_css %}
 <style>
-/* ===== STYLES SPÉCIFIQUES À LA PAGE D'ACCUEIL ===== */
-.hero-section {
-    background: linear-gradient(135deg, var(--primary-bg) 0%, var(--white) 100%);
-    min-height: 70vh;
+.lp-hero {
+    position: relative;
+    padding: 3rem 0 2rem;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 10% 5%, rgba(37, 99, 235, 0.16), transparent 36%),
+        radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.14), transparent 30%),
+        linear-gradient(180deg, #f3f8ff 0%, #f8fbff 55%, #f8fafc 100%);
+}
+
+.lp-shell {
+    position: relative;
+    z-index: 1;
+}
+
+.lp-orb {
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+}
+
+.lp-orb-one {
+    width: 300px;
+    height: 300px;
+    top: -85px;
+    left: -110px;
+    background: rgba(37, 99, 235, 0.15);
+}
+
+.lp-orb-two {
+    width: 220px;
+    height: 220px;
+    right: -70px;
+    bottom: 20px;
+    background: rgba(14, 165, 233, 0.14);
+}
+
+.lp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.1);
+    color: #1d4ed8;
+    font-weight: 600;
+    font-size: 0.84rem;
+    margin-bottom: 1rem;
+}
+
+.lp-title {
+    font-size: clamp(2rem, 4vw, 3.3rem);
+    line-height: 1.05;
+    margin-bottom: 1rem;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.lp-title span {
+    display: block;
+    color: #1d4ed8;
+}
+
+.lp-subtitle {
+    font-size: 1.06rem;
+    color: #475569;
+    max-width: 560px;
+    margin-bottom: 1.5rem;
+}
+
+.lp-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.4rem;
+}
+
+.lp-btn-primary,
+.lp-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    height: 44px;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 0 1rem;
+}
+
+.lp-btn-primary {
+    background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.23);
+}
+
+.lp-btn-primary:hover {
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.lp-btn-secondary {
+    background: #fff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+}
+
+.lp-btn-secondary:hover {
+    color: #1d4ed8;
+    border-color: #93c5fd;
+}
+
+.lp-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.lp-meta-item {
+    border: 1px solid #dbeafe;
+    background: #fff;
+    border-radius: 12px;
+    padding: 0.75rem;
+}
+
+.lp-meta-item strong {
+    display: block;
+    font-size: 0.92rem;
+    color: #1e3a8a;
+    margin-bottom: 0.2rem;
+}
+
+.lp-meta-item span {
+    color: #475569;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.lp-visual-card {
+    background: rgba(255, 255, 255, 0.93);
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 20px;
+    padding: 1.2rem;
+    box-shadow: 0 20px 42px rgba(15, 23, 42, 0.1);
+}
+
+.lp-visual-head {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.95rem;
 }
 
-.hero-title {
-    font-size: 3.5rem;
-    font-weight: 800;
-    line-height: 1.1;
+.lp-visual-head p {
+    margin: 0;
+    color: #334155;
+    font-weight: 600;
 }
 
-.hero-subtitle {
-    font-size: var(--font-size-lg);
-    line-height: 1.6;
+.lp-visual-head span {
+    font-size: 0.78rem;
+    color: #0369a1;
+    background: #e0f2fe;
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem;
 }
 
-.hero-illustration {
-    animation: float 6s ease-in-out infinite;
+.lp-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.95rem;
 }
 
-.features-section {
-    background: var(--white);
+.lp-kpi-card {
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    padding: 0.8rem;
+    background: #fff;
 }
 
-.stats-section {
-    background: var(--gray-50);
+.lp-kpi-card small {
+    display: block;
+    color: #64748b;
+    margin-bottom: 0.4rem;
 }
 
-.min-vh-50 {
-    min-height: 50vh;
+.lp-kpi-card h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #0f172a;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .hero-title {
-        font-size: 2.5rem;
+.lp-kpi-card span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.lp-kpi-card span.up {
+    color: #15803d;
+}
+
+.lp-kpi-card span.neutral {
+    color: #475569;
+}
+
+.lp-progress-wrap {
+    border: 1px solid #dbeafe;
+    border-radius: 14px;
+    background: #fff;
+    padding: 0.75rem;
+    margin-bottom: 0.95rem;
+}
+
+.lp-progress-wrap small {
+    color: #64748b;
+}
+
+.lp-progress-wrap strong {
+    color: #0f172a;
+}
+
+.lp-progress-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.lp-progress-bar span {
+    display: block;
+    width: 78%;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #1d4ed8, #0284c7);
+}
+
+.lp-alert-list {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+}
+
+.lp-alert-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #334155;
+    font-size: 0.85rem;
+}
+
+.lp-alert-list i {
+    color: #0ea5e9;
+}
+
+.lp-features,
+.lp-flow {
+    padding: 3rem 0;
+}
+
+.lp-features {
+    background: #ffffff;
+}
+
+.lp-flow {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.lp-section-head {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+}
+
+.lp-section-kicker {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #1d4ed8;
+    font-weight: 700;
+    font-size: 0.77rem;
+    margin-bottom: 0.55rem;
+}
+
+.lp-section-head h2 {
+    font-size: clamp(1.55rem, 2.5vw, 2.25rem);
+    color: #0f172a;
+    margin-bottom: 0.6rem;
+}
+
+.lp-section-head p {
+    color: #64748b;
+    margin: 0;
+}
+
+.lp-feature-card,
+.lp-step-card {
+    height: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    background: #fff;
+    padding: 1.15rem;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.lp-feature-card:hover,
+.lp-step-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
+    border-color: #c7ddff;
+}
+
+.lp-feature-card .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 1.1rem;
+    background: #dbeafe;
+    color: #1d4ed8;
+    margin-bottom: 0.75rem;
+}
+
+.lp-feature-card h3,
+.lp-step-card h4 {
+    color: #0f172a;
+    margin-bottom: 0.45rem;
+    font-size: 1.02rem;
+}
+
+.lp-feature-card p,
+.lp-step-card p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.lp-step-card span {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #1d4ed8;
+    background: #dbeafe;
+    margin-bottom: 0.65rem;
+}
+
+[data-theme="dark"] .lp-hero {
+    background:
+        radial-gradient(circle at 10% 5%, rgba(37, 99, 235, 0.2), transparent 36%),
+        radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.2), transparent 30%),
+        linear-gradient(180deg, #0b1220 0%, #0f172a 60%, #0b1220 100%);
+}
+
+[data-theme="dark"] .lp-title,
+[data-theme="dark"] .lp-section-head h2,
+[data-theme="dark"] .lp-feature-card h3,
+[data-theme="dark"] .lp-step-card h4,
+[data-theme="dark"] .lp-kpi-card h3 {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .lp-subtitle,
+[data-theme="dark"] .lp-meta-item span,
+[data-theme="dark"] .lp-section-head p,
+[data-theme="dark"] .lp-feature-card p,
+[data-theme="dark"] .lp-step-card p,
+[data-theme="dark"] .lp-alert-list li {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .lp-btn-secondary,
+[data-theme="dark"] .lp-meta-item,
+[data-theme="dark"] .lp-visual-card,
+[data-theme="dark"] .lp-kpi-card,
+[data-theme="dark"] .lp-progress-wrap,
+[data-theme="dark"] .lp-feature-card,
+[data-theme="dark"] .lp-step-card {
+    background: rgba(15, 23, 42, 0.88);
+    border-color: #334155;
+}
+
+[data-theme="dark"] .lp-features,
+[data-theme="dark"] .lp-flow {
+    background: #0b1220;
+}
+
+[data-theme="dark"] .lp-visual-head p,
+[data-theme="dark"] .lp-progress-wrap strong {
+    color: #cbd5e1;
+}
+
+[data-theme="dark"] .lp-progress-bar {
+    background: #334155;
+}
+
+@media (max-width: 991.98px) {
+    .lp-hero {
+        padding-top: 2rem;
     }
-    
-    .hero-section {
-        min-height: 60vh;
-        text-align: center;
+
+    .lp-meta-grid {
+        grid-template-columns: 1fr;
     }
-    
-    .hero-illustration {
-        margin-top: var(--spacing-8);
+}
+
+@media (max-width: 575.98px) {
+    .lp-title {
+        font-size: 1.85rem;
+    }
+
+    .lp-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lp-actions {
+        gap: 0.6rem;
+    }
+
+    .lp-btn-primary,
+    .lp-btn-secondary {
+        width: 100%;
+        justify-content: center;
     }
 }
 </style>
