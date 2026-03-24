@@ -1,0 +1,16 @@
+{% autoescape off %}
+New Message on Ticket #{{ ticket.id }}
+
+Hello,
+
+A new message has been added to ticket #{{ ticket.id }}: {{ ticket.title }}
+
+Message from: {{ author_name }}
+Message: {{ message.message|truncatewords:100 }}
+
+View the full conversation:
+{{ request.build_absolute_uri }}/tickets/{{ ticket.id }}/
+
+Best regards,
+Snadik.ma System
+{% endautoescape %}

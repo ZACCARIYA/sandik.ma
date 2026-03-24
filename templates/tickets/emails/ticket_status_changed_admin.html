@@ -1,0 +1,19 @@
+{% autoescape off %}
+Ticket Status Changed
+
+Hello {{ recipient.get_full_name }},
+
+A ticket that may require your attention has had its status changed.
+
+Ticket Details:
+- Ticket ID: #{{ ticket.id }}
+- Title: {{ ticket.title }}
+- Resident: {{ ticket.resident.get_full_name }}
+- Previous Status: {{ old_status|title }}
+- New Status: {{ new_status|title }}
+
+Please review the ticket if needed.
+
+Best regards,
+Snadik.ma System
+{% endautoescape %}

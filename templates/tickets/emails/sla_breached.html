@@ -1,0 +1,19 @@
+{% autoescape off %}
+⚠️ SLA Breached - Urgent Action Required
+
+Hello,
+
+A ticket has exceeded its SLA (Service Level Agreement) deadline and requires immediate attention.
+
+Ticket Details:
+- Ticket ID: #{{ ticket.id }}
+- Title: {{ ticket.title }}
+- Priority: {{ ticket.get_priority_display }}
+- SLA Due Date: {{ sla_due_date|date:"M d, Y H:i" }}
+- Status: {{ ticket.get_status_display }}
+
+Please take immediate action to resolve this ticket.
+
+Best regards,
+Snadik.ma System
+{% endautoescape %}

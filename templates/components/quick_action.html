@@ -1,10 +1,10 @@
 <!-- ===== COMPOSANT ACTION RAPIDE ===== -->
 <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
-    <a href="{{ url }}" class="quick-action-card">
-        <div class="action-icon {{ icon_class }}">
+    <a href="{{ url }}" class="quick-action-card text-decoration-none p-3 d-flex flex-column align-items-center justify-content-center gap-2 h-100">
+        <div class="action-icon {{ icon_class }} rounded-3 d-inline-flex align-items-center justify-content-center" style="width:36px;height:36px;">
             <i class="{{ icon }}"></i>
         </div>
-        <h6>{{ title }}</h6>
-        <small class="text-muted">{{ description }}</small>
+        <h6 class="mb-0 text-center">{{ title }}</h6>
+        <small class="text-muted text-center">{{ description }}</small>
     </a>
 </div>

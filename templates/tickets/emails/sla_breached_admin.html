@@ -1,0 +1,15 @@
+{% autoescape off %}
+⚠️ SLA Breached - Alert
+
+Hello {{ recipient.get_full_name }},
+
+A ticket has exceeded its SLA deadline.
+
+Ticket: #{{ ticket.id }} - {{ ticket.title }}
+SLA Due: {{ sla_due_date|date:"M d, Y H:i" }}
+
+Please review and take appropriate action.
+
+Best regards,
+Snadik.ma System
+{% endautoescape %}

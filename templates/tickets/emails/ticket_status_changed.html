@@ -1,0 +1,22 @@
+{% autoescape off %}
+Ticket Status Updated
+
+Hello {{ recipient.get_full_name }},
+
+The status of your ticket has been updated.
+
+Ticket Details:
+- Ticket ID: #{{ ticket.id }}
+- Title: {{ ticket.title }}
+- Previous Status: {{ old_status|title }}
+- New Status: {{ new_status|title }}
+- Updated: {{ ticket.updated_at|date:"M d, Y H:i" }}
+
+You can view your ticket and add messages here:
+{{ request.build_absolute_uri }}/tickets/{{ ticket.id }}/
+
+We appreciate your patience as we work on your request.
+
+Best regards,
+Snadik.ma Support Team
+{% endautoescape %}

@@ -22,6 +22,11 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('finance.urls')),
+    path('system/accounts/', include('accounts.urls')),
+    path('system/residents/', include('residents.urls')),
+    path('system/documents/', include('documents.urls')),
+    path('system/notifications/', include('notifications.urls')),
+    path('tickets/', include('tickets.urls')),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tickets - Snadik.ma{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ticket-list-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .ticket-status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+    
+    .status-open { background-color: #dc3545; color: white; }
+    .status-in_progress { background-color: #0dcaf0; color: white; }
+    .status-resolved { background-color: #198754; color: white; }
+    .status-closed { background-color: #6c757d; color: white; }
+    .status-reopened { background-color: #0d6efd; color: white; }
+    
+    .ticket-priority-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .priority-urgent { background-color: #dc3545; color: white; }
+    .priority-high { background-color: #fd7e14; color: white; }
+    .priority-medium { background-color: #ffc107; color: #333; }
+    .priority-low { background-color: #28a745; color: white; }
+    
+    .ticket-row:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .filter-card {
+        background-color: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-left: 4px solid;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card.stat-open { border-left-color: #dc3545; }
+    .stat-card.stat-in-progress { border-left-color: #0dcaf0; }
+    .stat-card.stat-resolved { border-left-color: #198754; }
+    .stat-card.stat-urgent { border-left-color: #fd7e14; }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: #666;
+        text-transform: uppercase;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="ticket-list-header">
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    {% if user.role == 'RESIDENT' %}
+                        My Tickets
+                    {% else %}
+                        Ticket Management System
+                    {% endif %}
+                </h1>
+                <p class="mb-0 opacity-75">Manage complaints and maintenance requests</p>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if user.role == 'RESIDENT' %}
+                    <a href="{% url 'tickets:create' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-plus-circle"></i> Report Issue
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Statistics -->
+        {% if stats %}
+        <div class="col-md-12">
+            <div class="row mb-4">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card stat-open">
+                        <div class="stat-number">{{ stats.total_open }}</div>
+                        <div class="stat-label">Open Tickets</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card stat-in-progress">
+                        <div class="stat-number">{{ stats.total_in_progress }}</div>
+                        <div class="stat-label">In Progress</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card stat-resolved">
+                        <div class="stat-number">{{ stats.total_resolved }}</div>
+                        <div class="stat-label">Resolved</div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card stat-urgent">
+                        <div class="stat-number">{{ stats.urgent_open }}</div>
+                        <div class="stat-label">Urgent</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Sidebar Filters -->
+        <div class="col-md-3">
+            <div class="filter-card">
+                <h5 class="mb-3">Filters</h5>
+                <form method="get" id="filter-form">
+                    <!-- Search -->
+                    <div class="mb-3">
+                        <label for="search" class="form-label">Search</label>
+                        <input 
+                            type="text" 
+                            class="form-control form-control-sm" 
+                            id="search" 
+                            name="q" 
+                            placeholder="Search tickets..."
+                            value="{{ current_search }}"
+                        >
+                    </div>
+                    
+                    <!-- Status Filter -->
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select form-select-sm" id="status" name="status">
+                            <option value="">All Statuses</option>
+                            {% for value, label in statuses %}
+                                <option value="{{ value }}" {% if value == current_status %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Priority Filter -->
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select class="form-select form-select-sm" id="priority" name="priority">
+                            <option value="">All Priorities</option>
+                            {% for value, label in priorities %}
+                                <option value="{{ value }}" {% if value == current_priority %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Category Filter -->
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select form-select-sm" id="category" name="category">
+                            <option value="">All Categories</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if cat.id|stringformat:"i" == current_category %}selected{% endif %}>
+                                    {{ cat.name_en }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Assignment Filter (Admin only) -->
+                    {% if user.role != 'RESIDENT' %}
+                    <div class="mb-3">
+                        <label for="assigned" class="form-label">Assignment</label>
+                        <select class="form-select form-select-sm" id="assigned" name="assigned">
+                            <option value="">All</option>
+                            <option value="unassigned" {% if current_assigned == "unassigned" %}selected{% endif %}>
+                                Unassigned
+                            </option>
+                            <option value="assigned_to_me" {% if current_assigned == "assigned_to_me" %}selected{% endif %}>
+                                Assigned to Me
+                            </option>
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Submit -->
+                    <button type="submit" class="btn btn-primary btn-sm w-100 mb-2">
+                        <i class="bi bi-funnel"></i> Apply Filters
+                    </button>
+                    <a href="{% url 'tickets:list' %}" class="btn btn-secondary btn-sm w-100">
+                        Clear Filters
+                    </a>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Tickets List -->
+        <div class="col-md-9">
+            {% if tickets %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            {% if user.role != 'RESIDENT' %}
+                                <th>Resident</th>
+                            {% endif %}
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Assigned</th>
+                            <th>Created</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr class="ticket-row" onclick="window.location='{% url 'tickets:detail' ticket.id %}'">
+                            <td>
+                                <a href="{% url 'tickets:detail' ticket.id %}">
+                                    #{{ ticket.id }}
+                                </a>
+                            </td>
+                            <td>
+                                <strong>{{ ticket.title|truncatewords:8 }}</strong>
+                                <br>
+                                <small class="text-muted">{{ ticket.category.name_en }}</small>
+                            </td>
+                            {% if user.role != 'RESIDENT' %}
+                                <td>{{ ticket.resident.get_full_name }}</td>
+                            {% endif %}
+                            <td>
+                                <span class="ticket-status-badge status-{{ ticket.status }}">
+                                    {{ ticket.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="ticket-priority-badge priority-{{ ticket.priority }}">
+                                    {{ ticket.get_priority_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if ticket.assigned_to %}
+                                    <small>{{ ticket.assigned_to.get_full_name }}</small>
+                                {% else %}
+                                    <small class="text-muted">Unassigned</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ ticket.created_at|date:"M d, H:i" }}
+                                </small>
+                            </td>
+                            <td style="cursor: pointer;">
+                                <i class="bi bi-chevron-right text-muted"></i>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if current_search %}&q={{ current_search }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_search %}&q={{ current_search }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_search %}&q={{ current_search }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_search %}&q={{ current_search }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h4>No tickets found</h4>
+                <p class="text-muted">
+                    {% if user.role == 'RESIDENT' %}
+                        You haven't reported any issues yet.
+                        <a href="{% url 'tickets:create' %}">Create your first ticket</a>
+                    {% else %}
+                        No tickets match your filters. Try adjusting your search criteria.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-submit form on filter change
+    document.querySelectorAll('#filter-form select').forEach(select => {
+        select.addEventListener('change', function() {
+            document.getElementById('filter-form').submit();
+        });
+    });
+</script>
+{% endblock %}

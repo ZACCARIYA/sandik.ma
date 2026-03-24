@@ -4,499 +4,524 @@
 {% block title %}Inscription - SyndicPro{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="login-card">
-                    <div class="login-header">
-                        <div class="login-logo animate-pulse">
-                            <img src="{% static 'images/logos/logo.svg' %}" alt="SyndicPro" class="logo-main">
-                        </div>
-                        <h2 class="text-gradient">Inscription</h2>
-                        <p>Créez votre compte résident</p>
-                    </div>
-                    
-                    <!-- Messages d'erreur/succès -->
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert-modern alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-4" role="alert">
-                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
+<section class="auth-register-page">
+    <span class="auth-r-orb auth-r-orb-one" aria-hidden="true"></span>
+    <span class="auth-r-orb auth-r-orb-two" aria-hidden="true"></span>
+
+    <div class="container-fluid px-3 px-md-4">
+        <div class="row justify-content-center align-items-stretch g-4 auth-r-grid">
+            <div class="col-lg-5 d-none d-lg-block">
+                <aside class="auth-r-brand-card h-100">
+                    <img src="{% static 'images/logos/logo.svg' %}" alt="SyndicPro" class="auth-r-logo">
+                    <p class="auth-r-kicker">Onboarding resident</p>
+                    <h1>Creer un compte resident en moins de 2 minutes.</h1>
+                    <p class="auth-r-lead">Inscription simple et securisee pour acceder a vos documents, paiements et notifications syndic.</p>
+
+                    <ul class="auth-r-points list-unstyled mb-0">
+                        <li><i class="fas fa-id-card"></i> Un compte unique par appartement</li>
+                        <li><i class="fas fa-file-circle-check"></i> Acces direct a vos documents</li>
+                        <li><i class="fas fa-bell"></i> Notifications en temps reel</li>
+                    </ul>
+                </aside>
+            </div>
+
+            <div class="col-12 col-lg-7 col-xl-6">
+                <section class="auth-r-form-card">
+                    <header class="auth-r-header">
+                        <h2>Inscription resident</h2>
+                        <p>Completez les informations pour activer votre espace.</p>
+                    </header>
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
                         {% endfor %}
+                    </div>
                     {% endif %}
-                    
-                    <form method="post" class="login-form">
+
+                    <form method="post" id="registerForm" novalidate>
                         {% csrf_token %}
-                        
-                        <div class="row">
+
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="username">Nom d'utilisateur *</label>
-                                    <input type="text" 
-                                           class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
-                                           id="username" 
-                                           name="username" 
-                                           required 
-                                           value="{{ form.username.value|default:'' }}"
-                                           placeholder="Votre nom d'utilisateur">
+                                <label for="username" class="form-label">Nom d'utilisateur *</label>
+                                <div class="auth-r-input-wrap">
+                                    <i class="fas fa-user auth-r-input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="text"
+                                        class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                                        id="username"
+                                        name="username"
+                                        value="{{ form.username.value|default:'' }}"
+                                        autocomplete="username"
+                                        placeholder="Ex: resident.aitali"
+                                        required
+                                    >
                                     {% if form.username.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.username.errors %}{{ error }}{% endfor %}
-                                        </div>
+                                    <div class="invalid-feedback d-block">{{ form.username.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                             </div>
+
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="email">Email *</label>
-                                    <input type="email" 
-                                           class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
-                                           id="email" 
-                                           name="email" 
-                                           required 
-                                           value="{{ form.email.value|default:'' }}"
-                                           placeholder="votre@email.com">
+                                <label for="email" class="form-label">Email *</label>
+                                <div class="auth-r-input-wrap">
+                                    <i class="fas fa-envelope auth-r-input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="email"
+                                        class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+                                        id="email"
+                                        name="email"
+                                        value="{{ form.email.value|default:'' }}"
+                                        autocomplete="email"
+                                        placeholder="nom@email.com"
+                                        required
+                                    >
                                     {% if form.email.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.email.errors %}{{ error }}{% endfor %}
-                                        </div>
+                                    <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="row">
+
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="first_name">Prénom *</label>
-                                    <input type="text" 
-                                           class="form-control {% if form.first_name.errors %}is-invalid{% endif %}" 
-                                           id="first_name" 
-                                           name="first_name" 
-                                           required 
-                                           value="{{ form.first_name.value|default:'' }}"
-                                           placeholder="Votre prénom">
+                                <label for="first_name" class="form-label">Prenom *</label>
+                                <div class="auth-r-input-wrap">
+                                    <i class="fas fa-signature auth-r-input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="text"
+                                        class="form-control {% if form.first_name.errors %}is-invalid{% endif %}"
+                                        id="first_name"
+                                        name="first_name"
+                                        value="{{ form.first_name.value|default:'' }}"
+                                        autocomplete="given-name"
+                                        placeholder="Votre prenom"
+                                        required
+                                    >
                                     {% if form.first_name.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.first_name.errors %}{{ error }}{% endfor %}
-                                        </div>
+                                    <div class="invalid-feedback d-block">{{ form.first_name.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                             </div>
+
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="last_name">Nom *</label>
-                                    <input type="text" 
-                                           class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" 
-                                           id="last_name" 
-                                           name="last_name" 
-                                           required 
-                                           value="{{ form.last_name.value|default:'' }}"
-                                           placeholder="Votre nom">
+                                <label for="last_name" class="form-label">Nom *</label>
+                                <div class="auth-r-input-wrap">
+                                    <i class="fas fa-user-tag auth-r-input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="text"
+                                        class="form-control {% if form.last_name.errors %}is-invalid{% endif %}"
+                                        id="last_name"
+                                        name="last_name"
+                                        value="{{ form.last_name.value|default:'' }}"
+                                        autocomplete="family-name"
+                                        placeholder="Votre nom"
+                                        required
+                                    >
                                     {% if form.last_name.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.last_name.errors %}{{ error }}{% endfor %}
-                                        </div>
+                                    <div class="invalid-feedback d-block">{{ form.last_name.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="apartment">Appartement / Lot *</label>
-                            <input type="text" 
-                                   class="form-control {% if form.apartment.errors %}is-invalid{% endif %}" 
-                                   id="apartment" 
-                                   name="apartment" 
-                                   required 
-                                   value="{{ form.apartment.value|default:'' }}"
-                                   placeholder="Ex: A1, B12, etc.">
-                            {% if form.apartment.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.apartment.errors %}{{ error }}{% endfor %}
-                                </div>
-                            {% endif %}
-                            <small class="text-muted">Un seul compte par appartement</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="phone">Téléphone</label>
-                            <input type="tel" 
-                                   class="form-control {% if form.phone.errors %}is-invalid{% endif %}" 
-                                   id="phone" 
-                                   name="phone" 
-                                   value="{{ form.phone.value|default:'' }}"
-                                   placeholder="+212 6XX XXX XXX">
-                            {% if form.phone.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.phone.errors %}{{ error }}{% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="row">
+
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="password1">Mot de passe *</label>
-                                    <input type="password" 
-                                           class="form-control {% if form.password1.errors %}is-invalid{% endif %}" 
-                                           id="password1" 
-                                           name="password1" 
-                                           required 
-                                           placeholder="Minimum 8 caractères">
+                                <label for="apartment" class="form-label">Appartement / Lot *</label>
+                                <div class="auth-r-input-wrap">
+                                    <i class="fas fa-building auth-r-input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="text"
+                                        class="form-control {% if form.apartment.errors %}is-invalid{% endif %}"
+                                        id="apartment"
+                                        name="apartment"
+                                        value="{{ form.apartment.value|default:'' }}"
+                                        placeholder="Ex: B-12"
+                                        required
+                                    >
+                                    {% if form.apartment.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.apartment.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">Un seul compte est autorise par appartement.</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Telephone</label>
+                                <div class="auth-r-input-wrap">
+                                    <i class="fas fa-phone auth-r-input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="tel"
+                                        class="form-control {% if form.phone.errors %}is-invalid{% endif %}"
+                                        id="phone"
+                                        name="phone"
+                                        value="{{ form.phone.value|default:'' }}"
+                                        autocomplete="tel"
+                                        placeholder="+212 6XX XXX XXX"
+                                    >
+                                    {% if form.phone.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.phone.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="password1" class="form-label">Mot de passe *</label>
+                                <div class="auth-r-input-wrap">
+                                    <i class="fas fa-lock auth-r-input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="password"
+                                        class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+                                        id="password1"
+                                        name="password1"
+                                        autocomplete="new-password"
+                                        placeholder="Minimum 8 caracteres"
+                                        required
+                                    >
+                                    <button type="button" class="auth-r-toggle" data-target="password1" aria-label="Afficher le mot de passe">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                     {% if form.password1.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.password1.errors %}{{ error }}{% endfor %}
-                                        </div>
+                                    <div class="invalid-feedback d-block">{{ form.password1.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                             </div>
+
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="password2">Confirmer le mot de passe *</label>
-                                    <input type="password" 
-                                           class="form-control {% if form.password2.errors %}is-invalid{% endif %}" 
-                                           id="password2" 
-                                           name="password2" 
-                                           required 
-                                           placeholder="Répétez le mot de passe">
+                                <label for="password2" class="form-label">Confirmer le mot de passe *</label>
+                                <div class="auth-r-input-wrap">
+                                    <i class="fas fa-shield-halved auth-r-input-icon" aria-hidden="true"></i>
+                                    <input
+                                        type="password"
+                                        class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+                                        id="password2"
+                                        name="password2"
+                                        autocomplete="new-password"
+                                        placeholder="Repetez le mot de passe"
+                                        required
+                                    >
+                                    <button type="button" class="auth-r-toggle" data-target="password2" aria-label="Afficher le mot de passe">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                     {% if form.password2.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.password2.errors %}{{ error }}{% endfor %}
-                                        </div>
+                                    <div class="invalid-feedback d-block">{{ form.password2.errors.0 }}</div>
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
-                        
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-user-plus me-2"></i>S'inscrire
+
+                        <button type="submit" class="btn auth-r-submit-btn w-100 mt-4" id="registerSubmitBtn">
+                            <span class="btn-label"><i class="fas fa-user-plus me-2"></i>Creer mon compte</span>
                         </button>
-                        
-                        <div class="text-center mt-4">
-                            <p class="text-muted">
-                                Vous avez déjà un compte ? 
-                                <a href="{% url 'finance:login' %}" class="text-primary fw-bold">Se connecter</a>
-                            </p>
-                        </div>
+
+                        <p class="auth-r-login-hint text-center mb-0">
+                            Vous avez deja un compte ?
+                            <a href="{% url 'finance:login' %}" class="fw-semibold">Se connecter</a>
+                        </p>
                     </form>
-                    
-                </div>
+                </section>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-/* ===== STYLES MODERNES POUR PAGE D'INSCRIPTION ===== */
-
-.login-container {
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    background-size: 400% 400%;
-    animation: gradient-shift 15s ease infinite;
-    padding: 2rem 0;
-    display: flex;
-    align-items: center;
+.auth-register-page {
     position: relative;
+    min-height: calc(100vh - var(--navbar-height));
+    padding: 2.3rem 0 1.7rem;
     overflow: hidden;
+    background:
+        radial-gradient(circle at 10% 8%, rgba(37, 99, 235, 0.17), transparent 35%),
+        radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.18), transparent 30%),
+        linear-gradient(170deg, #f4f8ff 0%, #f7fbff 52%, #f8fafc 100%);
 }
 
-.login-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
-    pointer-events: none;
-}
-
-.login-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 24px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255, 255, 255, 0.3);
-    padding: 3rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+.auth-r-grid {
     position: relative;
     z-index: 1;
-    animation: slideInUp 0.8s ease-out;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 1180px;
+    margin: 0 auto;
 }
 
-.login-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255, 255, 255, 0.4);
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes gradient-shift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-.login-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-}
-
-.login-logo {
-    margin-bottom: 1.5rem;
-    animation: float 3s ease-in-out infinite;
-}
-
-.login-logo img {
-    width: 80px;
-    height: 80px;
-    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
-    transition: transform 0.3s ease;
-}
-
-.login-logo:hover img {
-    transform: scale(1.1) rotate(5deg);
-}
-
-.login-header h2 {
-    color: #2d3748;
-    font-size: 2.2rem;
-    font-weight: 800;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
-}
-
-.login-header .text-gradient {
-    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.login-header p {
-    color: #718096;
-    font-size: 1.1rem;
-    margin: 0;
-    font-weight: 500;
-}
-
-.login-form .form-group {
-    margin-bottom: 1.8rem;
-    position: relative;
-}
-
-.login-form label {
-    display: block;
-    margin-bottom: 0.8rem;
-    color: #2d3748;
-    font-weight: 600;
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.login-form .form-control {
-    width: 100%;
-    padding: 1rem 1.2rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #f7fafc;
-    font-weight: 500;
-    color: #2d3748;
-    position: relative;
-}
-
-.login-form .form-control:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 4px 12px rgba(102, 126, 234, 0.1);
-    background: white;
-    transform: translateY(-3px) scale(1.01);
-}
-
-.login-form .form-control.is-invalid {
-    border-color: #f43f5e;
-}
-
-.login-form .form-control.is-invalid:focus {
-    border-color: #f43f5e;
-    box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.15);
-}
-
-.login-form .form-control::placeholder {
-    color: #a0aec0;
-    font-weight: 400;
-}
-
-.login-form .invalid-feedback {
-    display: block;
-    color: #f43f5e;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-}
-
-.login-form .btn {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    border-radius: 16px;
-    margin-top: 1.5rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border: none;
-    color: white;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-}
-
-.login-form .btn::before {
-    content: '';
+.auth-r-orb {
     position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-}
-
-.login-form .btn:hover::before {
-    left: 100%;
-}
-
-.login-form .btn:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.5);
-    background: linear-gradient(135deg, #764ba2, #667eea);
-}
-
-.login-form .btn:active {
-    transform: translateY(-1px);
-}
-
-.login-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(255,255,255,0.05) 0%, transparent 50%);
-    animation: float 6s ease-in-out infinite;
+    border-radius: 999px;
     pointer-events: none;
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
+.auth-r-orb-one {
+    width: 280px;
+    height: 280px;
+    background: rgba(37, 99, 235, 0.15);
+    top: -90px;
+    left: -95px;
 }
 
-.login-form .form-group {
-    transition: transform 0.3s ease;
+.auth-r-orb-two {
+    width: 210px;
+    height: 210px;
+    background: rgba(14, 165, 233, 0.14);
+    right: -60px;
+    bottom: 35px;
 }
 
-.login-form .form-group:focus-within {
+.auth-r-brand-card,
+.auth-r-form-card {
+    border-radius: 24px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    box-shadow: 0 22px 46px rgba(15, 23, 42, 0.10);
+}
+
+.auth-r-brand-card {
+    background: linear-gradient(150deg, #0f3a8a 0%, #1348ae 55%, #0f9bca 100%);
+    color: #eaf3ff;
+    padding: 2.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.auth-r-logo {
+    width: 66px;
+    height: 66px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 0.45rem;
+}
+
+.auth-r-kicker {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    opacity: 0.84;
+}
+
+.auth-r-brand-card h1 {
+    margin: 0;
+    font-size: clamp(1.55rem, 1.8vw, 2rem);
+    line-height: 1.2;
+    font-weight: 760;
+}
+
+.auth-r-lead {
+    margin: 0;
+    color: rgba(234, 243, 255, 0.92);
+    line-height: 1.58;
+}
+
+.auth-r-points {
+    margin-top: 0.35rem;
+    display: grid;
+    gap: 0.72rem;
+}
+
+.auth-r-points li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.92rem;
+}
+
+.auth-r-form-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1.75rem;
+    transition: transform 0.24s ease, box-shadow 0.24s ease;
+}
+
+.auth-r-form-card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 26px 55px rgba(15, 23, 42, 0.13);
 }
 
-.text-muted {
-    font-size: 0.875rem;
-    color: #718096;
-    margin-top: 0.5rem;
-    display: block;
+.auth-r-header {
+    margin-bottom: 1.25rem;
 }
 
-.text-primary {
-    color: #667eea;
-    text-decoration: none;
+.auth-r-header h2 {
+    margin: 0;
+    font-size: 1.7rem;
+    color: #0f172a;
+    font-weight: 720;
+}
+
+.auth-r-header p {
+    margin: 0.42rem 0 0;
+    color: #64748b;
+}
+
+.auth-r-form-card .alert {
+    border-radius: 12px;
+    font-size: 0.92rem;
+}
+
+.auth-r-form-card .form-label {
+    color: #1e293b;
     font-weight: 600;
+    margin-bottom: 0.45rem;
 }
 
-.text-primary:hover {
-    color: #764ba2;
+.auth-r-input-wrap {
+    position: relative;
+}
+
+.auth-r-input-icon {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+.auth-r-form-card .form-control {
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    padding-left: 2.5rem;
+    padding-right: 2.7rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-r-form-card .form-control:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.auth-r-form-card .form-control::placeholder {
+    color: #94a3b8;
+}
+
+.auth-r-form-card .form-control.is-invalid {
+    border-color: #dc2626;
+}
+
+.auth-r-form-card .invalid-feedback {
+    font-size: 0.8rem;
+    margin-top: 0.35rem;
+}
+
+.auth-r-toggle {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #64748b;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.auth-r-toggle:hover,
+.auth-r-toggle:focus {
+    background: #e2e8f0;
+    color: #0f172a;
+    outline: none;
+}
+
+.auth-r-submit-btn {
+    height: 48px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 650;
+    font-size: 0.98rem;
+    background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+    color: #fff;
+    box-shadow: 0 11px 22px rgba(29, 78, 216, 0.27);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-r-submit-btn:hover {
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(29, 78, 216, 0.33);
+}
+
+.auth-r-submit-btn:disabled {
+    opacity: 0.92;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.auth-r-login-hint {
+    margin-top: 1rem;
+    color: #64748b;
+    font-size: 0.92rem;
+}
+
+.auth-r-login-hint a {
+    color: #1d4ed8;
+    text-decoration: none;
+}
+
+.auth-r-login-hint a:hover {
     text-decoration: underline;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .login-container {
-        padding: 1rem 0;
+[data-theme="dark"] .auth-register-page {
+    background:
+        radial-gradient(circle at 10% 8%, rgba(37, 99, 235, 0.21), transparent 35%),
+        radial-gradient(circle at 90% 0%, rgba(14, 165, 233, 0.2), transparent 30%),
+        linear-gradient(170deg, #0b1220 0%, #0f172a 55%, #0b1220 100%);
+}
+
+[data-theme="dark"] .auth-r-form-card {
+    background: rgba(15, 23, 42, 0.9);
+    border-color: rgba(71, 85, 105, 0.5);
+}
+
+[data-theme="dark"] .auth-r-header h2,
+[data-theme="dark"] .auth-r-form-card .form-label {
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .auth-r-header p,
+[data-theme="dark"] .auth-r-login-hint,
+[data-theme="dark"] .auth-r-form-card small,
+[data-theme="dark"] .auth-r-form-card .text-muted {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .auth-r-form-card .form-control {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] .auth-r-toggle {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .auth-r-toggle:hover,
+[data-theme="dark"] .auth-r-toggle:focus {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+@media (max-width: 991.98px) {
+    .auth-register-page {
+        padding-top: 1.6rem;
+        padding-bottom: 1.4rem;
     }
-    
-    .login-card {
-        padding: 2rem;
-        margin: 1rem;
-    }
-    
-    .login-header h2 {
-        font-size: 1.8rem;
-    }
-    
-    .login-form .form-control {
-        padding: 0.9rem 1rem;
-    }
-    
-    .login-form .btn {
-        padding: 0.9rem 1.5rem;
-        font-size: 1rem;
+
+    .auth-r-form-card {
+        padding: 1.4rem;
     }
 }
 
-@media (max-width: 576px) {
-    .login-card {
-        padding: 1.5rem;
-        margin: 0.5rem;
+@media (max-width: 575.98px) {
+    .auth-r-form-card {
+        padding: 1.15rem;
+        border-radius: 18px;
     }
-    
-    .login-header h2 {
-        font-size: 1.6rem;
-    }
-    
-    .login-form .form-control {
-        padding: 0.8rem;
-    }
-    
-    .login-form .btn {
-        padding: 0.8rem 1.2rem;
+
+    .auth-r-header h2 {
+        font-size: 1.45rem;
     }
 }
 </style>
@@ -504,71 +529,28 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Animation d'entrée de la carte
-    const loginCard = document.querySelector('.login-card');
-    if (loginCard) {
-        loginCard.style.opacity = '0';
-        loginCard.style.transform = 'translateY(50px)';
-        
-        setTimeout(() => {
-            loginCard.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-            loginCard.style.opacity = '1';
-            loginCard.style.transform = 'translateY(0)';
-        }, 100);
-    }
-    
-    // Validation en temps réel du mot de passe
-    const password1 = document.getElementById('password1');
-    const password2 = document.getElementById('password2');
-    
-    function validatePassword() {
-        if (password2.value && password1.value !== password2.value) {
-            password2.setCustomValidity('Les mots de passe ne correspondent pas');
-            password2.classList.add('is-invalid');
-        } else {
-            password2.setCustomValidity('');
-            password2.classList.remove('is-invalid');
-        }
-    }
-    
-    if (password1 && password2) {
-        password1.addEventListener('input', validatePassword);
-        password2.addEventListener('input', validatePassword);
-    }
-    
-    // Animation des champs au focus
-    document.querySelectorAll('.form-control').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.style.transform = 'translateY(-2px)';
-            this.parentElement.style.transition = 'transform 0.3s ease';
-        });
-        
-        input.addEventListener('blur', function() {
-            this.parentElement.style.transform = 'translateY(0)';
-        });
-        
-        // Animation de validation en temps réel
-        input.addEventListener('input', function() {
-            if (this.value.length > 0 && !this.classList.contains('is-invalid')) {
-                this.style.borderColor = '#48bb78';
-                this.style.boxShadow = '0 0 0 4px rgba(72, 187, 120, 0.1)';
-            } else if (!this.classList.contains('is-invalid')) {
-                this.style.borderColor = '#e2e8f0';
-                this.style.boxShadow = 'none';
-            }
+document.addEventListener('DOMContentLoaded', function () {
+    const toggles = document.querySelectorAll('.auth-r-toggle');
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('registerSubmitBtn');
+
+    toggles.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            this.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-eye"></i>';
+            this.setAttribute('aria-label', isHidden ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
         });
     });
-    
-    // Animation du bouton au survol
-    const submitBtn = document.querySelector('.btn-primary');
-    if (submitBtn) {
-        submitBtn.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-3px) scale(1.02)';
-        });
-        
-        submitBtn.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
+
+    if (form && submitBtn) {
+        form.addEventListener('submit', function () {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creation du compte...';
         });
     }
 });

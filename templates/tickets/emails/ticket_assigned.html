@@ -1,0 +1,20 @@
+{% autoescape off %}
+Ticket Assigned to You
+
+Hello {{ assigned_admin.get_full_name }},
+
+A new ticket has been assigned to you.
+
+Ticket Details:
+- Ticket ID: #{{ ticket.id }}
+- Title: {{ ticket.title }}
+- Description: {{ ticket.description|truncatewords:50 }}
+- Reported by: {{ resident_name }}
+- Priority: {{ ticket.get_priority_display }}
+- Category: {{ ticket.category.name_en }}
+
+Please review the ticket and begin work on the issue as needed.
+
+Best regards,
+Snadik.ma System
+{% endautoescape %}

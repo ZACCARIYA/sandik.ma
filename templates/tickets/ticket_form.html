@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Report Issue - Snadik.ma{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .form-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .form-group .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .priority-helper {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .priority-option {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .priority-option:hover {
+        border-color: #667eea;
+        background-color: #f8f9ff;
+    }
+    
+    .priority-option input[type="radio"] {
+        margin-right: 0.5rem;
+    }
+    
+    .priority-option.priority-urgent {
+        border-color: #dc3545;
+    }
+    
+    .priority-option.priority-high {
+        border-color: #fd7e14;
+    }
+    
+    .priority-option.priority-medium {
+        border-color: #ffc107;
+    }
+    
+    .priority-option.priority-low {
+        border-color: #28a745;
+    }
+    
+    .priority-label {
+        font-weight: 600;
+        display: block;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+    }
+    
+    .priority-description {
+        font-size: 0.75rem;
+        color: #666;
+    }
+    
+    .form-steps {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+    
+    .form-step {
+        flex: 1;
+        text-align: center;
+        padding-bottom: 1rem;
+        border-bottom: 3px solid #e9ecef;
+        position: relative;
+    }
+    
+    .form-step.active {
+        border-bottom-color: #667eea;
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 2.5rem;
+        height: 2.5rem;
+        background-color: #e9ecef;
+        color: #6c757d;
+        border-radius: 50%;
+        line-height: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-step.active .step-number {
+        background-color: #667eea;
+        color: white;
+    }
+    
+    .step-title {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #666;
+    }
+    
+    .form-step.active .step-title {
+        color: #667eea;
+    }
+    
+    .success-message {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .error-message {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="form-header">
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="mb-2">Report an Issue</h1>
+                <p class="mb-0 opacity-75">Let us know about maintenance or service issues in your apartment</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <!-- Error Messages -->
+        {% if form.non_field_errors %}
+        <div class="error-message">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="form-card">
+            <h4 class="mb-4">Create a New Ticket</h4>
+            
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                
+                <!-- Title -->
+                <div class="form-group mb-4">
+                    <label for="id_title" class="form-label">
+                        Issue Title *
+                    </label>
+                    <input 
+                        type="text" 
+                        class="form-control {% if form.title.errors %}is-invalid{% endif %}" 
+                        id="id_title" 
+                        name="title" 
+                        value="{{ form.title.value|default:'' }}"
+                        placeholder="e.g., Leaking faucet in bathroom"
+                        required
+                    >
+                    {% if form.title.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.title.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <small class="form-text">Be specific and clear about the issue</small>
+                </div>
+                
+                <!-- Description -->
+                <div class="form-group mb-4">
+                    <label for="id_description" class="form-label">
+                        Description *
+                    </label>
+                    <textarea 
+                        class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                        id="id_description" 
+                        name="description" 
+                        placeholder="Provide details about the issue, when it started, and any other relevant information"
+                        required
+                    >{{ form.description.value|default:'' }}</textarea>
+                    {% if form.description.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.description.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <small class="form-text">Include location, frequency, and impact</small>
+                </div>
+                
+                <!-- Category -->
+                <div class="form-group mb-4">
+                    <label for="id_category" class="form-label">
+                        Category
+                    </label>
+                    <select 
+                        class="form-select {% if form.category.errors %}is-invalid{% endif %}" 
+                        id="id_category" 
+                        name="category"
+                    >
+                        <option value="">Select a category...</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if form.category.value|stringformat:"i" == category.id|stringformat:"i" %}selected{% endif %}>
+                                {{ category.name_en }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.category.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.category.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Priority -->
+                <div class="form-group mb-4">
+                    <label class="form-label">Priority Level *</label>
+                    <p class="text-muted" style="font-size: 0.875rem;">Choose the urgency of this issue</p>
+                    
+                    <div class="priority-helper">
+                        <label class="priority-option priority-low">
+                            <input 
+                                type="radio" 
+                                name="priority" 
+                                value="low"
+                                {% if form.priority.value == "low" %}checked{% endif %}
+                            >
+                            <div>
+                                <span class="priority-label">🟢 Low</span>
+                                <span class="priority-description">Can wait</span>
+                            </div>
+                        </label>
+                        
+                        <label class="priority-option priority-medium">
+                            <input 
+                                type="radio" 
+                                name="priority" 
+                                value="medium"
+                                {% if form.priority.value == "medium" or not form.priority.value %}checked{% endif %}
+                            >
+                            <div>
+                                <span class="priority-label">🟡 Medium</span>
+                                <span class="priority-description">Standard</span>
+                            </div>
+                        </label>
+                        
+                        <label class="priority-option priority-high">
+                            <input 
+                                type="radio" 
+                                name="priority" 
+                                value="high"
+                                {% if form.priority.value == "high" %}checked{% endif %}
+                            >
+                            <div>
+                                <span class="priority-label">🟠 High</span>
+                                <span class="priority-description">Important</span>
+                            </div>
+                        </label>
+                        
+                        <label class="priority-option priority-urgent">
+                            <input 
+                                type="radio" 
+                                name="priority" 
+                                value="urgent"
+                                {% if form.priority.value == "urgent" %}checked{% endif %}
+                            >
+                            <div>
+                                <span class="priority-label">🔴 Urgent</span>
+                                <span class="priority-description">Emergency</span>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    {% if form.priority.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in form.priority.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Help Text -->
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Tips for better support:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Provide as much detail as possible about the issue</li>
+                        <li>If urgent, mention it in the title or description</li>
+                        <li>You can upload photos or documents after creating the ticket</li>
+                        <li>You'll receive updates via email as your ticket progresses</li>
+                    </ul>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
+                    <a href="{% url 'tickets:list' %}" class="btn btn-secondary btn-lg">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle"></i> Create Ticket
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
