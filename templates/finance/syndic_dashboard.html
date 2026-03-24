@@ -218,37 +218,46 @@
                         <div class="sd-kpi-label">Montants Dus (DH)</div>
 >>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
                     </div>
-                    <div class="sd-kpi-trend">
-                        <i class="fas fa-file-invoice-dollar"></i>
-                        <span>{{ overdue_count }} en retard</span>
+                    <div class="col-12 col-md-3 col-xl-2">
+                        <label for="status" class="form-label mb-1">Statut</label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="all" {% if selected_status == 'all' %}selected{% endif %}>Tous</option>
+                            <option value="up_to_date" {% if selected_status == 'up_to_date' %}selected{% endif %}>A jour</option>
+                            <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>En attente</option>
+                            <option value="overdue" {% if selected_status == 'overdue' %}selected{% endif %}>En retard</option>
+                            <option value="critical" {% if selected_status == 'critical' %}selected{% endif %}>Critique</option>
+                        </select>
                     </div>
-                </div>
+                    <div class="col-6 col-md-3 col-xl-2">
+                        <label for="from" class="form-label mb-1">Du</label>
+                        <input id="from" name="from" type="date" class="form-control" value="{% if selected_from %}{{ selected_from|date:'Y-m-d' }}{% endif %}">
+                    </div>
+                    <div class="col-6 col-md-3 col-xl-2">
+                        <label for="to" class="form-label mb-1">Au</label>
+                        <input id="to" name="to" type="date" class="form-control" value="{% if selected_to %}{{ selected_to|date:'Y-m-d' }}{% endif %}">
+                    </div>
+                    <div class="col-12 col-xl-1 d-grid">
+                        <button class="btn btn-primary" type="submit">Appliquer</button>
+                    </div>
+                    <div class="col-12 d-flex justify-content-end">
+                        <a href="{% url 'finance:syndic_dashboard' %}" class="btn btn-link text-decoration-none px-0">Réinitialiser</a>
+                    </div>
+                </form>
             </div>
-            <!-- Paiements ce mois -->
-            <div class="col-xl-3 col-sm-6">
-                <div class="sd-kpi sd-kpi-green">
-                    <div class="sd-kpi-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                    <div class="sd-kpi-body">
-                        <div class="sd-kpi-value">{{ payments_this_month|floatformat:0|default:"0" }}</div>
-                        <div class="sd-kpi-label">Encaissés ce mois (DH)</div>
-                    </div>
-                    <div class="sd-kpi-trend">
-                        <i class="fas fa-calendar-check"></i>
-                        <span>{{ documents_this_month }} docs</span>
-                    </div>
-                </div>
-            </div>
-            <!-- Dépenses -->
-            <div class="col-xl-3 col-sm-6">
-                <div class="sd-kpi sd-kpi-violet">
-                    <div class="sd-kpi-icon"><i class="fas fa-receipt"></i></div>
-                    <div class="sd-kpi-body">
-                        <div class="sd-kpi-value">{{ expenses_this_month|floatformat:0|default:"0" }}</div>
-                        <div class="sd-kpi-label">Dépenses ce mois (DH)</div>
-                    </div>
-                    <div class="sd-kpi-trend">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Budget mensuel</span>
+        </section>
+
+        <section class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xxl-3">
+                <article class="ft-kpi card border-0 ft-reveal">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <p class="ft-kpi-label mb-1">Résidents actifs</p>
+                                <h2 class="ft-kpi-value mb-0" data-kpi-count="{{ total_residents }}">{{ total_residents }}</h2>
+                            </div>
+                            <span class="ft-kpi-icon bg-primary-subtle text-primary"><i class="fa-solid fa-users"></i></span>
+                        </div>
+                        <p class="small text-secondary mb-0"><i class="fa-solid fa-user-plus me-1"></i>+{{ recent_residents }} ce mois</p>
                     </div>
                 </div>
             </div>
@@ -316,14 +325,14 @@
 >>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
                             </div>
                             <div>
-                                <h5 class="sd-card-title">Statut des Résidents</h5>
-                                <p class="sd-card-subtitle">{{ total_residents }} résident{{
-                                    total_residents|pluralize:"s" }} au total</p>
+                                <p class="ft-kpi-label mb-1">Encaissement mensuel</p>
+                                <h2 class="ft-kpi-value mb-0" data-kpi-count="{{ payments_this_month|floatformat:0|default:'0' }}">{{ payments_this_month|floatformat:0|default:'0' }} DH</h2>
                             </div>
+                            <span class="ft-kpi-icon bg-success-subtle text-success"><i class="fa-solid fa-arrow-trend-up"></i></span>
                         </div>
-                        <a href="{% url 'finance:resident_management' %}" class="sd-link-btn">
-                            Gérer <i class="fas fa-arrow-right ms-1"></i>
-                        </a>
+                        <p class="small mb-0 {% if payments_growth >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            <i class="fa-solid fa-chart-line me-1"></i>{{ payments_growth }}% vs mois précédent
+                        </p>
                     </div>
 <<<<<<< HEAD
                     <div class="col-12 col-lg-6">
@@ -620,10 +629,9 @@
 >>>>>>> 57f6a77 ({9} improve designs of impayer et dashbord and fix some errors)
                         {% endif %}
                     </div>
-                </div>
-
+                </article>
             </div>
-        </div>
+        </section>
     </div>
 </div>
 
@@ -667,684 +675,449 @@
         });
     }
 
-    .sd-alert-badge-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        background: rgba(239, 68, 68, 0.2);
-        color: #fca5a5;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-        animation: pulseRed 2.5s ease-in-out infinite;
+    .ft-dropdown-row:hover {
+        background: #f8fafc;
     }
 
-    @keyframes pulseRed {
-
-        0%,
-        100% {
-            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
-        }
-
-        50% {
-            box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
-        }
-    }
-
-    .sd-alert-badge-label {
-        font-size: 0.65rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: rgba(255, 255, 255, 0.5);
-    }
-
-    .sd-alert-badge-value {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #fca5a5;
-    }
-
-    .sd-alert-badge-arrow {
-        color: rgba(255, 255, 255, 0.4);
-        font-size: 0.75rem;
-        transition: transform 0.2s ease;
-    }
-
-    .sd-alert-badge:hover .sd-alert-badge-arrow {
-        transform: translateX(3px);
-    }
-
-    /* ===== KPI CARDS ===== */
-    .sd-kpi {
+    .ft-panel,
+    .ft-kpi {
         border-radius: 18px;
-        padding: 1.35rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.65rem;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(0, 0, 0, 0.04);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        cursor: default;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+        transition: transform .24s ease, box-shadow .24s ease;
     }
 
-    .sd-kpi:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    .ft-panel:hover,
+    .ft-kpi:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
     }
 
-    .sd-kpi-blue {
-        background: #f0f4ff;
+    .ft-kpi-label {
+        font-size: .82rem;
+        color: #64748b;
+        font-weight: 600;
     }
 
-    .sd-kpi-amber {
-        background: #fffbeb;
+    .ft-kpi-value {
+        font-size: 1.52rem;
+        letter-spacing: -.02em;
+        line-height: 1.15;
     }
 
-    .sd-kpi-green {
-        background: #f0fdf4;
-    }
-
-    .sd-kpi-violet {
-        background: #f5f3ff;
-    }
-
-    .sd-kpi-icon {
+    .ft-kpi-icon {
         width: 42px;
         height: 42px;
         border-radius: 12px;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
-        background: rgba(255, 255, 255, 0.65);
-        border: 1px solid rgba(0, 0, 0, 0.04);
     }
 
-    .sd-kpi-blue .sd-kpi-icon {
-        color: #4f46e5;
-    }
-
-    .sd-kpi-amber .sd-kpi-icon {
-        color: #b45309;
-    }
-
-    .sd-kpi-green .sd-kpi-icon {
-        color: #15803d;
-    }
-
-    .sd-kpi-violet .sd-kpi-icon {
-        color: #6d28d9;
-    }
-
-    .sd-kpi-value {
-        font-size: 1.65rem;
-        font-weight: 800;
-        color: #1e293b;
-        line-height: 1;
-        letter-spacing: -0.5px;
-    }
-
-    .sd-kpi-label {
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: #64748b;
-        letter-spacing: 0.2px;
-    }
-
-    .sd-kpi-trend {
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.72rem;
-        font-weight: 500;
-        color: #94a3b8;
-        margin-top: auto;
-        padding-top: 0.45rem;
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    /* ===== CARDS ===== */
-    .sd-card {
-        background: #fff;
-        border-radius: 18px;
-        border: 1px solid #e8eaed;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-        overflow: hidden;
-        transition: box-shadow 0.2s ease;
-    }
-
-    .sd-card:hover {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-    }
-
-    .sd-card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 1.1rem 1.35rem;
-        border-bottom: 1px solid #f1f3f5;
-        background: #fafbfc;
-    }
-
-    .sd-card-header-left {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .sd-card-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.95rem;
-        color: #fff;
-        flex-shrink: 0;
-    }
-
-    .sd-card-title {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0;
-        letter-spacing: -0.1px;
-    }
-
-    .sd-card-subtitle {
-        font-size: 0.72rem;
-        color: #94a3b8;
-        margin: 0;
-        font-weight: 400;
-    }
-
-    .sd-link-btn {
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: #6366f1;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        padding: 0.35rem 0.75rem;
+    .ft-loading .placeholder {
+        display: block;
+        height: 14px;
         border-radius: 8px;
-        background: rgba(99, 102, 241, 0.06);
-        transition: all 0.2s ease;
     }
 
-    .sd-link-btn:hover {
-        background: rgba(99, 102, 241, 0.12);
-        color: #4f46e5;
-    }
-
-    .sd-card-body {
-        padding: 0;
-    }
-
-    /* — Status tiles — */
-    .sd-status-tile {
+    .ft-empty {
+        border: 1px dashed #d1d5db;
         border-radius: 14px;
-        padding: 1.15rem;
+        padding: 1rem;
         text-align: center;
-        position: relative;
-        overflow: hidden;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        cursor: default;
+        color: #6b7280;
+        background: #fafafa;
     }
 
-    .sd-status-tile:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    }
-
-    .sd-st-green {
-        background: #f0fdf4;
-        border: 1px solid #dcfce7;
-    }
-
-    .sd-st-blue {
-        background: #f0f4ff;
-        border: 1px solid #dbeafe;
-    }
-
-    .sd-st-amber {
-        background: #fffbeb;
-        border: 1px solid #fef3c7;
-    }
-
-    .sd-st-red {
-        background: #fef2f2;
-        border: 1px solid #fee2e2;
-    }
-
-    .sd-st-count {
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: #1e293b;
-        line-height: 1;
-    }
-
-    .sd-st-label {
-        font-size: 0.72rem;
+    .ft-pills .nav-link {
+        border-radius: 10px;
+        color: #475569;
         font-weight: 600;
-        color: #64748b;
-        margin-top: 0.3rem;
     }
 
-    .sd-st-icon {
-        position: absolute;
-        right: 8px;
-        bottom: 8px;
-        font-size: 1.3rem;
-        opacity: 0.1;
+    .ft-pills .nav-link.active {
+        background: #0369a1;
+        color: #fff;
     }
 
-    .sd-st-green .sd-st-icon {
-        color: #16a34a;
+    .ft-list {
+        display: grid;
+        gap: .58rem;
     }
 
-    .sd-st-blue .sd-st-icon {
-        color: #2563eb;
+    .ft-scroll-feed {
+        max-height: 286px;
+        overflow-y: auto;
+        padding-right: .15rem;
     }
 
-    .sd-st-amber .sd-st-icon {
-        color: #d97706;
+    .ft-scroll-feed::-webkit-scrollbar {
+        width: 6px;
     }
 
-    .sd-st-red .sd-st-icon {
-        color: #dc2626;
+    .ft-scroll-feed::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, .38);
+        border-radius: 999px;
     }
 
-    /* — List rows — */
-    .sd-list-row {
+    .ft-metric-stack {
+        display: grid;
+        gap: .45rem;
+    }
+
+    .ft-metric-line {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: .86rem;
+        padding: .45rem .6rem;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .ft-focus-list {
+        display: grid;
+        gap: .55rem;
+    }
+
+    .ft-focus-item {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: .65rem .72rem;
+        background: #fff;
+    }
+
+    .ft-focus-item.tone-success {
+        border-color: rgba(22, 163, 74, 0.3);
+        background: rgba(22, 163, 74, 0.08);
+    }
+
+    .ft-focus-item.tone-info {
+        border-color: rgba(3, 105, 161, 0.3);
+        background: rgba(3, 105, 161, 0.08);
+    }
+
+    .ft-focus-item.tone-warning {
+        border-color: rgba(245, 158, 11, 0.34);
+        background: rgba(245, 158, 11, 0.09);
+    }
+
+    .ft-focus-item.tone-danger {
+        border-color: rgba(239, 68, 68, 0.34);
+        background: rgba(239, 68, 68, 0.08);
+    }
+
+    .ft-side-col {
+        position: sticky;
+        top: 94px;
+        align-self: flex-start;
+    }
+
+    .ft-row {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        padding: 0.8rem 1.35rem;
-        border-bottom: 1px solid #f1f3f5;
-        transition: background 0.15s ease;
+        gap: .7rem;
+        border-radius: 12px;
+        border: 1px solid #e5edf7;
+        background: #fff;
+        padding: .65rem .7rem;
+        transition: all .16s ease;
+        color: inherit;
     }
 
-    .sd-list-row:last-child {
-        border-bottom: none;
+    .ft-row:hover {
+        background: #f8fbff;
+        border-color: #bfdaf6;
     }
 
-    .sd-list-row:hover {
-        background: #fafbfc;
-    }
-
-    .sd-list-icon {
+    .ft-row-icon {
         width: 36px;
         height: 36px;
         border-radius: 10px;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.85rem;
-        flex-shrink: 0;
+        background: #e6f1ff;
+        color: #0369a1;
+        flex: 0 0 auto;
     }
 
-    .sd-icon-green {
-        background: rgba(16, 185, 129, 0.08);
-        color: #10b981;
-    }
-
-    .sd-icon-blue {
-        background: rgba(99, 102, 241, 0.08);
-        color: #6366f1;
-    }
-
-    .sd-icon-amber {
-        background: rgba(245, 158, 11, 0.08);
-        color: #f59e0b;
-    }
-
-    .sd-list-info {
-        flex: 1;
+    .ft-action {
+        height: 100%;
         display: flex;
         flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: .35rem;
+        padding: .85rem .45rem;
+        border-radius: 12px;
+        text-decoration: none;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        color: #0f172a;
+        font-weight: 600;
+        transition: all .18s ease;
+    }
+
+    .ft-action i {
+        font-size: 1.06rem;
+        color: #0369a1;
+    }
+
+    .ft-action:hover {
+        transform: translateY(-2px);
+        border-color: #bae6fd;
+        background: #f0f9ff;
+        color: #0c4a6e;
+    }
+
+    .ft-reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity .45s ease, transform .45s ease;
+    }
+
+    .ft-reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .min-w-0 {
         min-width: 0;
     }
 
-    .sd-list-title {
-        font-size: 0.84rem;
-        font-weight: 600;
-        color: #1e293b;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    [data-theme="dark"] .ft-page {
+        background:
+            radial-gradient(circle at 10% 10%, rgba(2, 132, 199, 0.2), transparent 42%),
+            radial-gradient(circle at 90% 0%, rgba(16, 185, 129, 0.15), transparent 36%),
+            #0b1220;
     }
 
-    .sd-list-sub {
-        font-size: 0.7rem;
+    [data-theme="dark"] .ft-hero,
+    [data-theme="dark"] .ft-panel,
+    [data-theme="dark"] .ft-kpi,
+    [data-theme="dark"] .ft-row,
+    [data-theme="dark"] .ft-action,
+    [data-theme="dark"] .ft-dropdown {
+        background: #111827;
+        border-color: #1f2937;
+        color: #e5e7eb;
+    }
+
+    [data-theme="dark"] .text-secondary,
+    [data-theme="dark"] .ft-kpi-label,
+    [data-theme="dark"] .ft-empty {
         color: #94a3b8;
-        font-weight: 400;
     }
 
-    .sd-list-right {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 0.2rem;
-        flex-shrink: 0;
+    [data-theme="dark"] .ft-empty {
+        background: #0b1626;
+        border-color: #233349;
     }
 
-    .sd-list-amount {
-        font-size: 0.84rem;
-        font-weight: 700;
-        color: #1e293b;
+    [data-theme="dark"] .ft-chip {
+        background: #0f172a;
+        border-color: #26364b;
+        color: #dbeafe;
     }
 
-    .sd-doc-badge {
-        padding: 0.12rem 0.5rem;
-        border-radius: 999px;
-        font-size: 0.62rem;
-        font-weight: 600;
-        letter-spacing: 0.2px;
+    [data-theme="dark"] .ft-row:hover,
+    [data-theme="dark"] .ft-action:hover,
+    [data-theme="dark"] .ft-dropdown-row:hover {
+        background: #0b1626;
+        border-color: #233349;
     }
 
-    .sd-badge-paid {
-        background: rgba(16, 185, 129, 0.08);
-        color: #059669;
+    [data-theme="dark"] .ft-pills .nav-link {
+        color: #cbd5e1;
     }
 
-    .sd-badge-pending {
-        background: rgba(245, 158, 11, 0.08);
-        color: #d97706;
-    }
-
-    .sd-row-action {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(99, 102, 241, 0.06);
-        color: #6366f1;
-        text-decoration: none;
-        font-size: 0.75rem;
-        flex-shrink: 0;
-        transition: all 0.2s ease;
-    }
-
-    .sd-row-action:hover {
-        background: #6366f1;
+    [data-theme="dark"] .ft-pills .nav-link.active {
         color: #fff;
-        transform: scale(1.08);
     }
 
-    /* — Chart — */
-    .sd-chart-wrap {
-        display: flex;
-        align-items: flex-end;
-        gap: 0.75rem;
-        height: 140px;
-        padding: 0 0.5rem;
+    [data-theme="dark"] .ft-metric-line,
+    [data-theme="dark"] .ft-focus-item {
+        background: #0b1626;
+        border-color: #223248;
+        color: #d1d5db;
     }
 
-    .sd-chart-col {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.35rem;
+    @media (max-width: 1200px) {
+        .ft-side-col {
+            position: static;
+        }
     }
 
-    .sd-chart-bar-wrap {
-        flex: 1;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 0.2rem;
+    @media (max-width: 576px) {
+        .ft-kpi-value {
+            font-size: 1.32rem;
+        }
+
+        .ft-action {
+            font-size: .84rem;
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const monthlyTrend = {{ monthly_trend_json|safe }};
+        const statusDistribution = {{ status_distribution_json|safe }};
+        const notificationMix = {{ notification_categories_json|safe }};
+
+        initializeReveal();
+        animateKpis();
+        initializeCharts(monthlyTrend, statusDistribution, notificationMix);
+        addActionPressFeedback();
+    });
+
+    function initializeReveal() {
+        const revealNodes = document.querySelectorAll('.ft-reveal');
+        if (!('IntersectionObserver' in window)) {
+            revealNodes.forEach((node) => node.classList.add('is-visible'));
+            return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        revealNodes.forEach((node, index) => {
+            node.style.transitionDelay = (index % 8) * 0.05 + 's';
+            observer.observe(node);
+        });
     }
 
-    .sd-chart-val {
-        font-size: 0.58rem;
-        font-weight: 600;
-        color: #94a3b8;
+    function animateKpis() {
+        const counters = document.querySelectorAll('[data-kpi-count]');
+        counters.forEach((node) => {
+            const target = Number(String(node.dataset.kpiCount).replace(/[^0-9.-]/g, ''));
+            if (!Number.isFinite(target)) return;
+
+            const duration = 700;
+            const startAt = performance.now();
+            const prefix = node.textContent.includes('DH') ? '' : '';
+            const suffix = node.textContent.includes('DH') ? ' DH' : '';
+
+            function tick(now) {
+                const p = Math.min(1, (now - startAt) / duration);
+                const eased = 1 - Math.pow(1 - p, 3);
+                const current = Math.round(target * eased);
+                node.textContent = prefix + current.toLocaleString('fr-MA') + suffix;
+                if (p < 1) requestAnimationFrame(tick);
+            }
+
+            requestAnimationFrame(tick);
+        });
     }
 
-    .sd-chart-bar {
-        width: 100%;
-        border-radius: 6px 6px 0 0;
-        background: linear-gradient(180deg, #818cf8, #6366f1);
-        min-height: 4px;
-        transition: height 0.8s ease;
+    function initializeCharts(monthlyTrend, statusDistribution, notificationMix) {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const axisColor = isDark ? '#94a3b8' : '#64748b';
+        const gridColor = isDark ? 'rgba(148,163,184,.14)' : 'rgba(100,116,139,.16)';
+
+        renderCashflowChart(monthlyTrend, axisColor, gridColor);
+        renderStatusChart(statusDistribution, axisColor);
+        renderNotificationChart(notificationMix, axisColor, gridColor);
     }
 
-    .sd-chart-label {
-        font-size: 0.6rem;
-        font-weight: 500;
-        color: #94a3b8;
-        text-align: center;
-    }
+    function renderCashflowChart(monthlyTrend, axisColor, gridColor) {
+        const loading = document.getElementById('cashflowLoading');
+        const wrap = document.getElementById('cashflowChartWrap');
+        const empty = document.getElementById('cashflowEmpty');
+        const canvas = document.getElementById('cashflowChart');
+        if (!canvas) return;
 
-    /* ===== SIDEBAR ===== */
-    .sd-sidebar-card {
-        background: #fff;
-        border-radius: 18px;
-        border: 1px solid #e8eaed;
-        overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-        transition: box-shadow 0.2s ease;
-    }
+        const hasData = Array.isArray(monthlyTrend) && monthlyTrend.some((item) => Number(item.payments || 0) > 0 || Number(item.expenses || 0) > 0);
+        if (!hasData) {
+            if (loading) loading.classList.add('d-none');
+            if (empty) empty.classList.remove('d-none');
+            return;
+        }
 
-    .sd-sidebar-card:hover {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-    }
+        const labels = monthlyTrend.map((item) => item.month);
+        const payments = monthlyTrend.map((item) => Number(item.payments || 0));
+        const expenses = monthlyTrend.map((item) => Number(item.expenses || 0));
+        const net = monthlyTrend.map((item) => Number(item.net || 0));
 
-    .sd-sidebar-header {
-        padding: 0.85rem 1.15rem;
-        background: #fafbfc;
-        border-bottom: 1px solid #f1f3f5;
-        font-size: 0.72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: #475569;
-        display: flex;
-        align-items: center;
-        gap: 0.45rem;
-    }
+        new Chart(canvas, {
+            data: {
+                labels,
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'Paiements (DH)',
+                        data: payments,
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22,163,74,.14)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 2
+                    },
+                    {
+                        type: 'line',
+                        label: 'Dépenses (DH)',
+                        data: expenses,
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234,88,12,.12)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 2
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Flux net (DH)',
+                        data: net,
+                        backgroundColor: net.map((value) => value >= 0 ? 'rgba(2,132,199,.45)' : 'rgba(239,68,68,.45)'),
+                        borderRadius: 8,
+                        maxBarThickness: 28
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: axisColor,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.dataset.label}: ${Number(context.parsed.y || 0).toLocaleString('fr-MA')} DH`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: axisColor },
+                        grid: { color: 'transparent' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: axisColor,
+                            callback: (value) => `${Number(value).toLocaleString('fr-MA')} DH`
+                        },
+                        grid: { color: gridColor }
+                    }
+                }
+            }
+        });
 
-    .sd-sidebar-header i {
-        color: #6366f1;
-        font-size: 0.8rem;
-    }
-
-    .sd-notif-count {
-        margin-left: auto;
-        background: #ef4444;
-        color: #fff;
-        font-size: 0.62rem;
-        font-weight: 700;
-        padding: 0.1rem 0.4rem;
-        border-radius: 999px;
-        min-width: 18px;
-        text-align: center;
-    }
-
-    /* — Quick actions — */
-    .sd-quick-actions {
-        padding: 0.4rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.1rem;
-    }
-
-    .sd-quick-btn {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.6rem 0.75rem;
-        border-radius: 12px;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-
-    .sd-quick-btn:hover {
-        background: #f8f9fb;
-        transform: translateX(2px);
-    }
-
-    .sd-quick-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.85rem;
-        flex-shrink: 0;
-        background: color-mix(in srgb, var(--qa) 10%, transparent);
-        color: var(--qa);
-        transition: all 0.2s ease;
-    }
-
-    .sd-quick-btn:hover .sd-quick-icon {
-        background: var(--qa);
-        color: #fff;
-        transform: scale(1.05);
-    }
-
-    .sd-quick-text {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .sd-quick-title {
-        font-size: 0.82rem;
-        font-weight: 600;
-        color: #1e293b;
-    }
-
-    .sd-quick-desc {
-        font-size: 0.7rem;
-        color: #94a3b8;
-        font-weight: 400;
-    }
-
-    .sd-quick-arr {
-        font-size: 0.6rem;
-        opacity: 0;
-        color: #94a3b8;
-        transition: all 0.2s ease;
-    }
-
-    .sd-quick-btn:hover .sd-quick-arr {
-        opacity: 1;
-        color: var(--qa);
-        transform: translateX(2px);
-    }
-
-    /* — Notifications — */
-    .sd-notif-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.65rem;
-        padding: 0.65rem 1.15rem;
-        transition: background 0.15s ease;
-        text-decoration: none;
-        cursor: pointer;
-    }
-
-    .sd-notif-item:hover {
-        background: #fafbfc;
-    }
-
-    .sd-notif-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: #e2e8f0;
-        flex-shrink: 0;
-        margin-top: 6px;
-    }
-
-    .sd-notif-dot.active {
-        background: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-    }
-
-    .sd-notif-body {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .sd-notif-title {
-        font-size: 0.78rem;
-        font-weight: 500;
-        color: #1e293b;
-    }
-
-    .sd-notif-time {
-        font-size: 0.65rem;
-        color: #94a3b8;
-        font-weight: 400;
-    }
-
-    .sd-notif-more {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.65rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #6366f1;
-        text-decoration: none;
-        border-top: 1px solid #f1f3f5;
-        transition: background 0.15s ease;
-    }
-
-    .sd-notif-more:hover {
-        background: rgba(99, 102, 241, 0.04);
-        color: #4f46e5;
-    }
-
-    /* ===== FINANCIAL CARD ===== */
-    .sd-fin-card {
-        background: linear-gradient(145deg, #1e293b, #1e1b4b);
-        border-radius: 18px;
-        overflow: hidden;
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
-    }
-
-    .sd-fin-header {
-        padding: 0.85rem 1.15rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        font-size: 0.72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        color: rgba(255, 255, 255, 0.6);
-        display: flex;
-        align-items: center;
-        gap: 0.45rem;
-    }
-
-    .sd-fin-header i {
-        color: #818cf8;
-    }
-
-    .sd-fin-body {
-        padding: 1.15rem;
-    }
-
-    .sd-fin-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.4rem 0;
-        font-size: 0.84rem;
+        if (loading) loading.classList.add('d-none');
+        if (wrap) wrap.classList.remove('d-none');
     }
 
     .sd-fin-row span {
