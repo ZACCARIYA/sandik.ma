@@ -609,23 +609,8 @@
                             <span><i class="fas fa-arrow-up text-success"></i> Total encaissé</span>
                             <strong class="text-success">{{ total_paid|floatformat:2 }} DH</strong>
                         </div>
-                        <div class="sd-fin-divider"></div>
-                        <div class="sd-fin-row sd-fin-net">
-                            <span>Solde net</span>
-                            <strong>{{ total_paid|floatformat:2 }} DH</strong>
-                        </div>
-                        <!-- Payment rate progress -->
-                        {% if total_due > 0 %}
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <small class="text-muted">Taux de recouvrement</small>
-                                <small class="fw-bold text-success">{% widthratio total_paid total_due 100 %}%</small>
-                            </div>
-                            <div class="sd-progress-bar">
-                                <div class="sd-progress-fill" style="width:{% widthratio total_paid total_due 100 %}%">
-                                </div>
-                            </div>
-                        </div>
+                        {% else %}
+                        <div class="ft-empty"><i class="fa-regular fa-flag mb-2"></i><p class="mb-0">Aucun rapport récent.</p></div>
                         {% endif %}
                     </div>
                 </article>
@@ -813,35 +798,33 @@
         align-self: flex-start;
     }
 
-    .sd-kpi-trend {
+    .ft-list {
+        display: grid;
+        gap: .58rem;
+    }
+
+    .ft-scroll-feed {
+        max-height: 286px;
+        overflow-y: auto;
+        padding-right: .15rem;
+    }
+
+    .ft-scroll-feed::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .ft-scroll-feed::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, .38);
+        border-radius: 999px;
+    }
+
+    .ft-metric-stack {
+        display: grid;
+        gap: .45rem;
+    }
+
+    .ft-metric-line {
         display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.72rem;
-        font-weight: 500;
-        color: #94a3b8;
-        margin-top: auto;
-        padding-top: 0.45rem;
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
-    }
-
-    /* ===== CARDS ===== */
-    .sd-card {
-        background: #fff;
-        border-radius: 18px;
-        border: 1px solid #e8eaed;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-        overflow: hidden;
-        transition: box-shadow 0.2s ease;
-    }
-
-    .sd-card:hover {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-    }
-
-    .sd-card-header {
-        display: flex;
-        align-items: center;
         justify-content: space-between;
         padding: 1.1rem 1.35rem;
         border-bottom: 1px solid #f1f3f5;
