@@ -90,70 +90,169 @@
                         <span class="badge rounded-pill text-bg-light report-draft-badge">Brouillon en cours</span>
                     </div>
                 </div>
-                
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+
+                <div class="card-body p-4 p-lg-5">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" id="reportCreateForm" novalidate>
                         {% csrf_token %}
-                        
-                        <!-- ===== TITRE ===== -->
-                        <div class="mb-4">
-                            {% include 'components/form_field.html' with field=form.title label="Titre du rapport" icon="fas fa-heading" required=True %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert-modern alert-danger mb-4">
+                            <i class="fas fa-circle-exclamation me-2"></i>
+                            {% for error in form.non_field_errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
                         </div>
-                        
-                        <!-- ===== DESCRIPTION ===== -->
-                        <div class="mb-4">
-                            {% include 'components/form_field.html' with field=form.description label="Description détaillée" icon="fas fa-align-left" required=True %}
-                        </div>
-                        
-                        <!-- ===== CATÉGORIE ===== -->
-                        <div class="mb-4">
-                            {% include 'components/form_field.html' with field=form.category label="Catégorie" icon="fas fa-tags" required=True %}
-                        </div>
-                        
-                        <!-- ===== LOCALISATION ===== -->
-                        <div class="mb-4">
-                            {% include 'components/form_field.html' with field=form.location label="Localisation (optionnelle)" icon="fas fa-map-marker-alt" placeholder="Ex: 3ème étage, Appartement 15, Parking..." %}
-                        </div>
-                        
-                        <!-- ===== PHOTO ===== -->
-                        <div class="mb-4">
-                            <label for="{{ form.photo.id_for_label }}" class="form-label">
-                                <i class="fas fa-camera me-2"></i>{{ form.photo.label }}
-                            </label>
-                            <input type="file" 
-                                   class="form-control" 
-                                   id="{{ form.photo.id_for_label }}" 
-                                   name="{{ form.photo.name }}" 
-                                   accept="image/*"
-                                   onchange="previewImage(this)">
-                            <div class="form-text">
-                                Formats acceptés : JPEG, PNG, GIF, WebP. Taille maximale : 5MB
+                        {% endif %}
+
+                        <div class="row g-4">
+                            <div class="col-lg-8">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">
+                                    <i class="fas fa-heading me-2 text-primary"></i>Titre du rapport <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group input-group-modern">
+                                    <span class="input-group-text"><i class="fas fa-pen"></i></span>
+                                    <input
+                                        type="text"
+                                        id="{{ form.title.id_for_label }}"
+                                        name="{{ form.title.name }}"
+                                        class="form-control {% if form.title.errors %}is-invalid{% endif %}"
+                                        value="{{ form.title.value|default:'' }}"
+                                        placeholder="Ex: Fuite d'eau dans le couloir du 3ème étage"
+                                        required
+                                        maxlength="200"
+                                        data-counter-target="titleCount">
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-muted">Soyez court et descriptif pour un traitement rapide.</small>
+                                    <small class="text-muted"><span id="titleCount">0</span>/200</small>
+                                </div>
+                                {% if form.title.errors %}
+                                <div class="invalid-feedback d-block mt-1">
+                                    {% for error in form.title.errors %}
+                                    <small><i class="fas fa-circle-exclamation me-1"></i>{{ error }}</small>{% if not forloop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                             </div>
-                            <div id="imagePreview" class="mt-3" style="display: none;">
-                                <img id="previewImg" src="" alt="Aperçu" class="img-fluid rounded" style="max-height: 200px;">
+
+                            <div class="col-lg-4">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">
+                                    <i class="fas fa-tags me-2 text-primary"></i>Catégorie <span class="text-danger">*</span>
+                                </label>
+                                <select
+                                    id="{{ form.category.id_for_label }}"
+                                    name="{{ form.category.name }}"
+                                    class="form-select {% if form.category.errors %}is-invalid{% endif %}"
+                                    required>
+                                    {% for choice in form.category.field.choices %}
+                                    <option value="{{ choice.0 }}" {% if choice.0 == form.category.value %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.category.errors %}
+                                <div class="invalid-feedback d-block mt-1">
+                                    {% for error in form.category.errors %}
+                                    <small><i class="fas fa-circle-exclamation me-1"></i>{{ error }}</small>{% if not forloop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label for="{{ form.description.id_for_label }}" class="form-label">
+                                    <i class="fas fa-align-left me-2 text-primary"></i>Description détaillée <span class="text-danger">*</span>
+                                </label>
+                                <textarea
+                                    id="{{ form.description.id_for_label }}"
+                                    name="{{ form.description.name }}"
+                                    class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                                    rows="6"
+                                    placeholder="Décrivez la situation, sa fréquence, l'impact, et les détails utiles..."
+                                    required
+                                    data-counter-target="descriptionCount">{{ form.description.value|default:'' }}</textarea>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-muted">Ajoutez des détails concrets pour éviter les allers-retours.</small>
+                                    <small class="text-muted"><span id="descriptionCount">0</span> caractères</small>
+                                </div>
+                                {% if form.description.errors %}
+                                <div class="invalid-feedback d-block mt-1">
+                                    {% for error in form.description.errors %}
+                                    <small><i class="fas fa-circle-exclamation me-1"></i>{{ error }}</small>{% if not forloop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label for="{{ form.location.id_for_label }}" class="form-label">
+                                    <i class="fas fa-location-dot me-2 text-primary"></i>Localisation (optionnelle)
+                                </label>
+                                <div class="input-group input-group-modern">
+                                    <span class="input-group-text"><i class="fas fa-map-pin"></i></span>
+                                    <input
+                                        type="text"
+                                        id="{{ form.location.id_for_label }}"
+                                        name="{{ form.location.name }}"
+                                        class="form-control {% if form.location.errors %}is-invalid{% endif %}"
+                                        value="{{ form.location.value|default:'' }}"
+                                        placeholder="Ex: 3ème étage, bloc B, près de l'ascenseur"
+                                        maxlength="200"
+                                        data-counter-target="locationCount">
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-muted">Indiquer l'emplacement exact accélère l'intervention.</small>
+                                    <small class="text-muted"><span id="locationCount">0</span>/200</small>
+                                </div>
+                                {% if form.location.errors %}
+                                <div class="invalid-feedback d-block mt-1">
+                                    {% for error in form.location.errors %}
+                                    <small><i class="fas fa-circle-exclamation me-1"></i>{{ error }}</small>{% if not forloop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label for="{{ form.photo.id_for_label }}" class="form-label">
+                                    <i class="fas fa-camera me-2 text-primary"></i>{{ form.photo.label }}
+                                </label>
+                                <div class="upload-surface" id="uploadSurface">
+                                    <input
+                                        type="file"
+                                        class="form-control {% if form.photo.errors %}is-invalid{% endif %}"
+                                        id="{{ form.photo.id_for_label }}"
+                                        name="{{ form.photo.name }}"
+                                        accept="image/*">
+                                    <p class="upload-hint mb-0 mt-2">
+                                        <i class="fas fa-circle-info me-1"></i>Formats acceptés : JPEG, PNG, GIF, WebP (max recommandé: 5MB).
+                                    </p>
+                                </div>
+                                {% if form.photo.errors %}
+                                <div class="invalid-feedback d-block mt-1">
+                                    {% for error in form.photo.errors %}
+                                    <small><i class="fas fa-circle-exclamation me-1"></i>{{ error }}</small>{% if not forloop.last %}<br>{% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                <div id="imagePreview" class="preview-panel mt-3" hidden>
+                                    <img id="previewImg" src="" alt="Aperçu du fichier sélectionné" class="preview-image">
+                                    <div class="preview-meta">
+                                        <h6 class="mb-1">Aperçu de la photo</h6>
+                                        <small class="text-muted" id="previewName"></small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- ===== INFORMATIONS UTILES ===== -->
-                        <div class="alert alert-info">
-                            <h6 class="alert-heading">
-                                <i class="fas fa-info-circle me-2"></i>Conseils pour un bon rapport
-                            </h6>
-                            <ul class="mb-0">
-                                <li>Soyez précis dans votre description</li>
-                                <li>Indiquez la localisation si possible</li>
-                                <li>Ajoutez une photo si elle peut aider à comprendre le problème</li>
-                                <li>Choisissez la bonne catégorie pour faciliter le traitement</li>
-                            </ul>
-                        </div>
-                        
-                        <!-- ===== BOUTONS ===== -->
-                        <div class="d-flex justify-content-between">
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-5">
                             <a href="{% url 'finance:report_list' %}" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Retour
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Enregistrer le Rapport
+                            <button type="submit" class="btn btn-primary px-4" id="submitReportBtn">
+                                <span class="submit-label"><i class="fas fa-paper-plane me-2"></i>Envoyer le rapport</span>
+                                <span class="submit-loading d-none"><span class="spinner-border spinner-border-sm me-2"></span>Envoi en cours...</span>
                             </button>
                         </div>
                     </form>
@@ -578,39 +677,146 @@
 >>>>>>> Stashed changes
 {% block extra_js %}
 <script>
-function previewImage(input) {
-    const preview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            previewImg.src = e.target.result;
-            preview.style.display = 'block';
-        }
-        
-        reader.readAsDataURL(input.files[0]);
-    } else {
-        preview.style.display = 'none';
-    }
-}
+    (function () {
+        'use strict';
 
-// Validation du formulaire
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
+        const form = document.getElementById('reportCreateForm');
+        if (!form) return;
+
+        const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+        const descriptionInput = document.getElementById('{{ form.description.id_for_label }}');
+        const categoryInput = document.getElementById('{{ form.category.id_for_label }}');
+        const locationInput = document.getElementById('{{ form.location.id_for_label }}');
+        const photoInput = document.getElementById('{{ form.photo.id_for_label }}');
+        const uploadSurface = document.getElementById('uploadSurface');
+
+        const completionBar = document.getElementById('completionBar');
+        const completionText = document.getElementById('completionText');
+        const submitBtn = document.getElementById('submitReportBtn');
+        const submitLabel = submitBtn ? submitBtn.querySelector('.submit-label') : null;
+        const submitLoading = submitBtn ? submitBtn.querySelector('.submit-loading') : null;
+
+        const counters = [
+            { input: titleInput, output: document.getElementById('titleCount') },
+            { input: descriptionInput, output: document.getElementById('descriptionCount') },
+            { input: locationInput, output: document.getElementById('locationCount') }
+        ];
+
+        function updateCounter(input, output) {
+            if (!input || !output) return;
+            output.textContent = input.value.length;
+        }
+
+        function markChecklist(key, done) {
+            const item = document.querySelector('[data-check-item="' + key + '"]');
+            if (!item) return;
+            item.classList.toggle('is-done', done);
+            const icon = item.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-circle-check', done);
+                icon.classList.toggle('fa-circle', !done);
+            }
+        }
+
+        function computeCompletion() {
+            const titleDone = !!(titleInput && titleInput.value.trim().length);
+            const descriptionDone = !!(descriptionInput && descriptionInput.value.trim().length);
+            const categoryDone = !!(categoryInput && categoryInput.value);
+            const locationDone = !!(locationInput && locationInput.value.trim().length);
+            const photoDone = !!(photoInput && photoInput.files && photoInput.files.length);
+
+            markChecklist('title', titleDone);
+            markChecklist('description', descriptionDone);
+            markChecklist('category', categoryDone);
+            markChecklist('location', locationDone);
+            markChecklist('photo', photoDone);
+
+            const requiredScore = ((titleDone ? 1 : 0) + (descriptionDone ? 1 : 0) + (categoryDone ? 1 : 0)) / 3 * 75;
+            const optionalScore = (locationDone ? 12.5 : 0) + (photoDone ? 12.5 : 0);
+            const score = Math.round(requiredScore + optionalScore);
+
+            completionBar.style.width = score + '%';
+            completionBar.textContent = score + '%';
+
+            if (score >= 90) {
+                completionText.textContent = 'Excellent. Votre signalement est prêt à être envoyé.';
+            } else if (score >= 60) {
+                completionText.textContent = 'Bon niveau. Ajoutez encore un peu de contexte pour plus de clarté.';
+            } else {
+                completionText.textContent = 'Complétez les champs clés pour accélérer le traitement.';
+            }
+        }
+
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const previewName = document.getElementById('previewName');
+
+            if (!preview || !previewImg || !previewName) return;
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                    previewName.textContent = input.files[0].name;
+                    preview.hidden = false;
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.hidden = true;
+                previewImg.src = '';
+                previewName.textContent = '';
+            }
+            computeCompletion();
+        }
+
+        counters.forEach(function (entry) {
+            if (!entry.input) return;
+            entry.input.addEventListener('input', function () {
+                updateCounter(entry.input, entry.output);
+                computeCompletion();
+            });
+            updateCounter(entry.input, entry.output);
         });
-    }, false);
-})();
+
+        if (categoryInput) {
+            categoryInput.addEventListener('change', computeCompletion);
+        }
+
+        if (photoInput) {
+            photoInput.addEventListener('change', function () {
+                previewImage(photoInput);
+            });
+
+            ['dragenter', 'dragover'].forEach(function (eventName) {
+                photoInput.addEventListener(eventName, function () {
+                    if (uploadSurface) uploadSurface.classList.add('is-active');
+                });
+            });
+
+            ['dragleave', 'drop', 'change'].forEach(function (eventName) {
+                photoInput.addEventListener(eventName, function () {
+                    if (uploadSurface) uploadSurface.classList.remove('is-active');
+                });
+            });
+        }
+
+        form.addEventListener('submit', function (event) {
+            if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else if (submitBtn && submitLabel && submitLoading) {
+                submitBtn.disabled = true;
+                submitLabel.classList.add('d-none');
+                submitLoading.classList.remove('d-none');
+            }
+            form.classList.add('was-validated');
+        }, false);
+
+        computeCompletion();
+        if (photoInput && photoInput.files && photoInput.files.length) {
+            previewImage(photoInput);
+        }
+    })();
 </script>
 {% endblock %}
