@@ -4,132 +4,16 @@
 {% block title %}Tableau de Bord Syndic - SyndicPro{% endblock %}
 
 {% block content %}
-<div class="ft-page">
-    <div class="container-fluid px-3 px-lg-4 py-4 py-lg-5">
-        <section class="ft-hero card border-0 mb-4 ft-reveal">
-            <div class="card-body p-3 p-lg-4">
-                <div class="d-flex flex-column flex-xl-row justify-content-between gap-3">
-                    <div class="pe-xl-4">
-                        <p class="ft-kicker mb-2">FinOps Command Center</p>
-                        <h1 class="h3 fw-bold mb-2">Pilotage financier et opérationnel</h1>
-                        <p class="text-secondary mb-3">Suivez trésorerie, risque de recouvrement et activité résidents dans une interface SaaS orientée décision.</p>
-                        <div class="d-flex flex-wrap gap-2">
-                            <span class="ft-chip"><i class="fa-solid fa-wave-square"></i>Flux net: {{ net_cash_this_month|floatformat:0 }} DH</span>
-                            <span class="ft-chip"><i class="fa-solid fa-shield-halved"></i>Recouvrement: {{ collection_rate }}%</span>
-                            <span class="ft-chip"><i class="fa-solid fa-triangle-exclamation"></i>{{ overdue_count }} impayé{{ overdue_count|pluralize:'s' }}</span>
-                        </div>
-                    </div>
-                    <div class="d-flex flex-wrap align-items-start gap-2">
-                        <div class="dropdown">
-                            <button class="btn btn-light ft-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa-solid fa-bell me-2 text-warning"></i>Notifications
-                                {% if unread_notifications > 0 %}<span class="badge text-bg-danger ms-2">{{ unread_notifications }}</span>{% endif %}
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end p-0 ft-dropdown">
-                                <div class="p-3 border-bottom">
-                                    <h6 class="mb-1">Répartition par catégorie</h6>
-                                    <p class="small text-secondary mb-0">Vue rapide des communications actives</p>
-                                </div>
-                                <div class="p-2">
-                                    {% for cat in notification_categories %}
-                                    <div class="d-flex justify-content-between align-items-center px-2 py-2 rounded-3 ft-dropdown-row">
-                                        <span class="small fw-semibold">{{ cat.label }}</span>
-                                        <span class="badge text-bg-light border">{{ cat.count }}</span>
-                                    </div>
-                                    {% empty %}
-                                    <div class="px-2 py-3 text-secondary small">Aucune notification active.</div>
-                                    {% endfor %}
-                                </div>
-                                <div class="p-2 border-top">
-                                    <a class="btn btn-sm btn-outline-primary w-100" href="{% url 'finance:notification_list' %}">Ouvrir le centre de notifications</a>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="{% url 'finance:notification_create' %}" class="btn btn-primary ft-btn"><i class="fa-solid fa-paper-plane me-2"></i>Nouvelle diffusion</a>
-                    </div>
-                </div>
-            </div>
-        </section>
+<<<<<<< Updated upstream
+<!-- ===== EN-TÊTE DE PAGE ===== -->
+{% include 'components/page_header.html' with title="Tableau de Bord Syndic" subtitle="Vue d'ensemble" icon="fas fa-tachometer-alt" %}
 
-        <section class="card border-0 ft-panel mb-4 ft-reveal">
-            <div class="card-body p-3 p-lg-4">
-                <form method="get" class="row g-3 align-items-end" aria-label="Filtres du tableau de bord syndic">
-                    <div class="col-12 col-md-3 col-xl-2">
-                        <label for="period" class="form-label mb-1">Période</label>
-                        <select id="period" name="period" class="form-select">
-                            <option value="30d" {% if selected_period == '30d' %}selected{% endif %}>30 jours</option>
-                            <option value="90d" {% if selected_period == '90d' %}selected{% endif %}>90 jours</option>
-                            <option value="6m" {% if selected_period == '6m' %}selected{% endif %}>6 mois</option>
-                            <option value="12m" {% if selected_period == '12m' %}selected{% endif %}>12 mois</option>
-                            <option value="all" {% if selected_period == 'all' %}selected{% endif %}>Tout</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-4 col-xl-3">
-                        <label for="resident" class="form-label mb-1">Résident</label>
-                        <select id="resident" name="resident" class="form-select">
-                            <option value="">Tous les résidents</option>
-                            {% for resident in dashboard_residents %}
-                            <option value="{{ resident.id }}" {% if selected_resident == resident.id|stringformat:'s' %}selected{% endif %}>{{ resident.get_full_name|default:resident.username }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3 col-xl-2">
-                        <label for="status" class="form-label mb-1">Statut</label>
-                        <select id="status" name="status" class="form-select">
-                            <option value="all" {% if selected_status == 'all' %}selected{% endif %}>Tous</option>
-                            <option value="up_to_date" {% if selected_status == 'up_to_date' %}selected{% endif %}>A jour</option>
-                            <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>En attente</option>
-                            <option value="overdue" {% if selected_status == 'overdue' %}selected{% endif %}>En retard</option>
-                            <option value="critical" {% if selected_status == 'critical' %}selected{% endif %}>Critique</option>
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-3 col-xl-2">
-                        <label for="from" class="form-label mb-1">Du</label>
-                        <input id="from" name="from" type="date" class="form-control" value="{% if selected_from %}{{ selected_from|date:'Y-m-d' }}{% endif %}">
-                    </div>
-                    <div class="col-6 col-md-3 col-xl-2">
-                        <label for="to" class="form-label mb-1">Au</label>
-                        <input id="to" name="to" type="date" class="form-control" value="{% if selected_to %}{{ selected_to|date:'Y-m-d' }}{% endif %}">
-                    </div>
-                    <div class="col-12 col-xl-1 d-grid">
-                        <button class="btn btn-primary" type="submit">Appliquer</button>
-                    </div>
-                    <div class="col-12 d-flex justify-content-end">
-                        <a href="{% url 'finance:syndic_dashboard' %}" class="btn btn-link text-decoration-none px-0">Réinitialiser</a>
-                    </div>
-                </form>
-            </div>
-        </section>
-
-        <section class="row g-3 mb-4">
-            <div class="col-12 col-sm-6 col-xxl-3">
-                <article class="ft-kpi card border-0 ft-reveal">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <p class="ft-kpi-label mb-1">Résidents actifs</p>
-                                <h2 class="ft-kpi-value mb-0" data-kpi-count="{{ total_residents }}">{{ total_residents }}</h2>
-                            </div>
-                            <span class="ft-kpi-icon bg-primary-subtle text-primary"><i class="fa-solid fa-users"></i></span>
-                        </div>
-                        <p class="small text-secondary mb-0"><i class="fa-solid fa-user-plus me-1"></i>+{{ recent_residents }} ce mois</p>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-xxl-3">
-                <article class="ft-kpi card border-0 ft-reveal">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <p class="ft-kpi-label mb-1">Montant impayé</p>
-                                <h2 class="ft-kpi-value mb-0" data-kpi-count="{{ total_due|floatformat:0 }}">{{ total_due|floatformat:0 }} DH</h2>
-                            </div>
-                            <span class="ft-kpi-icon bg-danger-subtle text-danger"><i class="fa-solid fa-wallet"></i></span>
-                        </div>
-                        <div class="d-flex justify-content-between small mb-1"><span class="text-secondary">Part impayée</span><span>{{ unpaid_rate }}%</span></div>
-                        <div class="progress"><div class="progress-bar bg-danger" style="width: {{ unpaid_rate }}%"></div></div>
-                    </div>
-                </article>
+<div class="container">
+    <!-- ===== MÉTRIQUES PRINCIPALES ===== -->
+    <section class="metrics-section mb-4">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                {% include 'components/stats_card.html' with value=total_residents label="Total Résidents" icon="fas fa-users" color="primary" %}
             </div>
             <div class="col-12 col-sm-6 col-xxl-3">
                 <article class="ft-kpi card border-0 ft-reveal">
@@ -1069,3 +953,659 @@
     }
 </script>
 {% endblock %}
+=======
+<div style="background: radial-gradient(circle at 10% 10%, rgba(2, 132, 199, 0.14), transparent 42%), radial-gradient(circle at 90% 0%, rgba(16, 185, 129, 0.12), transparent 36%), #f3f7fb; min-height: 100%;">
+    <div class="container-fluid px-3 px-lg-4 py-4 py-lg-5">
+        <!-- Filters Card -->
+        <section class="card-modern mb-4">
+            <div class="card-body-modern">
+                <form method="get" class="row g-3 align-items-end" aria-label="Filtres du tableau de bord syndic">
+                    <div class="col-12 col-md-3 col-xl-2">
+                        <label for="period" class="form-label mb-1">Période</label>
+                        <select id="period" name="period" class="form-select">
+                            <option value="30d" {% if selected_period == '30d' %}selected{% endif %}>30 jours</option>
+                            <option value="90d" {% if selected_period == '90d' %}selected{% endif %}>90 jours</option>
+                            <option value="6m" {% if selected_period == '6m' %}selected{% endif %}>6 mois</option>
+                            <option value="12m" {% if selected_period == '12m' %}selected{% endif %}>12 mois</option>
+                            <option value="all" {% if selected_period == 'all' %}selected{% endif %}>Tout</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4 col-xl-3">
+                        <label for="resident" class="form-label mb-1">Résident</label>
+                        <select id="resident" name="resident" class="form-select">
+                            <option value="">Tous les résidents</option>
+                            {% for resident in dashboard_residents %}
+                            <option value="{{ resident.id }}" {% if selected_resident == resident.id|stringformat:'s' %}selected{% endif %}>{{ resident.get_full_name|default:resident.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3 col-xl-2">
+                        <label for="status" class="form-label mb-1">Statut</label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="all" {% if selected_status == 'all' %}selected{% endif %}>Tous</option>
+                            <option value="up_to_date" {% if selected_status == 'up_to_date' %}selected{% endif %}>A jour</option>
+                            <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>En attente</option>
+                            <option value="overdue" {% if selected_status == 'overdue' %}selected{% endif %}>En retard</option>
+                            <option value="critical" {% if selected_status == 'critical' %}selected{% endif %}>Critique</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3 col-xl-2">
+                        <label for="from" class="form-label mb-1">Du</label>
+                        <input id="from" name="from" type="date" class="form-control" value="{% if selected_from %}{{ selected_from|date:'Y-m-d' }}{% endif %}">
+                    </div>
+                    <div class="col-6 col-md-3 col-xl-2">
+                        <label for="to" class="form-label mb-1">Au</label>
+                        <input id="to" name="to" type="date" class="form-control" value="{% if selected_to %}{{ selected_to|date:'Y-m-d' }}{% endif %}">
+                    </div>
+                    <div class="col-12 col-xl-1 d-grid">
+                        <button class="btn btn-primary" type="submit">Appliquer</button>
+                    </div>
+                    <div class="col-12 d-flex justify-content-end">
+                        <a href="{% url 'finance:syndic_dashboard' %}" class="btn btn-link text-decoration-none px-0">Réinitialiser</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- KPI Stats Row -->
+        <section class="row g-3 mb-4">
+            {% include 'components/stats_card.html' with label='Résidents actifs' value=total_residents icon='fa-solid fa-users' color='primary' trend=recent_residents_trend %}
+            {% include 'components/stats_card.html' with label='Montant impayé' value=total_due|floatformat:0 icon='fa-solid fa-wallet' color='danger' %}
+            {% include 'components/stats_card.html' with label='Encaissement mensuel' value=payments_this_month|floatformat:0|default:'0' icon='fa-solid fa-arrow-trend-up' color='success' trend=payments_growth %}
+            {% include 'components/stats_card.html' with label='Dépenses mensuelles' value=expenses_this_month|floatformat:0|default:'0' icon='fa-solid fa-file-invoice-dollar' color='warning' trend=expenses_growth %}
+
+        <!-- Insight Cards Row -->
+        <section class="row g-3 mb-4">
+            <div class="col-12 col-lg-4">
+                <article class="card-modern h-100">
+                    <header class="card-header-modern">
+                        <h5 class="mb-0">Risk Radar</h5>
+                    </header>
+                    <div class="card-body-modern">
+                        <p class="small text-secondary mb-3">Indice global de risque recouvrement</p>
+                        <div class="d-flex justify-content-between align-items-end mb-2">
+                            <h3 class="mb-0 fw-bold">{{ risk_index }} <span class="small text-secondary">/100</span></h3>
+                             <span class="badge {% if risk_index >= 70 %}bg-danger{% elif risk_index >= 40 %}bg-warning{% else %}bg-success{% endif %}">
+                                {% if risk_index >= 70 %}Risque élevé{% elif risk_index >= 40 %}Sous surveillance{% else %}Risque maîtrisé{% endif %}
+                            </span>
+                        </div>
+                        <div class="progress mb-3"><div class="progress-bar {% if risk_index >= 70 %}bg-danger{% elif risk_index >= 40 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ risk_index }}%"></div></div>
+                        <div class="row g-2 small">
+                            <div class="col-6"><span class="text-secondary">A jour</span><p class="mb-0 fw-semibold">{{ up_to_date_count }}</p></div>
+                            <div class="col-6"><span class="text-secondary">En attente</span><p class="mb-0 fw-semibold">{{ pending_count }}</p></div>
+                            <div class="col-6"><span class="text-secondary">En retard</span><p class="mb-0 fw-semibold">{{ overdue_residents_count }}</p></div>
+                            <div class="col-6"><span class="text-secondary">Critique</span><p class="mb-0 fw-semibold text-danger">{{ critical_count }}</p></div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-lg-4">
+                <article class="card-modern h-100">
+                    <header class="card-header-modern">
+                        <h5 class="mb-0">Ops Pressure</h5>
+                    </header>
+                    <div class="card-body-modern">
+                        <p class="small text-secondary mb-3">Charge opérationnelle en cours</p>
+                        <div class="d-flex justify-content-between align-items-end mb-2">
+                            <h3 class="mb-0 fw-bold">{{ ops_pressure_score }} <span class="small text-secondary">pts</span></h3>
+                            <span class="badge {% if ops_pressure_score >= 70 %}bg-danger{% elif ops_pressure_score >= 40 %}bg-warning{% else %}bg-success{% endif %}">{{ ops_pressure_level|title }}</span>
+                        </div>
+                        <div class="progress mb-3"><div class="progress-bar {% if ops_pressure_score >= 70 %}bg-danger{% elif ops_pressure_score >= 40 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ ops_pressure_score }}%"></div></div>
+                        <div style="display: grid; gap: 0.45rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.86rem; padding: 0.45rem 0.6rem; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                                <span>Signalements ouverts</span><strong>{{ open_reports_count }}</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.86rem; padding: 0.45rem 0.6rem; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                                <span>Notifications non lues</span><strong>{{ unread_notifications }}</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.86rem; padding: 0.45rem 0.6rem; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                                <span>Documents impayés</span><strong>{{ overdue_count }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-lg-4">
+                <article class="card-modern h-100">
+                    <header class="card-header-modern">
+                        <h5 class="mb-0">Focus Exécutif</h5>
+                    </header>
+                    <div class="card-body-modern">
+                        <p class="small text-secondary mb-3">{{ cashflow_message }} · Marge {{ net_margin }}%</p>
+                        <div style="display: grid; gap: 0.55rem;">
+                            {% for item in focus_items|slice:':3' %}
+                            <div style="border-radius: 12px; border: 1px solid #e2e8f0; padding: 0.65rem 0.72rem; background: #fff;">
+                                <p class="mb-1 fw-semibold">{{ item.label }}</p>
+                                <p class="mb-0 small text-secondary">{{ item.value }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="row g-4">
+            <div class="col-12 col-xl-8">
+                <!-- Cashflow Analytics -->
+                <article class="card-modern mb-4">
+                    <header class="card-header-modern d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h5 class="mb-0">Cashflow Analytics</h5>
+                        </div>
+                        <span class="badge bg-light border text-dark">Marge nette: {{ net_margin }}%</span>
+                    </header>
+                    <div class="card-body-modern">
+                        <div id="cashflowLoading" class="mb-3" style="display: grid; gap: 0.5rem;">
+                            <span class="placeholder col-12 mb-2"></span>
+                            <span class="placeholder col-10 mb-2"></span>
+                            <span class="placeholder col-8"></span>
+                        </div>
+                        <div id="cashflowChartWrap" class="d-none" style="height: 320px;">
+                            <canvas id="cashflowChart"></canvas>
+                        </div>
+                        <div id="cashflowEmpty" class="d-none" style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
+                            <i class="fa-regular fa-chart-bar mb-2" style="display: block; font-size: 2rem;"></i>
+                            <p class="mb-0">Aucune donnée de flux pour cette période.</p>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Charts -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-lg-6">
+                        <article class="card-modern h-100">
+                            <header class="card-header-modern">
+                                <h5 class="mb-0">Risque Recouvrement</h5>
+                            </header>
+                            <div class="card-body-modern">
+                                <p class="small text-secondary mb-3">Distribution du statut résidents</p>
+                                <div id="statusLoading" class="mb-3" style="display: grid; gap: 0.5rem;">
+                                    <span class="placeholder col-12 mb-2"></span>
+                                    <span class="placeholder col-9"></span>
+                                </div>
+                                <div id="statusChartWrap" class="d-none" style="height: 220px;">
+                                    <canvas id="statusChart"></canvas>
+                                </div>
+                                <div id="statusEmpty" class="d-none" style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
+                                    <i class="fa-regular fa-circle-check mb-2" style="display: block; font-size: 2rem;"></i>
+                                    <p class="mb-0">Aucun résident dans le scope actuel.</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <article class="card-modern h-100">
+                            <header class="card-header-modern">
+                                <h5 class="mb-0">Mix Notifications</h5>
+                            </header>
+                            <div class="card-body-modern">
+                                <p class="small text-secondary mb-3">Canaux de communication dominants</p>
+                                <div id="notifLoading" class="mb-3" style="display: grid; gap: 0.5rem;">
+                                    <span class="placeholder col-12 mb-2"></span>
+                                    <span class="placeholder col-8"></span>
+                                </div>
+                                <div id="notifChartWrap" class="d-none" style="height: 220px;">
+                                    <canvas id="notifChart"></canvas>
+                                </div>
+                                <div id="notifEmpty" class="d-none" style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
+                                    <i class="fa-regular fa-bell-slash mb-2" style="display: block; font-size: 2rem;"></i>
+                                    <p class="mb-0">Pas de catégories disponibles.</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <article class="card-modern">
+                    <header class="card-header-modern d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Activité récente</h5>
+                        </div>
+                    </header>
+                    <div class="card-body-modern">
+                        <ul class="nav nav-pills mb-3" id="activityTab" role="tablist" style="gap: 0.5rem;">
+                            <li class="nav-item" role="presentation"><button class="btn btn-sm btn-outline-primary active" id="docs-tab" data-bs-toggle="pill" data-bs-target="#docs-pane" type="button" role="tab">Documents <span class="badge bg-light text-dark ms-1" style="font-size: 0.75rem;">{{ recent_documents|length }}</span></button></li>
+                            <li class="nav-item" role="presentation"><button class="btn btn-sm btn-outline-primary" id="payments-tab" data-bs-toggle="pill" data-bs-target="#payments-pane" type="button" role="tab">Paiements <span class="badge bg-light text-dark ms-1" style="font-size: 0.75rem;">{{ recent_payments|length }}</span></button></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="docs-pane" role="tabpanel" aria-labelledby="docs-tab" tabindex="0">
+                                {% if recent_documents %}
+                                <div style="display: grid; gap: 0.58rem;">
+                                    {% for doc in recent_documents %}
+                                    <a href="{% url 'finance:document_detail' doc.pk %}" class="text-decoration-none" style="display: flex; gap: 0.75rem; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; transition: all 0.2s ease;">
+                                        <div style="flex-shrink: 0;"><i class="fa-solid fa-file-lines text-primary" style="font-size: 1.25rem;"></i></div>
+                                        <div style="flex-grow: 1; min-width: 0;">
+                                            <p class="fw-semibold mb-0 text-truncate text-dark">{{ doc.title }}</p>
+                                            <p class="small text-secondary mb-0">{{ doc.resident.get_full_name|default:doc.resident.username }} · {{ doc.date|date:'d/m/Y' }}</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <p class="fw-semibold mb-0 text-dark">{{ doc.amount|floatformat:2 }} DH</p>
+                                            <span class="badge {% if doc.is_paid %}bg-success{% else %}bg-warning{% endif %}" style="font-size: 0.75rem;">{% if doc.is_paid %}Payé{% else %}En attente{% endif %}</span>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
+                                    <i class="fa-regular fa-folder-open mb-2" style="display: block; font-size: 2rem;"></i>
+                                    <p class="mb-0">Aucun document sur cette période.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="tab-pane fade" id="payments-pane" role="tabpanel" aria-labelledby="payments-tab" tabindex="0">
+                                {% if recent_payments %}
+                                <div style="display: grid; gap: 0.58rem;">
+                                    {% for payment in recent_payments %}
+                                    <a href="{% url 'finance:payment_detail' payment.pk %}" class="text-decoration-none" style="display: flex; gap: 0.75rem; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; transition: all 0.2s ease;">
+                                        <div style="flex-shrink: 0;"><i class="fa-solid fa-money-check-dollar text-success" style="font-size: 1.25rem;"></i></div>
+                                        <div style="flex-grow: 1; min-width: 0;">
+                                            <p class="fw-semibold mb-0 text-truncate text-dark">{{ payment.document.title }}</p>
+                                            <p class="small text-secondary mb-0">{{ payment.document.resident.get_full_name|default:payment.document.resident.username }} · {{ payment.payment_date|date:'d/m/Y' }}</p>
+                                        </div>
+                                        <div class="text-end">
+                                            <p class="fw-semibold mb-0 text-dark">{{ payment.amount|floatformat:2 }} DH</p>
+                                            <span class="badge {% if payment.is_verified %}bg-success{% else %}bg-secondary{% endif %}" style="font-size: 0.75rem;">{% if payment.is_verified %}Vérifié{% else %}En attente{% endif %}</span>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
+                                    <i class="fa-regular fa-credit-card mb-2" style="display: block; font-size: 2rem;"></i>
+                                    <p class="mb-0">Aucun paiement enregistré sur cette période.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-12 col-xl-4">
+                <!-- Quick Actions -->
+                <article class="card-modern mb-4">
+                    <header class="card-header-modern">
+                        <h5 class="mb-0">Actions rapides</h5>
+                    </header>
+                    <div class="card-body-modern">
+                        <div class="row g-2">
+                            <div class="col-6"><a href="{% url 'finance:document_create' %}" class="btn btn-outline-primary btn-sm w-100"><i class="fa-solid fa-file-circle-plus me-1"></i><span>Document</span></a></div>
+                            <div class="col-6"><a href="{% url 'finance:resident_create' %}" class="btn btn-outline-primary btn-sm w-100"><i class="fa-solid fa-user-plus me-1"></i><span>Résident</span></a></div>
+                            <div class="col-6"><a href="{% url 'finance:depense_create' %}" class="btn btn-outline-primary btn-sm w-100"><i class="fa-solid fa-receipt me-1"></i><span>Dépense</span></a></div>
+                            <div class="col-6"><a href="{% url 'finance:event_create' %}" class="btn btn-outline-primary btn-sm w-100"><i class="fa-solid fa-calendar-plus me-1"></i><span>Événement</span></a></div>
+                            <div class="col-6"><a href="{% url 'finance:overdue_dashboard' %}" class="btn btn-outline-primary btn-sm w-100"><i class="fa-solid fa-triangle-exclamation me-1"></i><span>Impayés</span></a></div>
+                            <div class="col-6"><a href="{% url 'finance:report_management' %}" class="btn btn-outline-primary btn-sm w-100"><i class="fa-solid fa-flag me-1"></i><span>Rapports</span></a></div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Watchlist -->
+                <article class="card-modern mb-4">
+                    <header class="card-header-modern d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Watchlist Impayés</h5>
+                        <span class="badge bg-danger">{{ top_debtors|length }}</span>
+                    </header>
+                    <div class="card-body-modern">
+                        {% if top_debtors %}
+                        <div style="display: grid; gap: 0.58rem; max-height: 286px; overflow-y: auto;">
+                            {% for debtor in top_debtors %}
+                            <a href="{% url 'finance:resident_detail' debtor.id %}" class="text-decoration-none" style="display: flex; gap: 0.75rem; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; transition: all 0.2s ease;">
+                                <div style="flex-shrink: 0;"><i class="fa-solid fa-user-clock text-warning" style="font-size: 1.25rem;"></i></div>
+                                <div style="flex-grow: 1; min-width: 0;">
+                                    <p class="fw-semibold mb-0 text-truncate text-dark">{{ debtor.name }}</p>
+                                    <p class="small text-secondary mb-0">{% if debtor.apartment %}Appartement {{ debtor.apartment }}{% else %}Appartement non défini{% endif %}</p>
+                                </div>
+                                <div class="text-end">
+                                    <p class="fw-semibold mb-0 text-danger">{{ debtor.balance|floatformat:0 }} DH</p>
+                                    <span class="badge {% if debtor.category == 'critical' %}bg-danger{% elif debtor.category == 'overdue' %}bg-warning{% else %}bg-secondary{% endif %}" style="font-size: 0.75rem;">{{ debtor.category }}</span>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
+                            <i class="fa-regular fa-thumbs-up mb-2" style="display: block; font-size: 2rem;"></i>
+                            <p class="mb-0">Aucun profil à risque élevé.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </article>
+
+                <!-- Recent Notifications -->
+                <article class="card-modern mb-4">
+                    <header class="card-header-modern d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Notifications récentes</h5>
+                        <a href="{% url 'finance:notification_list' %}" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                    </header>
+                    <div class="card-body-modern">
+                        {% if recent_notifications %}
+                        <div style="display: grid; gap: 0.58rem; max-height: 286px; overflow-y: auto;">
+                            {% for notif in recent_notifications|slice:':4' %}
+                            <a href="{% url 'finance:notification_detail' notif.pk %}" class="text-decoration-none" style="display: flex; gap: 0.75rem; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; transition: all 0.2s ease;">
+                                <div style="flex-shrink: 0;"><i class="fa-solid fa-bell text-info" style="font-size: 1.25rem;"></i></div>
+                                <div style="flex-grow: 1; min-width: 0;">
+                                    <p class="fw-semibold mb-0 text-truncate text-dark">{{ notif.title }}</p>
+                                    <p class="small text-secondary mb-0">{{ notif.get_notification_type_display }} · {{ notif.created_at|timesince }}</p>
+                                </div>
+                                <span class="badge {% if notif.priority == 'URGENT' %}bg-danger{% elif notif.priority == 'HIGH' %}bg-warning{% else %}bg-light{% endif %}" style="font-size: 0.75rem;">{{ notif.get_priority_display }}</span>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
+                            <i class="fa-regular fa-bell-slash mb-2" style="display: block; font-size: 2rem;"></i>
+                            <p class="mb-0">Aucune notification récente.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </article>
+
+                <!-- Recent Reports -->
+                <article class="card-modern">
+                    <header class="card-header-modern d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Rapports résidents</h5>
+                        <a href="{% url 'finance:report_management' %}" class="btn btn-sm btn-outline-primary">Gérer</a>
+                    </header>
+                    <div class="card-body-modern">
+                        {% if recent_reports %}
+                        <div style="display: grid; gap: 0.58rem; max-height: 286px; overflow-y: auto;">
+                            {% for report in recent_reports|slice:':4' %}
+                            <a href="{% url 'finance:report_detail' report.pk %}" class="text-decoration-none" style="display: flex; gap: 0.75rem; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 10px; transition: all 0.2s ease;">
+                                <div style="flex-shrink: 0;"><i class="fa-solid fa-flag text-danger" style="font-size: 1.25rem;"></i></div>
+                                <div style="flex-grow: 1; min-width: 0;">
+                                    <p class="fw-semibold mb-0 text-truncate text-dark">{{ report.title }}</p>
+                                    <p class="small text-secondary mb-0">{{ report.resident.get_full_name|default:report.resident.username }} · {{ report.created_at|timesince }}</p>
+                                </div>
+                                <span class="badge {% if report.status == 'NEW' %}bg-primary{% elif report.status == 'IN_PROGRESS' %}bg-warning{% elif report.status == 'RESOLVED' %}bg-success{% else %}bg-light{% endif %}" style="font-size: 0.75rem;">{{ report.get_status_display }}</span>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div style="border: 1px dashed #d1d5db; border-radius: 14px; padding: 1rem; text-align: center; color: #6b7280; background: #fafafa;">
+                            <i class="fa-regular fa-flag mb-2" style="display: block; font-size: 2rem;"></i>
+                            <p class="mb-0">Aucun rapport récent.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+    /* Custom styles for syndic dashboard charts */
+    .min-w-0 { min-width: 0; }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const monthlyTrend = {{ monthly_trend_json|safe }};
+        const statusDistribution = {{ status_distribution_json|safe }};
+        const notificationMix = {{ notification_categories_json|safe }};
+
+        initializeReveal();
+        animateKpis();
+        initializeCharts(monthlyTrend, statusDistribution, notificationMix);
+        addActionPressFeedback();
+    });
+
+    function initializeReveal() {
+        const revealNodes = document.querySelectorAll('.ft-reveal');
+        if (!('IntersectionObserver' in window)) {
+            revealNodes.forEach((node) => node.classList.add('is-visible'));
+            return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        revealNodes.forEach((node, index) => {
+            node.style.transitionDelay = (index % 8) * 0.05 + 's';
+            observer.observe(node);
+        });
+    }
+
+    function animateKpis() {
+        const counters = document.querySelectorAll('[data-kpi-count]');
+        counters.forEach((node) => {
+            const target = Number(String(node.dataset.kpiCount).replace(/[^0-9.-]/g, ''));
+            if (!Number.isFinite(target)) return;
+
+            const duration = 700;
+            const startAt = performance.now();
+            const prefix = node.textContent.includes('DH') ? '' : '';
+            const suffix = node.textContent.includes('DH') ? ' DH' : '';
+
+            function tick(now) {
+                const p = Math.min(1, (now - startAt) / duration);
+                const eased = 1 - Math.pow(1 - p, 3);
+                const current = Math.round(target * eased);
+                node.textContent = prefix + current.toLocaleString('fr-MA') + suffix;
+                if (p < 1) requestAnimationFrame(tick);
+            }
+
+            requestAnimationFrame(tick);
+        });
+    }
+
+    function initializeCharts(monthlyTrend, statusDistribution, notificationMix) {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const axisColor = isDark ? '#94a3b8' : '#64748b';
+        const gridColor = isDark ? 'rgba(148,163,184,.14)' : 'rgba(100,116,139,.16)';
+
+        renderCashflowChart(monthlyTrend, axisColor, gridColor);
+        renderStatusChart(statusDistribution, axisColor);
+        renderNotificationChart(notificationMix, axisColor, gridColor);
+    }
+
+    function renderCashflowChart(monthlyTrend, axisColor, gridColor) {
+        const loading = document.getElementById('cashflowLoading');
+        const wrap = document.getElementById('cashflowChartWrap');
+        const empty = document.getElementById('cashflowEmpty');
+        const canvas = document.getElementById('cashflowChart');
+        if (!canvas) return;
+
+        const hasData = Array.isArray(monthlyTrend) && monthlyTrend.some((item) => Number(item.payments || 0) > 0 || Number(item.expenses || 0) > 0);
+        if (!hasData) {
+            if (loading) loading.classList.add('d-none');
+            if (empty) empty.classList.remove('d-none');
+            return;
+        }
+
+        const labels = monthlyTrend.map((item) => item.month);
+        const payments = monthlyTrend.map((item) => Number(item.payments || 0));
+        const expenses = monthlyTrend.map((item) => Number(item.expenses || 0));
+        const net = monthlyTrend.map((item) => Number(item.net || 0));
+
+        new Chart(canvas, {
+            data: {
+                labels,
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'Paiements (DH)',
+                        data: payments,
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22,163,74,.14)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 2
+                    },
+                    {
+                        type: 'line',
+                        label: 'Dépenses (DH)',
+                        data: expenses,
+                        borderColor: '#ea580c',
+                        backgroundColor: 'rgba(234,88,12,.12)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 2
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Flux net (DH)',
+                        data: net,
+                        backgroundColor: net.map((value) => value >= 0 ? 'rgba(2,132,199,.45)' : 'rgba(239,68,68,.45)'),
+                        borderRadius: 8,
+                        maxBarThickness: 28
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: axisColor,
+                            usePointStyle: true
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.dataset.label}: ${Number(context.parsed.y || 0).toLocaleString('fr-MA')} DH`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: axisColor },
+                        grid: { color: 'transparent' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: axisColor,
+                            callback: (value) => `${Number(value).toLocaleString('fr-MA')} DH`
+                        },
+                        grid: { color: gridColor }
+                    }
+                }
+            }
+        });
+
+        if (loading) loading.classList.add('d-none');
+        if (wrap) wrap.classList.remove('d-none');
+    }
+
+    function renderStatusChart(statusDistribution, axisColor) {
+        const loading = document.getElementById('statusLoading');
+        const wrap = document.getElementById('statusChartWrap');
+        const empty = document.getElementById('statusEmpty');
+        const canvas = document.getElementById('statusChart');
+        if (!canvas) return;
+
+        const hasData = Array.isArray(statusDistribution) && statusDistribution.some((item) => Number(item.value || 0) > 0);
+        if (!hasData) {
+            if (loading) loading.classList.add('d-none');
+            if (empty) empty.classList.remove('d-none');
+            return;
+        }
+
+        new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels: statusDistribution.map((item) => item.label),
+                datasets: [{
+                    data: statusDistribution.map((item) => Number(item.value || 0)),
+                    backgroundColor: statusDistribution.map((item) => item.color),
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: axisColor,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+
+        if (loading) loading.classList.add('d-none');
+        if (wrap) wrap.classList.remove('d-none');
+    }
+
+    function renderNotificationChart(notificationMix, axisColor, gridColor) {
+        const loading = document.getElementById('notifLoading');
+        const wrap = document.getElementById('notifChartWrap');
+        const empty = document.getElementById('notifEmpty');
+        const canvas = document.getElementById('notifChart');
+        if (!canvas) return;
+
+        const hasData = Array.isArray(notificationMix) && notificationMix.length > 0;
+        if (!hasData) {
+            if (loading) loading.classList.add('d-none');
+            if (empty) empty.classList.remove('d-none');
+            return;
+        }
+
+        new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: notificationMix.map((item) => item.label),
+                datasets: [{
+                    label: 'Volume',
+                    data: notificationMix.map((item) => Number(item.count || 0)),
+                    backgroundColor: 'rgba(3,105,161,.62)',
+                    borderRadius: 10,
+                    maxBarThickness: 20
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: axisColor },
+                        grid: { color: gridColor }
+                    },
+                    y: {
+                        ticks: { color: axisColor },
+                        grid: { color: 'transparent' }
+                    }
+                }
+            }
+        });
+
+        if (loading) loading.classList.add('d-none');
+        if (wrap) wrap.classList.remove('d-none');
+    }
+
+    function addActionPressFeedback() {
+        document.querySelectorAll('.ft-action').forEach((node) => {
+            node.addEventListener('mousedown', () => {
+                node.style.transform = 'translateY(1px) scale(0.99)';
+            });
+            node.addEventListener('mouseup', () => {
+                node.style.transform = '';
+            });
+            node.addEventListener('mouseleave', () => {
+                node.style.transform = '';
+            });
+        });
+    }
+</script>
+{% endblock %}
+>>>>>>> Stashed changes
