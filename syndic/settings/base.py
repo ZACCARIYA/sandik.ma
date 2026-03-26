@@ -124,6 +124,15 @@ DATE_INPUT_FORMATS = [
 
 
 
+DATE_FORMAT = "Y-m-d"
+DATE_INPUT_FORMATS = [
+    "%Y-%m-%d",
+    "%d/%m/%Y",
+    "%d-%m-%Y",
+]
+
+
+
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
