@@ -2,9 +2,17 @@ from django.http import JsonResponse
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+<<<<<<< Updated upstream
 from django.db.models import Sum, Count
 from django.utils import timezone
 from .models import User, Document, Depense, Notification, Payment, ResidentReport
+=======
+import logging
+
+from .services.navigation_service import build_navigation_stats
+>>>>>>> Stashed changes
+
+logger = logging.getLogger(__name__)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -12,10 +20,8 @@ class NavigationStatsAPI(View):
     """API pour les statistiques de navigation en temps réel"""
     
     def get(self, request):
-        if request.user.role not in ['SUPERADMIN', 'SYNDIC']:
-            return JsonResponse({'error': 'Accès non autorisé'}, status=403)
-        
         try:
+<<<<<<< Updated upstream
             # Statistiques de base
             total_residents = User.objects.filter(role='RESIDENT').count()
             total_documents = Document.objects.filter(is_archived=False).count()
@@ -80,6 +86,14 @@ class NavigationStatsAPI(View):
                 'recent_residents': recent_residents,
                 'timestamp': timezone.now().isoformat()
             })
+=======
+            if request.user.role not in ['SUPERADMIN', 'SYNDIC']:
+                return JsonResponse({'error': 'Accès non autorisé'}, status=403)
+            
+            stats = build_navigation_stats(request.user)
+            return JsonResponse(stats, safe=True)
+>>>>>>> Stashed changes
             
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+            logger.exception(f"Error in NavigationStatsAPI: {str(e)}")
+            return JsonResponse({'error': 'Erreur serveur', 'detail': str(e)}, status=500)

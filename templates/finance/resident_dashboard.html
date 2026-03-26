@@ -4,6 +4,7 @@
 {% block title %}Mon Tableau de Bord - Résident{% endblock %}
 
 {% block content %}
+<<<<<<< Updated upstream
 <!-- ===== EN-TÊTE DE PAGE ===== -->
 {% include 'components/page_header.html' with title="Mon Tableau de Bord" subtitle="Vue d'ensemble" icon="fas fa-home" %}
 
@@ -45,11 +46,612 @@
                             <p class="stats-label">Total des documents</p>
                         </div>
                     </div>
+=======
+<style>
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-30px);
+        }
+    }
+
+    @keyframes float-reverse {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(30px);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            left: -100%;
+        }
+        100% {
+            left: 100%;
+        }
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% {
+            box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+        }
+        50% {
+            box-shadow: 0 8px 25px rgba(37,99,235,0.12);
+        }
+    }
+
+    @keyframes gradient-shift {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .dashboard-container {
+        background: linear-gradient(135deg, #f3f7fb 0%, #f9fafb 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-container::before {
+        content: '';
+        position: fixed;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(37,99,235,0.1) 0%, transparent 70%);
+        pointer-events: none;
+        animation: float 8s ease-in-out infinite;
+        z-index: 0;
+    }
+
+    .dashboard-container::after {
+        content: '';
+        position: fixed;
+        bottom: -20%;
+        left: -5%;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%);
+        pointer-events: none;
+        animation: float-reverse 10s ease-in-out infinite;
+        z-index: 0;
+    }
+
+    .dashboard-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .premium-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2.5rem;
+        animation: slideDown 0.6s ease-out;
+    }
+
+    .header-text h1 {
+        margin: 0.25rem 0 0;
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+    }
+
+    .header-text p {
+        margin: 0.5rem 0 0;
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+    .header-subtitle {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-card {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe);
+        border-radius: 16px;
+        padding: 1.25rem 1.75rem;
+        border: 1px solid #93c5fd;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .status-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(37,99,235,0.15);
+    }
+
+    .status-card.critical {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca);
+        border: 1px solid #fca5a5;
+    }
+
+    .status-card.overdue {
+        background: linear-gradient(135deg, #fff7ed 0%, #fed7aa);
+        border: 1px solid #fdba74;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.45rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .status-badge:hover {
+        transform: scale(1.05);
+    }
+
+    .premium-alert {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        border: 2px solid #fca5a5;
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        animation: slideDown 0.6s ease-out 0.1s both;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+    }
+
+    .alert-icon {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: #fee2e2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #dc2626;
+    }
+
+    .section-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+        border: 1px solid #e2e8f0;
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .section-card:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .section-title {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .icon-primary {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #0369a1;
+    }
+
+    .icon-success {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #059669;
+    }
+
+    .icon-warning {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #9a3412;
+    }
+
+    .icon-info {
+        background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%);
+        color: #0d9488;
+    }
+
+    .icon-purple {
+        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        color: #4f46e5;
+    }
+
+    .icon-pink {
+        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+        color: #7c3aed;
+    }
+
+    .item-row {
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1.5px solid #e2e8f0;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .item-row:hover {
+        border-color: #cbd5e1;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateX(4px);
+    }
+
+    .item-row::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    .item-row-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1.25rem;
+    }
+
+    .item-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.25rem;
+    }
+
+    .item-main {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .item-title {
+        margin: 0;
+        font-weight: 700;
+        color: #0f172a;
+        font-size: 1rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .item-subtitle {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .item-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .item-actions {
+        flex-shrink: 0;
+        text-align: right;
+    }
+
+    .section-link {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .section-link:hover {
+        color: #1d4ed8;
+        transform: translateX(4px);
+    }
+
+    .empty-state {
+        padding: 3rem 1.5rem;
+        text-align: center;
+        border-radius: 12px;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-state-text {
+        margin: 0;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .sidebar-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+        border: 1px solid #e2e8f0;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .sidebar-card:nth-child(1) {
+        animation-delay: 0.3s;
+    }
+
+    .sidebar-card:nth-child(2) {
+        animation-delay: 0.4s;
+    }
+
+    .sidebar-card:nth-child(3) {
+        animation-delay: 0.5s;
+    }
+
+    .sidebar-card:nth-child(4) {
+        animation-delay: 0.6s;
+    }
+
+    .sidebar-header {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1rem;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        background: white;
+        color: #2563eb;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        width: 100%;
+        text-align: left;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-btn:hover {
+        background: #f0f9ff;
+        border-color: #2563eb;
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(37,99,235,0.15);
+    }
+
+    .action-btn:last-child {
+        margin-bottom: 0;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .summary-row:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+    .summary-row:last-child {
+        margin-bottom: 0;
+        border: 2px solid #2563eb;
+        background: rgba(37,99,235,0.05);
+    }
+
+    .summary-label {
+        color: #64748b;
+    }
+
+    .summary-value {
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .progress-bar-modern {
+        height: 6px;
+        border-radius: 3px;
+        background: #e2e8f0;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    .notif-item {
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .notif-item:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+    .notif-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-top: 0.35rem;
+        flex-shrink: 0;
+        background: #2563eb;
+    }
+
+    .notif-dot.read {
+        background: #d1d5db;
+    }
+
+    .notif-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .notif-title {
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+        word-break: break-word;
+    }
+
+    .notif-time {
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    @media (max-width: 991px) {
+        .premium-header {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .status-card {
+            width: 100%;
+        }
+
+        .item-row {
+            flex-direction: column;
+        }
+
+        .item-actions {
+            width: 100%;
+            text-align: left;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="container-fluid px-3 px-lg-4 py-4 py-lg-5 dashboard-content">
+        
+        <!-- Premium Page Header with Status -->
+        <div class="premium-header">
+            <div class="header-text">
+                <p class="header-subtitle">Bienvenue</p>
+                <h1>Bonjour, {{ request.user.get_full_name|default:request.user.username }}</h1>
+                <p>Voici votre vue d'ensemble financière</p>
+            </div>
+            {% if status.balance <= 0 %}
+            <div class="status-card">
+                <small style="display: block; color: #64748b; font-size: 0.8rem; margin-bottom: 0.35rem;">SITUATION FINANCIÈRE</small>
+                <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                    <h2 style="margin: 0; font-size: 2rem; font-weight: 800; color: #0c4a6e;">À jour</h2>
+                    <i class="fas fa-check-circle" style="font-size: 1.5rem; color: #0ea5e9;"></i>
+>>>>>>> Stashed changes
                 </div>
             </div>
+            {% else %}
+            <div class="status-card critical">
+                <small style="display: block; color: #64748b; font-size: 0.8rem; margin-bottom: 0.35rem;">SITUATION FINANCIÈRE</small>
+                <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                    <h2 style="margin: 0; font-size: 2rem; font-weight: 800; color: #7c2d12;">{{ status.balance|floatformat:0 }} DH</h2>
+                    <i class="fas fa-triangle-exclamation" style="font-size: 1.5rem; color: #ef4444;"></i>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </section>
 
+<<<<<<< Updated upstream
     <!-- ===== DOCUMENTS ===== -->
     <section class="documents-section mb-4">
         <div class="card-modern">
@@ -130,8 +732,307 @@
                         <p class="text-muted">Vous n'avez pas encore de documents.</p>
                     </div>
                 {% endif %}
+=======
+        <!-- Status Alert with Premium Design -->
+        {% if status.balance > 0 %}
+        <div class="premium-alert">
+            <div class="alert-icon">
+                <i class="fas fa-triangle-exclamation"></i>
             </div>
+            <div style="flex-grow: 1;">
+                <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 1rem;">Action urgente requise</p>
+                <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.95rem;">
+                    Vous avez un solde de <strong style="color: #dc2626;">{{ status.balance|floatformat:2 }} DH</strong> à régulariser.
+                </p>
+            </div>
+            <a href="{% url 'finance:document_list' %}" class="btn btn-sm btn-danger" style="flex-shrink: 0; font-weight: 600;">Voir documents</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" style="flex-shrink: 0;"></button>
         </div>
+        {% endif %}
+
+        <!-- Premium KPI Cards Row -->
+        <section class="row g-3 mb-5">
+            {% include 'components/stats_card.html' with label='Solde' value=status.balance|floatformat:2 icon='fa-solid fa-wallet' color='primary' %}
+            {% include 'components/stats_card.html' with label='Total facturé' value=status.total_due|floatformat:2 icon='fa-solid fa-file-invoice' color='warning' %}
+            {% include 'components/stats_card.html' with label='Total payé' value=status.total_paid|floatformat:2 icon='fa-solid fa-check-circle' color='success' %}
+            {% include 'components/stats_card.html' with label='Documents' value=documents|length icon='fa-solid fa-folder' color='info' %}
+        </section>
+
+        <!-- Main Content Grid -->
+        <div class="row g-5">
+
+            <!-- Left Column: Main Content -->
+            <div class="col-lg-8">
+
+                <!-- Documents Section -->
+                <section class="section-card" style="animation: slideUp 0.6s ease-out 0.2s both;">
+                    <div class="section-header">
+                        <div>
+                            <h3 class="section-title">
+                                <span class="section-icon icon-primary">
+                                    <i class="fas fa-file-lines"></i>
+                                </span>
+                                Mes Documents
+                            </h3>
+                        </div>
+                        <a href="{% url 'finance:document_list' %}" class="section-link">
+                            Voir tous <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    
+                    {% if documents %}
+                    <div style="display: flex; flex-direction: column; gap: 1rem; position: relative;">
+                        {% for doc in documents|slice:":6" %}
+                        <div class="item-row">
+                            <div class="item-row-content">
+                                <div style="display: flex; align-items: flex-start; gap: 1rem; flex: 1;">
+                                    <div class="item-icon" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #9a3412;">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div class="item-main">
+                                        <div class="item-meta">
+                                            <h4 class="item-title">{{ doc.reference }}</h4>
+                                        </div>
+                                        <p class="item-subtitle">
+                                            Période: <strong>{{ doc.period|date:'M Y' }}</strong> 
+                                            • Montant: <strong style="color: #2563eb;">{{ doc.amount|floatformat:2 }} DH</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="item-actions">
+                                    <span class="status-badge" style="{% if doc.paid %}background: #d1fae5; color: #065f46;{% elif doc.overdue %}background: #fee2e2; color: #991b1b;{% else %}background: #fef3c7; color: #92400e;{% endif %}">
+                                        <i class="fas fa-{% if doc.paid %}check-circle{% elif doc.overdue %}triangle-exclamation{% else %}clock{% endif %}"></i>
+                                        {% if doc.paid %}Payé{% elif doc.overdue %}En retard{% else %}En attente{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle empty-state-icon" style="color: #10b981;"></i>
+                        <p class="empty-state-text">Aucun document à afficher</p>
+                    </div>
+                    {% endif %}
+                </section>
+
+                <!-- Payments Section -->
+                <section class="section-card" style="animation: slideUp 0.6s ease-out 0.3s both;">
+                    <div class="section-header">
+                        <div>
+                            <h3 class="section-title">
+                                <span class="section-icon icon-success">
+                                    <i class="fas fa-credit-card"></i>
+                                </span>
+                                Mes Paiements
+                            </h3>
+                        </div>
+                        <a href="{% url 'finance:payment_list' %}" class="section-link">
+                            Tous les paiements <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    {% if payments %}
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        {% for payment in payments|slice:":5" %}
+                        <div class="item-row">
+                            <div class="item-row-content">
+                                <div style="display: flex; align-items: flex-start; gap: 1rem; flex: 1;">
+                                    <div class="item-icon" style="background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); color: #0d9488;">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <div class="item-main">
+                                        <h4 class="item-title">Paiement du {{ payment.date|date:'d/m/Y' }}</h4>
+                                        <p class="item-subtitle">Montant: <strong style="color: #059669;">{{ payment.amount|floatformat:2 }} DH</strong></p>
+                                    </div>
+                                </div>
+                                <div class="item-actions">
+                                    {% if payment.is_verified %}
+                                    <span class="status-badge" style="background: #d1fae5; color: #065f46;">
+                                        <i class="fas fa-badge-check"></i> Vérifié
+                                    </span>
+                                    {% else %}
+                                    <span class="status-badge" style="background: #fef3c7; color: #92400e;">
+                                        <i class="fas fa-hourglass-end"></i> En attente
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox empty-state-icon" style="color: #94a3b8;"></i>
+                        <p class="empty-state-text">Aucun paiement enregistré</p>
+                    </div>
+                    {% endif %}
+                </section>
+
+                <!-- Reports Section -->
+                <section class="section-card" style="animation: slideUp 0.6s ease-out 0.4s both;">
+                    <div class="section-header">
+                        <div>
+                            <h3 class="section-title">
+                                <span class="section-icon icon-purple">
+                                    <i class="fas fa-chart-bar"></i>
+                                </span>
+                                Mes Rapports
+                            </h3>
+                        </div>
+                    </div>
+
+                    {% if reports %}
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        {% for report in reports|slice:":5" %}
+                        <div class="item-row">
+                            <div class="item-row-content">
+                                <div style="display: flex; align-items: flex-start; gap: 1rem; flex: 1;">
+                                    <div class="item-icon" style="background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); color: #7c3aed;">
+                                        <i class="fas fa-document"></i>
+                                    </div>
+                                    <div class="item-main">
+                                        <h4 class="item-title">{{ report.title }}</h4>
+                                        <p class="item-subtitle">Soumis le: {{ report.created_at|date:'d/m/Y H:i' }}</p>
+                                    </div>
+                                </div>
+                                <div class="item-actions">
+                                    <span class="status-badge" style="{% if report.status == 'approved' %}background: #d1fae5; color: #065f46;{% elif report.status == 'pending' %}background: #fef3c7; color: #92400e;{% else %}background: #fee2e2; color: #991b1b;{% endif %}">
+                                        <i class="fas fa-{% if report.status == 'approved' %}check-circle{% elif report.status == 'pending' %}hourglass-end{% else %}x-circle{% endif %}"></i>
+                                        {{ report.status|upper }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard empty-state-icon" style="color: #94a3b8;"></i>
+                        <p class="empty-state-text">Aucun rapport pour le moment</p>
+                    </div>
+                    {% endif %}
+                </section>
+
+            </div>
+
+            <!-- Right Column: Sidebar -->
+            <div class="col-lg-4">
+
+                <!-- Quick Actions Card -->
+                <div class="sidebar-card" style="animation-delay: 0.3s;">
+                    <h3 class="sidebar-header">
+                        <i class="fas fa-bolt" style="color: #2563eb; margin-right: 0.5rem;"></i>
+                        Actions rapides
+                    </h3>
+                    <a href="{% url 'finance:document_list' %}" class="action-btn">
+                        <i class="fas fa-file-alt"></i> Mes documents
+                    </a>
+                    <a href="{% url 'finance:payment_list' %}" class="action-btn">
+                        <i class="fas fa-credit-card"></i> Mes paiements
+                    </a>
+                    <a href="{% url 'finance:notification_list' %}" class="action-btn">
+                        <i class="fas fa-bell"></i> Notifications
+                    </a>
+                    <a href="{% url 'finance:calendar' %}" class="action-btn">
+                        <i class="fas fa-calendar-alt"></i> Calendrier
+                    </a>
+                </div>
+
+                <!-- Financial Summary Card -->
+                <div class="sidebar-card" style="animation-delay: 0.4s;">
+                    <h3 class="sidebar-header">
+                        <i class="fas fa-chart-pie" style="color: #2563eb; margin-right: 0.5rem;"></i>
+                        Résumé financier
+                    </h3>
+                    <div class="summary-row">
+                        <span class="summary-label">Total facturé</span>
+                        <strong class="summary-value">{{ status.total_due|floatformat:2 }} DH</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Total payé</span>
+                        <strong class="summary-value" style="color: #10b981;">{{ status.total_paid|floatformat:2 }} DH</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Solde</span>
+                        <strong class="summary-value" style="color: {% if status.balance <= 0 %}#10b981{% else %}#dc2626{% endif %};">
+                            {{ status.balance|floatformat:2 }} DH
+                        </strong>
+                    </div>
+                    {% if status.total_due > 0 %}
+                    {% widthratio status.total_paid status.total_due 100 as pay_ratio %}
+                    <div style="margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <small style="color: #64748b; font-weight: 600;">Taux de paiement</small>
+                            <small style="color: #0f172a; font-weight: 700;">{{ pay_ratio }}%</small>
+                        </div>
+                        <div class="progress-bar-modern">
+                            <div class="progress-fill" style="width: {{ pay_ratio }}%;"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Recent Notifications Card -->
+                <div class="sidebar-card" style="animation-delay: 0.5s;">
+                    <h3 class="sidebar-header">
+                        <i class="fas fa-bell" style="color: #2563eb; margin-right: 0.5rem;"></i>
+                        Notifications récentes
+                    </h3>
+                    {% if notifications %}
+                    <div style="display: grid; gap: 0.5rem; max-height: 280px; overflow-y: auto; padding-right: 0.5rem;">
+                        {% for notif in notifications|slice:":5" %}
+                        <div class="notif-item">
+                            <span class="notif-dot {% if notif.is_read %}read{% endif %}"></span>
+                            <div class="notif-content">
+                                <p class="notif-title">{{ notif.title }}</p>
+                                <p class="notif-time">{{ notif.created_at|timesince }} ago</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'finance:notification_list' %}" class="action-btn" style="margin-top: 1rem;">
+                        <i class="fas fa-arrow-right"></i> Voir toutes
+                    </a>
+                    {% else %}
+                    <div class="empty-state" style="margin: -1.5rem; margin-top: 0; border-radius: 0 0 12px 12px; background: #fafafa;">
+                        <i class="fas fa-bell-slash empty-state-icon" style="color: #94a3b8;"></i>
+                        <p class="empty-state-text">Aucune notification</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Upcoming Events Card -->
+                <div class="sidebar-card" style="animation-delay: 0.6s;">
+                    <h3 class="sidebar-header">
+                        <i class="fas fa-calendar" style="color: #2563eb; margin-right: 0.5rem;"></i>
+                        Événements à venir
+                    </h3>
+                    {% if upcoming_events %}
+                    <div style="display: grid; gap: 0.75rem;">
+                        {% for event in upcoming_events|slice:":4" %}
+                        <div class="summary-row">
+                            <div style="min-width: 0;">
+                                <p style="font-weight: 600; margin: 0; color: #0f172a; font-size: 0.95rem;">{{ event.title }}</p>
+                                <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.8rem;">{{ event.event_date|date:'d/m/Y' }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-xmark empty-state-icon" style="color: #94a3b8;"></i>
+                        <p class="empty-state-text">Aucun événement planifié</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+>>>>>>> Stashed changes
+            </div>
+
+        </div>
+<<<<<<< Updated upstream
     </section>
 
     <!-- ===== ALERTE STATUT ===== -->
@@ -227,4 +1128,10 @@
     font-weight: 500;
 }
 </style>
+=======
+
+    </div>
+</div>
+
+>>>>>>> Stashed changes
 {% endblock %}

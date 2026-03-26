@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.core.mail import send_mail
 import os
 from decimal import Decimal
-from datetime import timedelta
+from datetime import timedelta, date
 
 User = get_user_model()
 
@@ -152,7 +152,7 @@ class Document(models.Model):
     title = models.CharField(max_length=200, help_text="Titre du document")
     file = models.FileField(upload_to='documents/%Y/%m/', help_text="Fichier du document")
     amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Montant en DH")
-    date = models.DateField(default=timezone.now, help_text="Date du document")
+    date = models.DateField(default=date.today, help_text="Date du document")
     document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPES, default='INVOICE')
     resident = models.ForeignKey(User, on_delete=models.CASCADE, related_name='documents', 
                                 limit_choices_to={'role': 'RESIDENT'})

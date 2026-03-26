@@ -379,9 +379,37 @@
 
         // ===== FONCTIONS NAVIGATION SYNDIC =====
         function updateNavigationBadges() {
+            // Helper to get CSRF token from cookie
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
             // Mise à jour des compteurs via AJAX
-            fetch('/api/navigation-stats/')
-                .then(response => response.json())
+            fetch('/api/navigation-stats/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     // Mise à jour des badges dans la sidebar
                     updateBadge('nav-badge-residents', data.total_residents || 0);
@@ -406,7 +434,7 @@
                     }
                 })
                 .catch(error => {
-                    console.log('Erreur mise à jour badges:', error);
+                    console.debug('Navigation stats update failed:', error);
                 });
         }
 

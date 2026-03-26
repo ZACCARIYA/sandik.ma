@@ -18,7 +18,16 @@ from django import forms
 from decimal import Decimal
 import json
 
+<<<<<<< Updated upstream
 from .models import Document, Notification, Payment, ResidentStatus, ResidentReport, ReportComment, Event, Depense, ChatbotFAQ, ChatbotConversation, ChatbotMessage, Reminder, send_sms, send_email
+=======
+from .models import (
+    Document, Payment, Notification, Event, ResidentReport, 
+    ReportComment, ResidentStatus, Depense, Reminder, send_sms, send_email
+)
+from .forms import DocumentForm
+from .services.dashboard_service import build_syndic_dashboard_context
+>>>>>>> Stashed changes
 
 User = get_user_model()
 
@@ -913,8 +922,8 @@ class DocumentListView(ListView):
 class DocumentCreateView(CreateView):
     """Create document - syndic and superadmin only"""
     model = Document
+    form_class = DocumentForm
     template_name = 'finance/document_form.html'
-    fields = ['title', 'file', 'amount', 'date', 'document_type', 'resident', 'description']
     success_url = reverse_lazy('finance:document_list')
     
     def dispatch(self, request, *args, **kwargs):
