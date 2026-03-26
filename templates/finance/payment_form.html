@@ -552,7 +552,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <span>Chèque</span>
                         </div>
                         <div class="pf-method-item">
                             <div class="pf-method-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">
@@ -807,19 +806,18 @@
         animation: slideInUp 0.8s ease-out 0.3s both;
     }
 
-    .pf-step {
+    .document-info-item {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        gap: 0.4rem;
+        gap: 0.5rem;
+        animation: slideInUp 0.5s ease-out forwards;
+        opacity: 0;
     }
 
-    .pf-step-dot {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
-        color: rgba(255, 255, 255, 0.4);
+    .info-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -910,74 +908,25 @@
         flex-direction: column;
         gap: 0.4rem;
         padding: 1rem;
-        border-right: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 12px;
+        border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
-    .pf-doc-field:last-child {
-        border-right: none;
-    }
-
-    .pf-doc-label {
-        font-size: 0.75rem;
+    .amount-value {
+        font-size: 1.5rem;
         font-weight: 700;
-        color: var(--text-secondary, #64748b);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
+        color: var(--success);
     }
 
-    .pf-doc-label i {
-        color: #6366f1;
+    .document-description {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
     }
 
-    .pf-doc-value {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: var(--text-primary, #1e293b);
-    }
-
-    .pf-doc-amount {
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.07), rgba(52, 211, 153, 0.03));
-    }
-
-    .pf-amount-big {
-        font-size: 1.75rem;
-        font-weight: 800;
-        color: #10b981;
-        line-height: 1;
-    }
-
-    .pf-amount-big sup {
-        font-size: 0.85rem;
-        font-weight: 700;
-    }
-
-    .pf-type-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        background: rgba(99, 102, 241, 0.1);
-        color: #6366f1;
-        border-radius: 20px;
-        font-size: 0.78rem;
-        font-weight: 700;
-    }
-
-    .pf-doc-desc {
-        margin: 0 1.75rem 1.25rem;
-        padding: 0.75rem 1rem;
-        background: rgba(99, 102, 241, 0.04);
-        border-left: 3px solid #6366f1;
-        border-radius: 0 8px 8px 0;
-        font-size: 0.875rem;
-        color: var(--text-secondary, #64748b);
-    }
-
-    .pf-desc-empty {
-        border-left-color: #e2e8f0;
-        color: #94a3b8;
+    .description-text {
         font-style: italic;
+        line-height: 1.6;
     }
 
     /* Form card */
@@ -986,7 +935,7 @@
         animation-delay: 0.2s;
     }
 
-    .pf-form-header {
+    .form-progress {
         display: flex;
         align-items: center;
         gap: 1rem;
@@ -1016,11 +965,9 @@
         box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
     }
 
-    .pf-form-title {
-        font-size: 1.05rem;
-        font-weight: 700;
-        color: var(--text-primary, #1e293b);
-        margin: 0;
+    .progress-step.active {
+        background: var(--primary);
+        color: white;
     }
 
     .pf-form-subtitle {
@@ -1054,10 +1001,9 @@
     .pf-section:nth-child(4) { animation-delay: 0.4s; }
     .pf-section:nth-child(5) { animation-delay: 0.5s; }
 
-    .pf-section-last {
+    .form-section:last-of-type {
         border-bottom: none;
         margin-bottom: 0;
-        padding-bottom: 0;
     }
 
     .pf-section-header {
@@ -1192,19 +1138,11 @@
         transform: scale(1.01);
     }
 
-    .pf-form textarea {
-        min-height: 90px;
-        resize: vertical;
-    }
-
-    .pf-form select {
-        appearance: auto;
-        cursor: pointer;
-    }
-
-    .pf-field-hint {
-        font-size: 0.775rem;
-        color: var(--text-secondary, #64748b);
+    .info-section-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
         display: flex;
         align-items: center;
         gap: 0.3rem;
@@ -1221,7 +1159,7 @@
         transform: scale(1.15);
     }
 
-    .pf-field-error {
+    .info-item {
         display: flex;
         flex-direction: column;
         gap: 0.2rem;
@@ -1235,12 +1173,12 @@
         animation: fadeInScale 0.3s ease-out;
     }
 
-    /* Upload zone */
-    .pf-upload-zone {
-        position: relative;
-        border: 2px dashed #c7d2fe;
-        border-radius: 16px;
-        padding: 2.5rem 1.5rem;
+    .info-item:hover {
+        background: var(--bg-tertiary);
+    }
+
+    .info-icon {
+        width: 20px;
         text-align: center;
         background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(139, 92, 246, 0.02));
         cursor: pointer;
@@ -1263,71 +1201,41 @@
         transform: scale(1.02);
     }
 
-    .pf-upload-zone input[type="file"] {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        cursor: pointer;
-        width: 100% !important;
-        height: 100%;
-        border: none !important;
-        padding: 0 !important;
-        background: transparent !important;
+    .info-icon.info {
+        color: var(--info);
     }
 
-    .pf-upload-icon {
-        font-size: 2.5rem;
-        color: #a5b4fc;
-        margin-bottom: 0.75rem;
-        animation: float 3s ease-in-out infinite;
+    .info-icon.warning {
+        color: var(--warning);
     }
 
-    @keyframes float {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-6px);
-        }
+    .info-icon.secondary {
+        color: var(--secondary);
     }
 
-    .pf-upload-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: var(--text-primary, #1e293b);
-        margin: 0 0 0.25rem;
-    }
-
-    .pf-upload-sub {
-        font-size: 0.8rem;
-        color: var(--text-secondary, #64748b);
-        margin: 0 0 0.75rem;
-    }
-
-    .pf-upload-formats {
+    .format-tags {
         display: flex;
-        justify-content: center;
-        gap: 0.4rem;
         flex-wrap: wrap;
-        margin-bottom: 0.5rem;
+        gap: 0.5rem;
     }
 
-    .pf-upload-formats span {
-        padding: 0.2rem 0.6rem;
-        border-radius: 6px;
-        font-size: 0.7rem;
-        font-weight: 800;
+    .format-tag {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
         letter-spacing: 0.5px;
-        background: rgba(99, 102, 241, 0.1);
-        color: #6366f1;
     }
 
-    .pf-upload-limit {
-        font-size: 0.72rem;
-        color: #94a3b8;
+    .format-tag.jpeg {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+    }
+
+    .format-tag.png {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--info);
     }
 
     /* Preview */
@@ -1598,40 +1506,34 @@
         padding: 1.25rem;
     }
 
-    .pf-summary-row {
+    .file-preview-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 0.5rem 0;
-        font-size: 0.875rem;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--bg-tertiary);
+        border-bottom: 1px solid var(--border-color);
     }
 
-    .pf-summary-row span {
-        color: var(--text-secondary, #64748b);
+    .file-name {
+        flex: 1;
+        font-weight: 600;
+        color: var(--text-primary);
     }
 
-    .pf-summary-row strong {
-        color: var(--text-primary, #1e293b);
+    .btn-remove-file {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
     }
 
-    .pf-summary-amount {
-        color: #6366f1;
-    }
-
-    .pf-summary-divider {
-        height: 1px;
-        background: var(--border-color, #e2e8f0);
-        margin: 0.5rem 0;
-    }
-
-    .pf-summary-total {
-        font-weight: 700;
-    }
-
-    .pf-summary-total span {
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: var(--text-primary, #1e293b);
+    .btn-remove-file:hover {
+        background: var(--danger-bg);
+        color: var(--danger);
     }
 
     .pf-summary-total strong {
