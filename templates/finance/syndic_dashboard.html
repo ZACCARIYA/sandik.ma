@@ -127,7 +127,7 @@
                             <span class="ft-kpi-icon bg-danger-subtle text-danger"><i class="fa-solid fa-wallet"></i></span>
                         </div>
                         <div class="d-flex justify-content-between small mb-1"><span class="text-secondary">Part impayée</span><span>{{ unpaid_rate }}%</span></div>
-                        <div class="progress"><div class="progress-bar bg-danger" style="width: {{ unpaid_rate }}%"></div></div>
+                        <div class="progress"><div class="progress-bar bg-danger" data-progress="{{ unpaid_rate|default:0 }}" style="width: 0%;"></div></div>
                     </div>
                 </article>
             </div>
@@ -179,7 +179,7 @@
                                 {% if risk_index >= 70 %}Risque élevé{% elif risk_index >= 40 %}Sous surveillance{% else %}Risque maîtrisé{% endif %}
                             </span>
                         </div>
-                        <div class="progress mb-3"><div class="progress-bar {% if risk_index >= 70 %}bg-danger{% elif risk_index >= 40 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ risk_index }}%"></div></div>
+                        <div class="progress mb-3"><div class="progress-bar {% if risk_index >= 70 %}bg-danger{% elif risk_index >= 40 %}bg-warning{% else %}bg-success{% endif %}" data-progress="{{ risk_index|default:0 }}" style="width: 0%;"></div></div>
                         <div class="row g-2 small">
                             <div class="col-6"><span class="text-secondary">A jour</span><p class="mb-0 fw-semibold">{{ up_to_date_count }}</p></div>
                             <div class="col-6"><span class="text-secondary">En attente</span><p class="mb-0 fw-semibold">{{ pending_count }}</p></div>
@@ -200,7 +200,7 @@
                             <h3 class="mb-0 fw-bold">{{ ops_pressure_score }} <span class="small text-secondary">pts</span></h3>
                             <span class="badge {% if ops_pressure_score >= 70 %}text-bg-danger{% elif ops_pressure_score >= 40 %}text-bg-warning{% else %}text-bg-success{% endif %}">{{ ops_pressure_level|title }}</span>
                         </div>
-                        <div class="progress mb-3"><div class="progress-bar {% if ops_pressure_score >= 70 %}bg-danger{% elif ops_pressure_score >= 40 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ ops_pressure_score }}%"></div></div>
+                        <div class="progress mb-3"><div class="progress-bar {% if ops_pressure_score >= 70 %}bg-danger{% elif ops_pressure_score >= 40 %}bg-warning{% else %}bg-success{% endif %}" data-progress="{{ ops_pressure_score|default:0 }}" style="width: 0%;"></div></div>
                         <div class="ft-metric-stack">
                             <div class="ft-metric-line"><span>Signalements ouverts</span><strong>{{ open_reports_count }}</strong></div>
                             <div class="ft-metric-line"><span>Notifications non lues</span><strong>{{ unread_notifications }}</strong></div>
@@ -805,12 +805,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const monthlyTrend = {{ monthly_trend_json|safe }};
-        const statusDistribution = {{ status_distribution_json|safe }};
-        const notificationMix = {{ notification_categories_json|safe }};
+        const monthlyTrend = JSON.parse('{{ monthly_trend_json|escapejs }}');
+        const statusDistribution = JSON.parse('{{ status_distribution_json|escapejs }}');
+        const notificationMix = JSON.parse('{{ notification_categories_json|escapejs }}');
 
         initializeReveal();
         animateKpis();
+        hydrateProgressBars();
         initializeCharts(monthlyTrend, statusDistribution, notificationMix);
         addActionPressFeedback();
     });
@@ -857,6 +858,16 @@
             }
 
             requestAnimationFrame(tick);
+        });
+    }
+
+    function hydrateProgressBars() {
+        const progressBars = document.querySelectorAll('[data-progress]');
+        progressBars.forEach((bar) => {
+            const value = parseFloat(bar.getAttribute('data-progress') || '0');
+            const clamped = Math.max(0, Math.min(100, value));
+            bar.style.width = clamped + '%';
+            bar.setAttribute('aria-valuenow', clamped.toString());
         });
     }
 
