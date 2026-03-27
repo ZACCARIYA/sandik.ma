@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+import os
 
 
 class User(AbstractUser):
@@ -20,15 +21,16 @@ class User(AbstractUser):
                                  help_text="Utilisateur qui a créé ce compte")
 
     class Meta:
-        constraints = [
-            # Ensure one resident per apartment (ignore empty/null apartments)
-            models.UniqueConstraint(
-                fields=['apartment'],
-                condition=(Q(role='RESIDENT') & Q(apartment__isnull=False) & ~Q(apartment='')),
-                name='unique_apartment_per_resident',
-                violation_error_message="Un résident existe déjà pour cet appartement."
+        constraints = []
+        if os.getenv("DB_ENGINE") != "django_mongodb_backend":
+            constraints.append(
+                models.UniqueConstraint(
+                    fields=['apartment'],
+                    condition=(Q(role='RESIDENT') & Q(apartment__isnull=False) & ~Q(apartment='')),
+                    name='unique_apartment_per_resident',
+                    violation_error_message="Un résident existe déjà pour cet appartement."
+                )
             )
-        ]
         indexes = [
             models.Index(fields=['role']),
             models.Index(fields=['is_active', 'role']),

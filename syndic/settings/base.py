@@ -1,5 +1,6 @@
 """Base Django settings shared by all environments."""
 
+import json
 import os
 from pathlib import Path
 
@@ -16,6 +17,16 @@ def env_bool(name, default=False):
     if raw is None:
         return default
     return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+def env_json(name, default=None):
+    """Parse a JSON string from an environment variable."""
+    raw = os.getenv(name)
+    if raw in (None, ""):
+        return default
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid JSON for {name}: {exc}") from exc
 
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-key")
@@ -35,6 +46,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 INSTALLED_APPS = [
+    "django_mongodb_backend",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -83,16 +95,32 @@ WSGI_APPLICATION = "syndic.wsgi.application"
 ASGI_APPLICATION = "syndic.asgi.application"
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.getenv("DB_NAME", BASE_DIR / "db.sqlite3"),
-        "USER": os.getenv("DB_USER", ""),
-        "PASSWORD": os.getenv("DB_PASSWORD", ""),
-        "HOST": os.getenv("DB_HOST", ""),
-        "PORT": os.getenv("DB_PORT", ""),
-    }
+DB_ENGINE = os.getenv("DB_ENGINE", "django.db.backends.sqlite3")
+DB_NAME_ENV = os.getenv("DB_NAME")
+
+if DB_NAME_ENV:
+    if DB_ENGINE == "django.db.backends.sqlite3" and not os.path.isabs(DB_NAME_ENV):
+        database_name = BASE_DIR / DB_NAME_ENV
+    else:
+        database_name = DB_NAME_ENV
+else:
+    database_name = BASE_DIR / "db.sqlite3" if DB_ENGINE == "django.db.backends.sqlite3" else "syndic_db"
+
+database_options = env_json("DB_OPTIONS")
+
+default_database = {
+    "ENGINE": DB_ENGINE,
+    "NAME": database_name,
+    "USER": os.getenv("DB_USER", ""),
+    "PASSWORD": os.getenv("DB_PASSWORD", ""),
+    "HOST": os.getenv("DB_HOST", ""),
+    "PORT": os.getenv("DB_PORT", ""),
 }
+
+if database_options:
+    default_database["OPTIONS"] = database_options
+
+DATABASES = {"default": default_database}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -127,7 +155,15 @@ STORAGES = {
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD = (
+    "django_mongodb_backend.fields.ObjectIdAutoField"
+    if DB_ENGINE == "django_mongodb_backend"
+    else "django.db.models.BigAutoField"
+)
+
+# Silence MongoDB AutoField error for built-in apps
+if DB_ENGINE == "django_mongodb_backend":
+    SILENCED_SYSTEM_CHECKS = ["mongodb.E001"]
 
 AUTH_USER_MODEL = "accounts.User"
 CRISPY_TEMPLATE_PACK = "bootstrap5"

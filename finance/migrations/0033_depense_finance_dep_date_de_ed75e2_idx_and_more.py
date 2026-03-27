@@ -21,10 +21,6 @@ class Migration(migrations.Migration):
             index=models.Index(fields=['categorie'], name='finance_dep_categor_0906d9_idx'),
         ),
         migrations.AddIndex(
-            model_name='depense',
-            index=models.Index(fields=['ajoute_par'], name='finance_dep_ajoute__9f8d1c_idx'),
-        ),
-        migrations.AddIndex(
             model_name='document',
             index=models.Index(fields=['resident', 'is_paid'], name='finance_doc_residen_8416eb_idx'),
         ),

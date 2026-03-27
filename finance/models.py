@@ -386,7 +386,6 @@ class Depense(models.Model):
         indexes = [
             models.Index(fields=['date_depense']),
             models.Index(fields=['categorie']),
-            models.Index(fields=['ajoute_par']),
         ]
 
     def __str__(self):
