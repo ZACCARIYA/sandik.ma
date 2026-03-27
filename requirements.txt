@@ -1,6 +1,12 @@
-Django==5.2.6
-python-dotenv==1.0.0
-django-crispy-forms==2.3
+asgiref==3.11.1
+chardet==6.0.0.post1
 crispy-bootstrap5==0.7
+Django==5.2.6
+django-crispy-forms==2.3
+gunicorn==25.3.0
+packaging==26.0
+pillow==12.1.1
+PyMySQL==1.1.2
+python-dotenv==1.0.0
 reportlab==4.0.9
-pymysql==1.1.2
+sqlparse==0.5.5
