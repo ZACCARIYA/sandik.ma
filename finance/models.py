@@ -602,6 +602,14 @@ def send_sms(phone_number, message):
     return True
 
 
+def send_whatsapp(phone_number, message):
+    """Mock WhatsApp sending function - logs message instead of sending."""
+    print(f"[WHATSAPP MOCK] To: {phone_number}")
+    print(f"[WHATSAPP MOCK] Message: {message}")
+    print(f"[WHATSAPP MOCK] Status: Sent (Mock)")
+    return True
+
+
 def send_email(recipient_email, subject, message, html_message=None):
     """Email sender. Uses real SMTP if SEND_REAL_EMAILS=True, otherwise logs (mock)."""
     try:

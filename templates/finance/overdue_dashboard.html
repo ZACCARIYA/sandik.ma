@@ -79,8 +79,10 @@
                                         </div>
                                         <div>
                                             <strong>{{ r.resident.get_full_name|default:r.resident.username }}</strong>
-                                            {% if r.resident.email %}<br><small class="text-muted">{{ r.resident.email
-                                                }}</small>{% endif %}
+                                            {% if r.resident.email %}
+                                            <br>
+                                            <small class="text-muted">{{ r.resident.email|default:"-" }}</small>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </td>
@@ -186,8 +188,15 @@
                                     <span class="badge-modern badge-warning">En attente</span>
                                     {% endif %}
                                 </td>
-                                <td><small class="text-muted">{{
-                                        rem.created_by.get_full_name|default:rem.created_by.username }}</small></td>
+                                <td>
+                                    <small class="text-muted">
+                                        {% if rem.created_by %}
+                                            {{ rem.created_by.get_full_name|default:rem.created_by.username }}
+                                        {% else %}
+                                            Système
+                                        {% endif %}
+                                    </small>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -232,43 +241,76 @@
 
 {% block extra_js %}
 <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            document.cookie.split(';').forEach(cookie => {
+                const trimmed = cookie.trim();
+                if (trimmed.startsWith(`${name}=`)) {
+                    cookieValue = decodeURIComponent(trimmed.substring(name.length + 1));
+                }
+            });
+        }
+        return cookieValue;
+    }
+
     function runOverdueDetection() {
-        const modal = new bootstrap.Modal(document.getElementById('detectionResultModal'));
+        const modalElement = document.getElementById('detectionResultModal');
+        const modal = new bootstrap.Modal(modalElement);
+        const resultsDiv = document.getElementById('detectionResults');
+
+        resultsDiv.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-3">Détection en cours...</p>
+            </div>
+        `;
+
         modal.show();
+
+        const csrfToken = getCookie('csrftoken');
 
         fetch('{% url "finance:run_overdue_detection" %}', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
+                'X-CSRFToken': csrfToken,
                 'Content-Type': 'application/json',
             },
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                const resultsDiv = document.getElementById('detectionResults');
                 if (data.success) {
                     resultsDiv.innerHTML = `
-                    <div class="alert alert-success">
-                        <h6><i class="fas fa-check-circle me-2"></i>Détection Terminée</h6>
-                        <p class="mb-0">${data.message}</p>
-                    </div>
-                `;
+                        <div class="alert alert-success">
+                            <h6><i class="fas fa-check-circle me-2"></i>Détection Terminée</h6>
+                            <p class="mb-0">${data.message || 'La détection s’est terminée avec succès.'}</p>
+                            ${data.output ? `<pre class="small mt-2 text-muted" style="max-height: 160px;overflow:auto;">${data.output}</pre>` : ''}
+                        </div>
+                    `;
                 } else {
                     resultsDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Erreur</h6>
-                        <p class="mb-0">${data.error}</p>
-                    </div>
-                `;
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Erreur</h6>
+                            <p class="mb-0">${data.error || 'Une erreur inattendue est survenue.'}</p>
+                        </div>
+                    `;
                 }
             })
             .catch(error => {
-                document.getElementById('detectionResults').innerHTML = `
-                <div class="alert alert-danger">
-                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Erreur</h6>
-                    <p class="mb-0">Impossible de contacter le serveur</p>
-                </div>
-            `;
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Erreur</h6>
+                        <p class="mb-0">${error.message || 'Impossible de contacter le serveur.'}</p>
+                    </div>
+                `;
             });
     }
 </script>

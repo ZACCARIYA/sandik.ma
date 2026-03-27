@@ -23,7 +23,7 @@ DEBUG = env_bool("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",")
+    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver,.up.railway.app").split(",")
     if host.strip()
 ]
 

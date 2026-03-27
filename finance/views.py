@@ -15,7 +15,20 @@ from django import forms
 from decimal import Decimal
 import json
 
-from .models import Document, Notification, Payment, ResidentStatus, ResidentReport, ReportComment, Event, Depense, Reminder, send_sms, send_email
+from .models import (
+    Document,
+    Notification,
+    Payment,
+    ResidentStatus,
+    ResidentReport,
+    ReportComment,
+    Event,
+    Depense,
+    Reminder,
+    send_sms,
+    send_email,
+    send_whatsapp,
+)
 from .services.dashboard_service import build_syndic_dashboard_context
 
 User = get_user_model()
@@ -1166,14 +1179,37 @@ class NotificationCreateView(CreateView):
             except User.DoesNotExist:
                 pass
 
-        # Envoyer un email HTML aux destinataires (si SMTP configuré)
+        def parse_flag(field_name, default=False):
+            raw_value = self.request.POST.get(field_name)
+            if raw_value is None:
+                return default
+            return str(raw_value).lower() in ['on', '1', 'true']
+
+        send_email_enabled = parse_flag('send_email', default=True)
+        send_sms_enabled = parse_flag('send_sms', default=False)
+        send_whatsapp_enabled = parse_flag('send_whatsapp', default=False)
+
+        dashboard_url = 'http://127.0.0.1:8000/resident-dashboard/'
         try:
-            from .emails import send_templated_email
-            subject = self.object.title or "Notification"
-            for user in self.object.recipients.all():
-                if not getattr(user, 'email', None):
-                    continue
-                # Construire le contexte dynamiquement (avec compatibilité si certains champs n'existent pas)
+            from django.conf import settings
+            base_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+            dashboard_url = base_url + reverse('finance:resident_dashboard')
+        except Exception:
+            pass
+
+        direct_message = f"{self.object.title or 'Notification'}\n\n{self.object.message or ''}"
+        whatsapp_message = f"{direct_message}\n{dashboard_url}"
+        subject = self.object.title or "Notification"
+
+        if send_email_enabled:
+            self.object._email_already_sent = True
+            try:
+                from .emails import send_templated_email
+            except ImportError:
+                send_templated_email = None
+
+        for user in self.object.recipients.all():
+            if send_email_enabled and getattr(user, 'email', None):
                 notification_type = getattr(self.object, 'get_notification_type_display', None)
                 notification_type = notification_type() if callable(notification_type) else getattr(self.object, 'notification_type', None)
                 priority = getattr(self.object, 'get_priority_display', None)
@@ -1183,14 +1219,6 @@ class NotificationCreateView(CreateView):
                 date_str = date_obj.strftime('%d/%m/%Y') if hasattr(date_obj, 'strftime') else (date_obj or None)
                 link = getattr(self.object, 'link', None)
 
-                # Construire le lien vers le dashboard résident
-                try:
-                    from django.conf import settings
-                    base_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
-                    dashboard_url = base_url + reverse('finance:resident_dashboard')
-                except Exception:
-                    dashboard_url = 'http://127.0.0.1:8000/resident-dashboard/'
-                
                 context = {
                     'subject': subject,
                     'resident_name': (user.get_full_name() or user.username),
@@ -1203,27 +1231,35 @@ class NotificationCreateView(CreateView):
                     'link': link,
                     'dashboard_url': dashboard_url,
                 }
-                # Marquer que l'email a été envoyé pour éviter le double envoi via le signal
-                self.object._email_already_sent = True
-                
-                # Marquer que l'email a été envoyé pour éviter le double envoi via le signal
-                self.object._email_already_sent = True
-                
                 try:
-                    result = send_templated_email(
-                        subject=subject,
-                        to_email=user.email,
-                        template_name='emails/notification_generic.html',
-                        context=context,
-                    )
+                    if send_templated_email:
+                        send_templated_email(
+                            subject=subject,
+                            to_email=user.email,
+                            template_name='emails/notification_generic.html',
+                            context=context,
+                        )
+                    else:
+                        send_email(user.email, subject, self.object.message or '')
                     print(f"[NOTIFICATION CREATE] Email envoyé à {user.email} pour notification: {subject}")
                 except Exception as e:
                     print(f"[NOTIFICATION CREATE] Erreur envoi email à {user.email}: {e}")
                     import traceback
                     traceback.print_exc()
-        except Exception:
-            # Ne pas bloquer l'application si l'email échoue
-            pass
+
+            if send_sms_enabled and getattr(user, 'phone', None):
+                try:
+                    send_sms(user.phone, direct_message)
+                    print(f"[NOTIFICATION CREATE] SMS mock envoyé à {user.phone}")
+                except Exception as e:
+                    print(f"[NOTIFICATION CREATE] Erreur SMS pour {user.phone}: {e}")
+
+            if send_whatsapp_enabled and getattr(user, 'phone', None):
+                try:
+                    send_whatsapp(user.phone, whatsapp_message)
+                    print(f"[NOTIFICATION CREATE] WhatsApp mock envoyé à {user.phone}")
+                except Exception as e:
+                    print(f"[NOTIFICATION CREATE] Erreur WhatsApp pour {user.phone}: {e}")
 
         messages.success(self.request, "Notification créée avec succès.")
         return response
@@ -1722,12 +1758,14 @@ class SendNotificationAPI(View):
             notification_id = data.get('notification_id')
             send_sms_enabled = data.get('send_sms', False)
             send_email_enabled = data.get('send_email', False)
+            send_whatsapp_enabled = data.get('send_whatsapp', False)
             
             notification = get_object_or_404(Notification, id=notification_id)
             
             results = {
                 'sms_sent': 0,
                 'email_sent': 0,
+                'whatsapp_sent': 0,
                 'errors': []
             }
             
@@ -1766,13 +1804,17 @@ class SendNotificationAPI(View):
                             # Fallback vers send_email simple si le template échoue
                             send_email(recipient.email, notification.title, notification.message)
                         results['email_sent'] += 1
+
+                    if send_whatsapp_enabled and recipient.phone:
+                        send_whatsapp(recipient.phone, f"{notification.title}\n\n{notification.message}")
+                        results['whatsapp_sent'] += 1
                         
                 except Exception as e:
                     results['errors'].append(f"Erreur pour {recipient.username}: {str(e)}")
             
             return JsonResponse({
                 'success': True,
-                'message': f"Notifications envoyées: {results['sms_sent']} SMS, {results['email_sent']} emails",
+                'message': f"Notifications envoyées: {results['sms_sent']} SMS, {results['email_sent']} emails, {results['whatsapp_sent']} WhatsApp",
                 'results': results
             })
             

@@ -6,51 +6,6 @@
 {% block content %}
 <div class="ft-page">
     <div class="container-fluid px-3 px-lg-4 py-4 py-lg-5">
-        <section class="ft-hero card border-0 mb-4 ft-reveal">
-            <div class="card-body p-3 p-lg-4">
-                <div class="d-flex flex-column flex-xl-row justify-content-between gap-3">
-                    <div class="pe-xl-4">
-                        <p class="ft-kicker mb-2">FinOps Command Center</p>
-                        <h1 class="h3 fw-bold mb-2">Pilotage financier et opérationnel</h1>
-                        <p class="text-secondary mb-3">Suivez trésorerie, risque de recouvrement et activité résidents dans une interface SaaS orientée décision.</p>
-                        <div class="d-flex flex-wrap gap-2">
-                            <span class="ft-chip"><i class="fa-solid fa-wave-square"></i>Flux net: {{ net_cash_this_month|floatformat:0 }} DH</span>
-                            <span class="ft-chip"><i class="fa-solid fa-shield-halved"></i>Recouvrement: {{ collection_rate }}%</span>
-                            <span class="ft-chip"><i class="fa-solid fa-triangle-exclamation"></i>{{ overdue_count }} impayé{{ overdue_count|pluralize:'s' }}</span>
-                        </div>
-                    </div>
-                    <div class="d-flex flex-wrap align-items-start gap-2">
-                        <div class="dropdown">
-                            <button class="btn btn-light ft-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa-solid fa-bell me-2 text-warning"></i>Notifications
-                                {% if unread_notifications > 0 %}<span class="badge text-bg-danger ms-2">{{ unread_notifications }}</span>{% endif %}
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end p-0 ft-dropdown">
-                                <div class="p-3 border-bottom">
-                                    <h6 class="mb-1">Répartition par catégorie</h6>
-                                    <p class="small text-secondary mb-0">Vue rapide des communications actives</p>
-                                </div>
-                                <div class="p-2">
-                                    {% for cat in notification_categories %}
-                                    <div class="d-flex justify-content-between align-items-center px-2 py-2 rounded-3 ft-dropdown-row">
-                                        <span class="small fw-semibold">{{ cat.label }}</span>
-                                        <span class="badge text-bg-light border">{{ cat.count }}</span>
-                                    </div>
-                                    {% empty %}
-                                    <div class="px-2 py-3 text-secondary small">Aucune notification active.</div>
-                                    {% endfor %}
-                                </div>
-                                <div class="p-2 border-top">
-                                    <a class="btn btn-sm btn-outline-primary w-100" href="{% url 'finance:notification_list' %}">Ouvrir le centre de notifications</a>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="{% url 'finance:notification_create' %}" class="btn btn-primary ft-btn"><i class="fa-solid fa-paper-plane me-2"></i>Nouvelle diffusion</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <section class="card border-0 ft-panel mb-4 ft-reveal">
             <div class="card-body p-3 p-lg-4">
                 <form method="get" class="row g-3 align-items-end" aria-label="Filtres du tableau de bord syndic">
