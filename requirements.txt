@@ -10,3 +10,4 @@ PyMySQL==1.1.2
 python-dotenv==1.0.0
 reportlab==4.0.9
 sqlparse==0.5.5
+whitenoise==6.12.0
