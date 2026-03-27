@@ -30,6 +30,7 @@ from .models import (
     send_whatsapp,
 )
 from .services.dashboard_service import build_syndic_dashboard_context
+from .forms import DocumentForm, EventForm
 
 User = get_user_model()
 
@@ -632,8 +633,8 @@ class CalendarListView(TemplateView):
 
 class EventCreateView(CreateView):
     model = Event
+    form_class = EventForm
     template_name = 'finance/event_form.html'
-    fields = ['title','description','event_type','start_at','end_at','audience','participants','reminder_minutes_before']
     success_url = reverse_lazy('finance:calendar')
 
     def dispatch(self, request, *args, **kwargs):
@@ -907,8 +908,8 @@ class DocumentListView(ListView):
 class DocumentCreateView(CreateView):
     """Create document - syndic and superadmin only"""
     model = Document
+    form_class = DocumentForm
     template_name = 'finance/document_form.html'
-    fields = ['title', 'file', 'amount', 'date', 'document_type', 'resident', 'description']
     success_url = reverse_lazy('finance:document_list')
     
     def dispatch(self, request, *args, **kwargs):
