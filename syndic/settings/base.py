@@ -29,7 +29,7 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
-    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "https://*.up.railway.app,https://sandikma.up.railway.app").split(",")
     if origin.strip()
 ]
 
