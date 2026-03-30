@@ -433,9 +433,12 @@ class ResidentStatus(models.Model):
     def update_totals(self):
         """Update totals from documents and payments"""
         # Aggregate in SQL to avoid Python loops and extra memory usage.
-        self.total_due = self.resident.documents.filter(is_paid=False).aggregate(
+        # total_due should be the sum of all invoices/documents issued to the resident
+        self.total_due = self.resident.documents.aggregate(
             total=models.Sum('amount')
         )['total'] or Decimal('0')
+        
+        # total_paid is the sum of all payments made by the resident
         self.total_paid = Payment.objects.filter(document__resident=self.resident).aggregate(
             total=models.Sum('amount')
         )['total'] or Decimal('0')
@@ -514,8 +517,6 @@ class Reminder(models.Model):
     def mark_failed(self):
         self.status = 'FAILED'
         self.save(update_fields=['status'])
-
-
 
 class ChatbotFAQ(models.Model):
     """Questions fréquentes pour l'assistant virtuel"""

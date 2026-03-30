@@ -156,10 +156,12 @@
                 <div class="header-right">
                     <div class="header-search">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Rechercher résidents, documents, paiements..." class="header-search-input">
+                        <input type="text" placeholder="Rechercher résidents, documents, paiements..."
+                            class="header-search-input">
                     </div>
                     <div class="header-notifications dropdown">
-                        <button class="header-icon-btn" id="notificationsBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="header-icon-btn" id="notificationsBtn" data-bs-toggle="dropdown"
+                            aria-expanded="false">
                             <i class="fas fa-bell"></i>
                             <span class="header-badge">0</span>
                         </button>
@@ -169,17 +171,20 @@
                                 <p class="small text-muted mb-0">Vue rapide des alertes critiques</p>
                             </div>
                             <div class="p-2">
-                                <a href="{% url 'finance:notification_list' %}" class="dropdown-item d-flex justify-content-between align-items-center py-2">
+                                <a href="{% url 'finance:notification_list' %}"
+                                    class="dropdown-item d-flex justify-content-between align-items-center py-2">
                                     <span><i class="fas fa-bell me-2 text-primary"></i>Notifications non lues</span>
                                     <span class="badge text-bg-light border" id="notifBadgeUnread">0</span>
                                 </a>
                                 {% if user.role in 'SYNDIC,SUPERADMIN' %}
-                                <a href="{% url 'finance:overdue_dashboard' %}" class="dropdown-item d-flex justify-content-between align-items-center py-2">
+                                <a href="{% url 'finance:overdue_dashboard' %}"
+                                    class="dropdown-item d-flex justify-content-between align-items-center py-2">
                                     <span><i class="fas fa-triangle-exclamation me-2 text-danger"></i>Impayés</span>
                                     <span class="badge text-bg-light border" id="notifBadgeOverdue">0</span>
                                 </a>
                                 {% endif %}
-                                <a href="{% url 'finance:document_list' %}" class="dropdown-item d-flex justify-content-between align-items-center py-2">
+                                <a href="{% url 'finance:document_list' %}"
+                                    class="dropdown-item d-flex justify-content-between align-items-center py-2">
                                     <span><i class="fas fa-file-invoice me-2 text-info"></i>Documents</span>
                                     <span class="badge text-bg-light border" id="notifBadgeDocs">0</span>
                                 </a>
@@ -191,11 +196,18 @@
                             <i class="fas fa-user-circle"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><h6 class="dropdown-header">{{ user.get_full_name|default:user.username }}</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'finance:user_profile' %}"><i class="fas fa-user me-2"></i>Mon profil</a></li>
-                            <li><a class="dropdown-item" href="{% url 'finance:settings' %}"><i class="fas fa-cog me-2"></i>Paramètres</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="{% url 'finance:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+                            <li>
+                                <h6 class="dropdown-header">{{ user.get_full_name|default:user.username }}</h6>
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'finance:user_profile' %}"><i
+                                        class="fas fa-user me-2"></i>Mon profil</a></li>
+                            <li><a class="dropdown-item" href="{% url 'finance:settings' %}"><i
+                                        class="fas fa-cog me-2"></i>Paramètres</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'finance:logout' %}"><i
+                                        class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
                         </ul>
                     </div>
                 </div>
@@ -216,45 +228,45 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-            </main>
+                {% else %}
+                <!-- ===== LAYOUT SANS SIDEBAR (NON CONNECTÉ) ===== -->
+                <nav class="navbar navbar-expand-lg fixed-top">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="{% url 'finance:home' %}">
+                            <img src="{% static 'images/logos/logo-compact.svg' %}" alt="SyndicPro"
+                                class="logo-compact me-2">
+                            <span class="brand-text">SyndicPro</span>
+                        </a>
+                        <div class="navbar-nav ms-auto">
+                            <a class="nav-link" href="{% url 'finance:login' %}">
+                                <i class="fas fa-sign-in-alt me-2"></i>Connexion
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+                <main class="main-content">
+                    <!-- ===== MESSAGES SYSTÈME ===== -->
+                    {% if messages %}
+                    <div class="container mt-3">
+                        {% for message in messages %}
+                        <div class="alert-modern alert-{{ message.tags }} alert-dismissible fade show">
+                            <i
+                                class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    {% block content %}{% endblock %}
+                    {% if user.is_authenticated %}
+                </main>
         </div>
     </div>
     {% else %}
-    <!-- ===== LAYOUT SANS SIDEBAR (NON CONNECTÉ) ===== -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'finance:home' %}">
-                <img src="{% static 'images/logos/logo-compact.svg' %}" alt="SyndicPro" class="logo-compact me-2">
-                <span class="brand-text">SyndicPro</span>
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="{% url 'finance:login' %}">
-                    <i class="fas fa-sign-in-alt me-2"></i>Connexion
-                </a>
-            </div>
-        </div>
-    </nav>
-    <main class="main-content">
-        <!-- ===== MESSAGES SYSTÈME ===== -->
-        {% if messages %}
-        <div class="container mt-3">
-            {% for message in messages %}
-            <div class="alert-modern alert-{{ message.tags }} alert-dismissible fade show">
-                <i
-                    class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
     </main>
     {% endif %}
-
-    <!-- ===== CONTENU DE LA PAGE (BLOC UNIQUE) ===== -->
-    <div data-content-block style="display: none;">
-        {% block content %}{% endblock %}
-    </div>
 
     <!-- ===== BOUTONS FLOTTANTS ===== -->
     {% if user.is_authenticated %}
@@ -281,35 +293,6 @@
     <!-- ===== JAVASCRIPT PRINCIPAL ===== -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // ===== DÉPLACEMENT DU CONTENU DANS LE BON CONTENEUR =====
-            const contentBlock = document.querySelector('[data-content-block]');
-            if (contentBlock) {
-                const userDataElement = document.getElementById('user-data');
-                const isAuthenticated = userDataElement && userDataElement.dataset.authenticated === 'true';
-
-                if (isAuthenticated) {
-                    const mainContent = document.querySelector('.app-content');
-                    if (mainContent) {
-                        // Déplacer tous les enfants du contentBlock dans mainContent
-                        while (contentBlock.firstChild) {
-                            mainContent.appendChild(contentBlock.firstChild);
-                        }
-                        // Supprimer le conteneur vide
-                        contentBlock.remove();
-                    }
-                } else {
-                    const mainContent = document.querySelector('.main-content');
-                    if (mainContent) {
-                        // Déplacer tous les enfants du contentBlock dans mainContent
-                        while (contentBlock.firstChild) {
-                            mainContent.appendChild(contentBlock.firstChild);
-                        }
-                        // Supprimer le conteneur vide
-                        contentBlock.remove();
-                    }
-                }
-            }
-
             // ===== RÉCUPÉRATION DES DONNÉES UTILISATEUR =====
             const userDataElement = document.getElementById('user-data');
             const isAuthenticated = userDataElement && userDataElement.dataset.authenticated === 'true';

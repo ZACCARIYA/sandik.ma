@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, logout, authenticate, login
 from django.db.models import Sum, Q, Count
 from django.utils import timezone
+from datetime import datetime, time as dt_time, timedelta
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -12,6 +13,7 @@ from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django import forms
+from django.utils.safestring import mark_safe
 from decimal import Decimal
 import json
 
@@ -367,6 +369,20 @@ class ResidentCreateView(CreateView):
             user.created_by = self.request.user  # Track who created this resident
             user.set_password('resident123')  # Default password
             
+            # Friendly duplicate-apartment check (Mongo-safe) before clean/save
+            apartment_value = form.cleaned_data.get('apartment') or ''
+            if apartment_value:
+                existing = User.objects.filter(role='RESIDENT', apartment=apartment_value).first()
+                if existing:
+                    edit_url = reverse('finance:resident_update', kwargs={'pk': str(existing.pk)})
+                    error_html = mark_safe(
+                        f"Un résident existe déjà pour l'appartement {apartment_value}. "
+                        "<br>Vous pouvez soit choisir un autre appartement, soit "
+                        f"<a href='{edit_url}'>modifier le résident existant</a>."
+                    )
+                    form.add_error('apartment', error_html)
+                    return self.form_invalid(form)
+			
             # Validate uniqueness before saving
             user.clean()
             user.save()
@@ -378,13 +394,23 @@ class ResidentCreateView(CreateView):
             return super().form_valid(form)
             
         except ValidationError as e:
-            # Handle validation errors (like duplicate apartment)
-            for field, errors in e.message_dict.items():
-                for error in errors:
-                    form.add_error(field, error)
+            # Handle validation errors (duplicate email, username, or apartment)
+            if hasattr(e, 'message_dict'):
+                for field, errors in e.message_dict.items():
+                    for error in errors:
+                        form.add_error(field, error)
+            else:
+                form.add_error(None, e.message)
             return self.form_invalid(form)
-        except IntegrityError:
-            form.add_error('apartment', "Un résident existe déjà pour cet appartement.")
+        except IntegrityError as e:
+            # Fallback for unexpected integrity issues
+            error_msg = str(e)
+            if 'email' in error_msg.lower():
+                form.add_error('email', "Cette adresse email est déjà utilisée.")
+            elif 'username' in error_msg.lower():
+                form.add_error('username', "Ce nom d'utilisateur est déjà pris.")
+            else:
+                form.add_error(None, "Une erreur d'intégrité est survenue lors de la création.")
             return self.form_invalid(form)
     
     def get_context_data(self, **kwargs):
@@ -489,14 +515,32 @@ class SyndicCreateView(CreateView):
         return super().dispatch(request, *args, **kwargs)
     
     def form_valid(self, form):
-        user = form.save(commit=False)
-        user.role = 'SYNDIC'
-        user.is_active = True
-        user.set_password('syndic123')  # Default password
-        user.save()
-        
-        messages.success(self.request, f"Syndic {user.username} créé avec succès. Mot de passe: syndic123")
-        return super().form_valid(form)
+        try:
+            user = form.save(commit=False)
+            user.role = 'SYNDIC'
+            user.is_active = True
+            user.set_password('syndic123')  # Default password
+            user.save()
+            
+            messages.success(self.request, f"Syndic {user.username} créé avec succès. Mot de passe: syndic123")
+            return super().form_valid(form)
+        except ValidationError as e:
+            if hasattr(e, 'message_dict'):
+                for field, errors in e.message_dict.items():
+                    for error in errors:
+                        form.add_error(field, error)
+            else:
+                form.add_error(None, e.message)
+            return self.form_invalid(form)
+        except IntegrityError as e:
+            error_msg = str(e)
+            if 'email' in error_msg.lower():
+                form.add_error('email', "Cette adresse email est déjà utilisée.")
+            elif 'username' in error_msg.lower():
+                form.add_error('username', "Ce nom d'utilisateur est déjà pris.")
+            else:
+                form.add_error(None, "Une erreur d'intégrité est survenue lors de la création.")
+            return self.form_invalid(form)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -611,7 +655,7 @@ class CalendarListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.role in ['SYNDIC', 'SUPERADMIN']:
-            events = Event.objects.all().prefetch_related('participants')
+            events = Event.objects.all()
         else:
             # resident sees events targeting all residents or specifically included
             events = Event.objects.filter(Q(audience='ALL_RESIDENTS') | Q(participants=self.request.user)).distinct()
@@ -977,12 +1021,7 @@ class NotificationListView(ListView):
         if not self.request.user.is_authenticated:
             return Notification.objects.none()
 
-        queryset = (
-            Notification.objects
-            .select_related('sender')
-            .prefetch_related('recipients')
-            .filter(is_active=True)
-        )
+        queryset = Notification.objects.filter(is_active=True)
 
         if self.request.user.role == 'RESIDENT':
             queryset = queryset.filter(recipients=self.request.user)
@@ -1015,10 +1054,26 @@ class NotificationListView(ListView):
             queryset = queryset.filter(is_read=False)
 
         if date_from:
-            queryset = queryset.filter(created_at__date__gte=date_from)
+            try:
+                parsed_from = datetime.strptime(date_from, "%Y-%m-%d").date()
+                start_from = timezone.make_aware(
+                    datetime.combine(parsed_from, dt_time.min),
+                    timezone.get_current_timezone()
+                )
+                queryset = queryset.filter(created_at__gte=start_from)
+            except ValueError:
+                pass
 
         if date_to:
-            queryset = queryset.filter(created_at__date__lte=date_to)
+            try:
+                parsed_to = datetime.strptime(date_to, "%Y-%m-%d").date()
+                end_to = timezone.make_aware(
+                    datetime.combine(parsed_to + timedelta(days=1), dt_time.min),
+                    timezone.get_current_timezone()
+                )
+                queryset = queryset.filter(created_at__lt=end_to)
+            except ValueError:
+                pass
 
         return queryset.order_by('-created_at')
 
@@ -1026,12 +1081,20 @@ class NotificationListView(ListView):
         context = super().get_context_data(**kwargs)
         is_resident_view = (self.request.user.is_authenticated and self.request.user.role == 'RESIDENT')
         notifications_queryset = self.get_queryset()
-        today = timezone.now().date()
+        today = timezone.localdate()
 
         total_notifications = notifications_queryset.count()
         unread_notifications = notifications_queryset.filter(is_read=False).count()
         high_priority_notifications = notifications_queryset.filter(priority__in=['HIGH', 'URGENT']).count()
-        today_notifications = notifications_queryset.filter(created_at__date=today).count()
+        start_today = timezone.make_aware(
+            datetime.combine(today, dt_time.min),
+            timezone.get_current_timezone()
+        )
+        end_today = start_today + timedelta(days=1)
+        today_notifications = notifications_queryset.filter(
+            created_at__gte=start_today,
+            created_at__lt=end_today
+        ).count()
 
         priority_summary = list(
             notifications_queryset
@@ -1579,7 +1642,13 @@ class PaymentCreateView(CreateView):
         context = super().get_context_data(**kwargs)
         document_id = self.kwargs.get('document_id')
         document = get_object_or_404(Document, id=document_id, resident=self.request.user)
+        
+        # Get or create resident status
+        status, created = ResidentStatus.objects.get_or_create(resident=self.request.user)
+        status.update_totals()
+        
         context['document'] = document
+        context['status'] = status
         context['help_text_amount'] = f"Montant du document : {document.amount} DH"
         return context
     

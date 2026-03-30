@@ -1,6 +1,6 @@
 """Service layer for navigation/stat cards API payloads."""
 
-from datetime import timedelta
+from datetime import timedelta, datetime, time
 
 from django.db.models import Sum
 from django.utils import timezone
@@ -12,6 +12,7 @@ from finance.serializers import NavigationStatsSerializer
 
 def build_navigation_stats(user):
     """Return high-level counters used by dashboard navigation widgets."""
+    tz = timezone.get_current_timezone()
     today = timezone.now().date()
     current_month = today.replace(day=1)
     overdue_cutoff = today - timedelta(days=30)
@@ -34,8 +35,9 @@ def build_navigation_stats(user):
 
     issue_reports = ResidentReport.objects.filter(status="NEW").count()
 
+    month_start_dt = timezone.make_aware(datetime.combine(current_month, time.min), tz)
     documents_this_month = Document.objects.filter(
-        created_at__date__gte=current_month,
+        created_at__gte=month_start_dt,
         is_archived=False,
     ).count()
 
@@ -48,7 +50,7 @@ def build_navigation_stats(user):
 
     recent_residents = User.objects.filter(
         role="RESIDENT",
-        date_joined__date__gte=current_month,
+        date_joined__gte=month_start_dt,
     ).count()
 
     payload = NavigationStatsSerializer(

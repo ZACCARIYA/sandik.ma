@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Immeubles - SyndicPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% include 'components/page_header.html' with title=title icon="fas fa-building" subtitle="Gérez vos immeubles et patrimoines immobiliers" actions=page_actions %}
+
+    <div class="card-modern sp-fade-up">
+        <div class="card-body-modern">
+            {% if buildings %}
+            <div class="table-responsive">
+                <table class="table table-modern align-middle">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Adresse</th>
+                            <th>Appartements</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for building in buildings %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ building.name }}</div>
+                            </td>
+                            <td>{{ building.address|truncatechars:50 }}</td>
+                            <td>
+                                <span class="badge bg-light text-primary fw-bold">{{ building.total_apartments }}</span>
+                                <small class="text-muted ms-1">unités</small>
+                            </td>
+                            <td class="text-end">
+                                {% if building.pk %}
+                                <div class="btn-group">
+                                    <a href="{% url 'properties:building_update' building.pk %}"
+                                       class="btn btn-sm btn-outline-primary" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'properties:building_delete' building.pk %}"
+                                       class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                                {% else %}
+                                <span class="text-muted small">ID manquant</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-building fa-4x text-muted opacity-25"></i>
+                </div>
+                <h5>Aucun immeuble enregistré</h5>
+                <p class="text-muted">Commencez par ajouter votre premier immeuble pour gérer les résidents et les
+                    documents associés.</p>
+                <a href="{% url 'properties:building_create' %}" class="btn btn-primary mt-2">
+                    <i class="fas fa-plus me-2"></i>Ajouter un immeuble
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

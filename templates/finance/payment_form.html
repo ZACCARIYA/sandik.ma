@@ -321,6 +321,12 @@
                             <span>Montant total</span>
                             <strong class="pf-summary-amount">{{ document.amount|floatformat:2 }} DH</strong>
                         </div>
+                        {% if status %}
+                        <div class="pf-summary-row">
+                            <span>Votre solde total</span>
+                            <strong class="text-danger">{{ status.balance|floatformat:2 }} DH</strong>
+                        </div>
+                        {% endif %}
                         <div class="pf-summary-divider"></div>
                         <div class="pf-summary-row pf-summary-total">
                             <span>À payer</span>

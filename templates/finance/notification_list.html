@@ -7,7 +7,41 @@
 
 {% block content %}
 <div class="container-fluid">
-    {% include 'components/page_header.html' with title=title|default:"Centre de notifications" icon="fas fa-bell" subtitle=subtitle|default:"Suivez les alertes, rappels et annonces en temps réel" actions=page_actions|default:None %}
+    <!-- En-tête de page (inline pour éviter tout souci de rendu d'include) -->
+    <section class="sp-page-header page-header sp-fade-up">
+        <div class="container-fluid px-0">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-start gap-3">
+                        {% if icon %}
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary" style="width:42px;height:42px;flex:0 0 auto;">
+                            <i class="{{ icon }}"></i>
+                        </span>
+                        {% endif %}
+                        <div>
+                            <h1 class="sp-page-title page-title mb-1">{{ title|default:"Centre de notifications" }}</h1>
+                            {% if subtitle %}
+                            <p class="sp-page-subtitle page-subtitle mb-0">{{ subtitle|default:"Suivez les alertes, rappels et annonces en temps réel" }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% if page_actions %}
+                <div class="col-lg-4">
+                    <div class="d-flex gap-2 justify-content-lg-end flex-wrap">
+                        {% for action in page_actions %}
+                        <a href="{{ action.url }}"
+                           class="btn {% if action.type == 'outline' %}btn-outline-primary{% elif action.type %}btn-{{ action.type }}{% else %}btn-primary{% endif %}">
+                            {% if action.icon %}<i class="{{ action.icon }} me-1"></i>{% endif %}
+                            {{ action.label }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
 
     <section class="card-modern mb-4 sp-fade-up">
         <div class="card-body-modern">
@@ -16,7 +50,8 @@
                     <label class="form-label" for="q">Recherche</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control" id="q" name="q" value="{{ selected_q }}" placeholder="Titre, message, expéditeur...">
+                        <input type="text" class="form-control" id="q" name="q" value="{{ selected_q }}"
+                            placeholder="Titre, message, expéditeur...">
                     </div>
                 </div>
                 <div class="col-6 col-lg-2">
@@ -33,7 +68,8 @@
                     <select class="form-select" id="priority" name="priority">
                         <option value="all" {% if selected_priority == 'all' %}selected{% endif %}>Toutes</option>
                         {% for code, label in priority_choices %}
-                        <option value="{{ code }}" {% if selected_priority == code %}selected{% endif %}>{{ label }}</option>
+                        <option value="{{ code }}" {% if selected_priority == code %}selected{% endif %}>{{ label }}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
@@ -47,7 +83,8 @@
                 </div>
                 <div class="col-6 col-lg-1">
                     <label class="form-label" for="date_from">Du</label>
-                    <input type="date" class="form-control" id="date_from" name="date_from" value="{{ selected_date_from }}">
+                    <input type="date" class="form-control" id="date_from" name="date_from"
+                        value="{{ selected_date_from }}">
                 </div>
                 <div class="col-6 col-lg-1">
                     <label class="form-label" for="date_to">Au</label>
@@ -69,16 +106,56 @@
 
     <section class="row g-3 mb-4 sp-fade-up">
         <div class="col-6 col-xl-3">
-            {% include 'components/stats_card.html' with value=total_notifications label="Total" icon="fas fa-inbox" color="primary" %}
+            <article class="stats-card sp-kpi-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="stats-meta">
+                        <p class="stats-label mb-1">Total</p>
+                        <h3 class="stats-value mb-0 text-primary">{{ total_notifications|default:'0' }}</h3>
+                    </div>
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary-subtle text-primary" style="width:40px;height:40px;">
+                        <i class="fas fa-inbox"></i>
+                    </span>
+                </div>
+            </article>
         </div>
         <div class="col-6 col-xl-3">
-            {% include 'components/stats_card.html' with value=unread_notifications label="Non lues" icon="fas fa-envelope" color="warning" %}
+            <article class="stats-card sp-kpi-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="stats-meta">
+                        <p class="stats-label mb-1">Non lues</p>
+                        <h3 class="stats-value mb-0 text-warning">{{ unread_notifications|default:'0' }}</h3>
+                    </div>
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-warning-subtle text-warning" style="width:40px;height:40px;">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                </div>
+            </article>
         </div>
         <div class="col-6 col-xl-3">
-            {% include 'components/stats_card.html' with value=high_priority_notifications label="Priorité haute" icon="fas fa-triangle-exclamation" color="danger" %}
+            <article class="stats-card sp-kpi-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="stats-meta">
+                        <p class="stats-label mb-1">Priorité haute</p>
+                        <h3 class="stats-value mb-0 text-danger">{{ high_priority_notifications|default:'0' }}</h3>
+                    </div>
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-danger-subtle text-danger" style="width:40px;height:40px;">
+                        <i class="fas fa-triangle-exclamation"></i>
+                    </span>
+                </div>
+            </article>
         </div>
         <div class="col-6 col-xl-3">
-            {% include 'components/stats_card.html' with value=today_notifications label="Aujourd'hui" icon="fas fa-bolt" color="success" %}
+            <article class="stats-card sp-kpi-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="stats-meta">
+                        <p class="stats-label mb-1">Aujourd'hui</p>
+                        <h3 class="stats-value mb-0 text-success">{{ today_notifications|default:'0' }}</h3>
+                    </div>
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success-subtle text-success" style="width:40px;height:40px;">
+                        <i class="fas fa-bolt"></i>
+                    </span>
+                </div>
+            </article>
         </div>
     </section>
 
@@ -93,40 +170,56 @@
                     {% if notifications %}
                     <div class="notification-feed">
                         {% for notification in notifications %}
-                        <article class="sp-notification-item {% if not notification.is_read %}is-unread{% endif %}">
+                        <article
+                            class="sp-notification-item {% if not notification.is_read %}is-unread{% endif %} sp-fade-up"
+                            style="animation-delay: {{ forloop.counter0|add:1 }}00ms">
+
                             <div class="sp-notification-top">
-                                <div class="d-flex align-items-start gap-3">
-                                    <span class="sp-notification-icon">
-                                        <i class="fas fa-{% if notification.notification_type == 'PAYMENT_REMINDER' %}money-check-dollar{% elif notification.notification_type == 'DOCUMENT_UPLOADED' %}file-circle-plus{% elif notification.notification_type == 'MEETING_NOTICE' %}calendar-day{% elif notification.notification_type == 'LEGAL_NOTICE' %}scale-balanced{% else %}bell{% endif %}"></i>
-                                    </span>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div
+                                        class="sp-notification-icon {% if notification.notification_type == 'PAYMENT_REMINDER' %}icon-payment{% elif notification.notification_type == 'DOCUMENT_UPLOADED' %}icon-document{% elif notification.notification_type == 'MEETING_NOTICE' %}icon-meeting{% elif notification.notification_type == 'LEGAL_NOTICE' %}icon-legal{% else %}icon-default{% endif %}">
+                                        <i
+                                            class="fas fa-{% if notification.notification_type == 'PAYMENT_REMINDER' %}money-check-dollar{% elif notification.notification_type == 'DOCUMENT_UPLOADED' %}file-circle-plus{% elif notification.notification_type == 'MEETING_NOTICE' %}calendar-day{% elif notification.notification_type == 'LEGAL_NOTICE' %}scale-balanced{% else %}bell{% endif %}"></i>
+                                    </div>
                                     <div>
-                                        <h6 class="mb-1 sp-notification-title">{{ notification.title }}</h6>
-                                        <div class="d-flex flex-wrap gap-2 align-items-center">
-                                            <span class="badge sp-priority-badge sp-priority-{{ notification.priority|lower }}">
-                                                <i class="fas fa-flag me-1"></i>{{ notification.get_priority_display }}
+                                        <h6 class="sp-notification-title mb-1">{{ notification.title }}</h6>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span
+                                                class="badge sp-priority-badge sp-priority-{{ notification.priority|lower }}">
+                                                {{ notification.get_priority_display }}
                                             </span>
                                             {% if not notification.is_read %}
-                                            <span class="badge text-bg-primary">Nouveau</span>
+                                            <span class="badge bg-primary rounded-pill"
+                                                style="font-size: 0.6rem;">Nouveau</span>
                                             {% endif %}
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-end">
-                                    <div class="small text-muted">{{ notification.created_at|date:"d/m/Y" }}</div>
-                                    <div class="small text-muted">{{ notification.created_at|date:"H:i" }}</div>
+                                <div class="sp-time-col">
+                                    <div class="fw-bold text-dark">{{ notification.created_at|date:"d M" }}</div>
+                                    <div>{{ notification.created_at|date:"H:i" }}</div>
                                 </div>
                             </div>
 
-                            <p class="sp-notification-message mb-3">{{ notification.message|truncatechars:280 }}</p>
+                            <div class="sp-notification-message">
+                                {{ notification.message|truncatechars:280 }}
+                            </div>
 
                             <div class="sp-notification-footer">
                                 <div class="sp-notification-meta">
-                                    <span><i class="fas fa-tag me-1"></i>{{ notification.get_notification_type_display }}</span>
-                                    <span><i class="fas fa-user me-1"></i>{{ notification.sender.get_full_name|default:notification.sender.username }}</span>
-                                    <span><i class="fas fa-circle-check me-1"></i>{% if notification.is_read %}Lue{% else %}Non lue{% endif %}</span>
+                                    <div class="sp-meta-item">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span>{{ notification.get_notification_type_display }}</span>
+                                    </div>
+                                    <div class="sp-meta-item">
+                                        <i class="fas fa-user-circle"></i>
+                                        <span>{{ notification.sender.get_full_name|default:notification.sender.username
+                                            }}</span>
+                                    </div>
                                 </div>
-                                <a href="{% url 'finance:notification_detail' notification.pk %}" class="btn btn-outline-primary btn-sm">
-                                    Ouvrir <i class="fas fa-arrow-right ms-1"></i>
+                                <a href="{% url 'finance:notification_detail' notification.pk %}"
+                                    class="btn btn-primary btn-sm rounded-pill px-3">
+                                    Ouvrir <i class="fas fa-chevron-right ms-1" style="font-size: 0.7rem;"></i>
                                 </a>
                             </div>
                         </article>
@@ -137,13 +230,21 @@
                     <nav aria-label="Pagination notifications" class="mt-4">
                         <ul class="pagination justify-content-center mb-0">
                             {% if page_obj.has_previous %}
-                            <li class="page-item"><a class="page-link" href="?page=1{% if querystring %}&{{ querystring }}{% endif %}">Premier</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Précédent</a></li>
+                            <li class="page-item"><a class="page-link"
+                                    href="?page=1{% if querystring %}&{{ querystring }}{% endif %}">Premier</a></li>
+                            <li class="page-item"><a class="page-link"
+                                    href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Précédent</a>
+                            </li>
                             {% endif %}
-                            <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                            <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{
+                                    page_obj.paginator.num_pages }}</span></li>
                             {% if page_obj.has_next %}
-                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Suivant</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if querystring %}&{{ querystring }}{% endif %}">Dernier</a></li>
+                            <li class="page-item"><a class="page-link"
+                                    href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Suivant</a>
+                            </li>
+                            <li class="page-item"><a class="page-link"
+                                    href="?page={{ page_obj.paginator.num_pages }}{% if querystring %}&{{ querystring }}{% endif %}">Dernier</a>
+                            </li>
                             {% endif %}
                         </ul>
                     </nav>
@@ -152,11 +253,14 @@
                     <div class="empty-state p-5 text-center">
                         <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
                         <h5 class="mb-2">Aucune notification trouvée</h5>
-                        <p class="text-muted mb-4">Ajustez vos filtres ou revenez plus tard pour voir les nouvelles alertes.</p>
+                        <p class="text-muted mb-4">Ajustez vos filtres ou revenez plus tard pour voir les nouvelles
+                            alertes.</p>
                         <div class="d-flex justify-content-center gap-2 flex-wrap">
-                            <a href="{% url 'finance:notification_list' %}" class="btn btn-outline-primary">Réinitialiser les filtres</a>
+                            <a href="{% url 'finance:notification_list' %}"
+                                class="btn btn-outline-primary">Réinitialiser les filtres</a>
                             {% if not is_resident_view %}
-                            <a href="{% url 'finance:notification_create' %}" class="btn btn-primary">Créer une notification</a>
+                            <a href="{% url 'finance:notification_create' %}" class="btn btn-primary">Créer une
+                                notification</a>
                             {% endif %}
                         </div>
                     </div>
@@ -166,29 +270,12 @@
         </div>
 
         <div class="col-12 col-xl-4">
-            <section class="card-modern mb-4 sp-fade-up">
-                <div class="card-body-modern">
-                    <h6 class="mb-3"><i class="fas fa-chart-pie me-2 text-primary"></i>Répartition par priorité</h6>
-                    <div class="chart-wrapper" style="min-height: 210px;">
-                        <canvas id="priorityChart"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <section class="card-modern mb-4 sp-fade-up">
-                <div class="card-body-modern">
-                    <h6 class="mb-3"><i class="fas fa-chart-column me-2 text-info"></i>Types de notifications</h6>
-                    <div class="chart-wrapper" style="min-height: 220px;">
-                        <canvas id="typeChart"></canvas>
-                    </div>
-                </div>
-            </section>
-
             <section class="card-modern sp-fade-up">
                 <div class="card-body-modern">
                     <h6 class="mb-3"><i class="fas fa-bolt me-2 text-warning"></i>Actions rapides</h6>
                     <div class="d-grid gap-2">
-                        <a href="{% url 'finance:notification_list' %}?status=unread" class="btn btn-outline-primary text-start">
+                        <a href="{% url 'finance:notification_list' %}?status=unread"
+                            class="btn btn-outline-primary text-start">
                             <i class="fas fa-envelope me-2"></i>Afficher les non lues
                         </a>
                         {% if not is_resident_view %}
@@ -209,204 +296,203 @@
 
 {% block extra_css %}
 <style>
-.sp-notification-item {
-    border: var(--sp-border);
-    border-radius: var(--sp-radius-lg);
-    background: var(--sp-surface);
-    box-shadow: var(--sp-shadow-sm);
-    padding: 1rem;
-    margin-bottom: 0.85rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.sp-notification-item:hover {
-    transform: translateY(-2px);
-    border-color: #93c5fd;
-    box-shadow: var(--sp-shadow-md);
-}
-
-.sp-notification-item.is-unread {
-    border-left: 4px solid var(--sp-primary-500);
-    background: linear-gradient(90deg, rgba(37, 99, 235, 0.06) 0%, var(--sp-surface) 7%);
-}
-
-.sp-notification-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 0.65rem;
-}
-
-.sp-notification-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
-    color: #1e40af;
-    flex: 0 0 auto;
-}
-
-.sp-notification-title {
-    font-size: 1rem;
-    font-weight: 700;
-}
-
-.sp-notification-message {
-    color: var(--sp-text-muted);
-    line-height: 1.55;
-}
-
-.sp-notification-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.8rem;
-    border-top: 1px solid var(--sp-neutral-200);
-    padding-top: 0.65rem;
-}
-
-.sp-notification-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.7rem;
-    color: var(--sp-neutral-500);
-    font-size: 0.78rem;
-}
-
-.sp-priority-badge {
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-
-.sp-priority-urgent {
-    background: rgba(220, 38, 38, 0.12);
-    color: #991b1b;
-}
-
-.sp-priority-high {
-    background: rgba(234, 88, 12, 0.14);
-    color: #9a3412;
-}
-
-.sp-priority-medium {
-    background: rgba(217, 119, 6, 0.14);
-    color: #92400e;
-}
-
-.sp-priority-low {
-    background: rgba(22, 163, 74, 0.14);
-    color: #166534;
-}
-
-[data-theme="dark"] .sp-notification-item.is-unread {
-    background: linear-gradient(90deg, rgba(37, 99, 235, 0.16) 0%, var(--sp-surface) 7%);
-}
-
-[data-theme="dark"] .sp-notification-icon {
-    background: linear-gradient(135deg, rgba(30, 64, 175, 0.35), rgba(12, 74, 110, 0.4));
-    color: #bfdbfe;
-}
-
-[data-theme="dark"] .sp-notification-footer {
-    border-top-color: #1f2937;
-}
-
-@media (max-width: 767.98px) {
-    .sp-notification-top,
-    .sp-notification-footer {
+    /* Notification Feed */
+    .notification-feed {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        gap: 1.25rem;
     }
 
-    .sp-notification-footer .btn {
-        width: 100%;
+    .sp-notification-item {
+        position: relative;
+        border: 1px solid rgba(226, 232, 240, 0.6);
+        border-radius: 1.25rem;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 1.25rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
     }
-}
+
+    .sp-notification-item:hover {
+        transform: translateY(-4px);
+        background: #fff;
+        border-color: var(--sp-primary-100);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .sp-notification-item.is-unread {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(255, 255, 255, 0.9) 100%);
+        border-left: 4px solid var(--sp-primary-500);
+    }
+
+    /* Pulse for unread */
+    .sp-notification-item.is-unread::after {
+        content: '';
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 8px;
+        height: 8px;
+        background: var(--sp-primary-500);
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+        animation: sp-pulse 2s infinite;
+    }
+
+    @keyframes sp-pulse {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+        }
+
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+        }
+
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+        }
+    }
+
+    .sp-notification-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .sp-notification-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: #fff;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Type-specific gradients */
+    .icon-payment {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .icon-document {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    }
+
+    .icon-meeting {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    .icon-legal {
+        background: linear-gradient(135deg, #6366f1, #4c1d95);
+    }
+
+    .icon-default {
+        background: linear-gradient(135deg, #64748b, #475569);
+    }
+
+    .sp-notification-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--sp-neutral-800);
+        margin-bottom: 0.25rem;
+    }
+
+    .sp-notification-message {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--sp-neutral-600);
+        margin-bottom: 1.25rem;
+    }
+
+    .sp-notification-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(226, 232, 240, 0.5);
+    }
+
+    .sp-notification-meta {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        font-size: 0.8rem;
+        color: var(--sp-neutral-500);
+        font-weight: 600;
+    }
+
+    .sp-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .sp-meta-item i {
+        font-size: 0.85rem;
+        color: var(--sp-primary-500);
+    }
+
+    .sp-time-col {
+        text-align: right;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.75rem;
+        color: var(--sp-neutral-400);
+    }
+
+    .sp-priority-badge {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 0.2rem 0.6rem;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Dark mode adjustments */
+    [data-theme="dark"] .sp-notification-item {
+        background: rgba(17, 24, 39, 0.6);
+        border-color: rgba(31, 41, 55, 0.6);
+    }
+
+    [data-theme="dark"] .sp-notification-item:hover {
+        background: rgba(31, 41, 55, 0.8);
+    }
+
+    [data-theme="dark"] .sp-notification-title {
+        color: #f8fafc;
+    }
+
+    [data-theme="dark"] .sp-notification-message {
+        color: #cbd5e1;
+    }
+
+    [data-theme="dark"] .sp-notification-footer {
+        border-top-color: rgba(75, 85, 99, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .sp-notification-footer {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .sp-notification-meta {
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+    }
+</style>
 </style>
 {% endblock %}
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const priorityData = {{ priority_summary_json|safe }};
-    const typeData = {{ type_summary_json|safe }};
-
-    function resolveThemeColors() {
-        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-        return {
-            tick: dark ? '#94a3b8' : '#64748b',
-            grid: dark ? '#334155' : '#e2e8f0'
-        };
-    }
-
-    const colors = resolveThemeColors();
-
-    const priorityCanvas = document.getElementById('priorityChart');
-    if (priorityCanvas && priorityData.length) {
-        new Chart(priorityCanvas, {
-            type: 'doughnut',
-            data: {
-                labels: priorityData.map(item => item.label),
-                datasets: [{
-                    data: priorityData.map(item => item.value),
-                    backgroundColor: ['#dc2626', '#ea580c', '#d97706', '#16a34a'],
-                    borderWidth: 2,
-                    borderColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#0f172a' : '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '62%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: { color: colors.tick, usePointStyle: true, padding: 14 }
-                    }
-                }
-            }
-        });
-    }
-
-    const typeCanvas = document.getElementById('typeChart');
-    if (typeCanvas && typeData.length) {
-        new Chart(typeCanvas, {
-            type: 'bar',
-            data: {
-                labels: typeData.map(item => item.label),
-                datasets: [{
-                    data: typeData.map(item => item.value),
-                    backgroundColor: '#2563eb',
-                    borderRadius: 8,
-                    maxBarThickness: 32
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: { color: colors.tick },
-                        grid: { color: colors.grid }
-                    },
-                    y: {
-                        ticks: { color: colors.tick },
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-    }
-});
-</script>
-{% endblock %}
+{% block extra_js %}{% endblock %}

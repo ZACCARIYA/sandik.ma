@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supprimer l'immeuble - SyndicPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    {% include 'components/page_header.html' with title="Confirmation de suppression" icon="fas fa-exclamation-triangle"
+    subtitle="Action irréversible" %}
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 sp-fade-up">
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-trash-alt fa-4x text-danger opacity-75"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Supprimer l'immeuble ?</h4>
+                    <p class="text-muted mb-4">
+                        Êtes-vous sûr de vouloir supprimer l'immeuble <strong class="text-dark">"{{ object.name
+                            }}"</strong> ?
+                        <br>Cette action est définitive et toutes les informations associées seront impactées.
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger py-2">
+                                <i class="fas fa-trash me-2"></i>Confirmer la suppression
+                            </button>
+                            <a href="{% url 'properties:building_list' %}" class="btn btn-outline-secondary py-2">
+                                Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

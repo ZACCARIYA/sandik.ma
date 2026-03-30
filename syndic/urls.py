@@ -26,6 +26,7 @@ urlpatterns = [
     path('system/residents/', include('residents.urls')),
     path('system/documents/', include('documents.urls')),
     path('system/notifications/', include('notifications.urls')),
+    path('system/properties/', include('properties.urls')),
     path('tickets/', include('tickets.urls')),
 ]
 

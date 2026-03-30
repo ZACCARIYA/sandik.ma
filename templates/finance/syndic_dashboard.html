@@ -427,42 +427,43 @@
 <style>
     .ft-page {
         background:
-            radial-gradient(circle at 10% 10%, rgba(2, 132, 199, 0.14), transparent 42%),
-            radial-gradient(circle at 90% 0%, rgba(16, 185, 129, 0.12), transparent 36%),
-            #f3f7fb;
+            radial-gradient(circle at 12% 8%, rgba(99, 102, 241, 0.08), transparent 38%),
+            radial-gradient(circle at 88% 0%, rgba(14, 165, 233, 0.06), transparent 40%),
+            #f8fafc;
         min-height: 100%;
     }
 
     .ft-hero {
-        border-radius: 22px;
-        background: linear-gradient(132deg, #ffffff 0%, #eef6ff 52%, #f4fbf8 100%);
-        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
+        border-radius: 18px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
     }
 
     .ft-kicker {
-        font-size: .73rem;
+        font-size: .72rem;
         text-transform: uppercase;
-        letter-spacing: .12em;
+        letter-spacing: .08em;
         font-weight: 700;
-        color: #0369a1;
+        color: #4f46e5;
     }
 
     .ft-chip {
         display: inline-flex;
         align-items: center;
         gap: .4rem;
-        padding: .36rem .7rem;
+        padding: .34rem .68rem;
         border-radius: 999px;
-        font-size: .74rem;
+        font-size: .73rem;
         font-weight: 600;
         color: #0f172a;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        background: rgba(255, 255, 255, 0.86);
     }
 
     .ft-btn {
-        border-radius: 12px;
+        border-radius: 10px;
         font-weight: 600;
+        letter-spacing: .01em;
     }
 
     .ft-dropdown {
@@ -478,36 +479,44 @@
 
     .ft-panel,
     .ft-kpi {
-        border-radius: 18px;
-        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
-        transition: transform .24s ease, box-shadow .24s ease;
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(6px);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        transition: transform .2s ease, box-shadow .2s ease;
     }
 
     .ft-panel:hover,
     .ft-kpi:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.12);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
     }
 
     .ft-kpi-label {
-        font-size: .82rem;
+        font-size: .78rem;
+        letter-spacing: .04em;
+        text-transform: uppercase;
         color: #64748b;
         font-weight: 600;
     }
 
     .ft-kpi-value {
-        font-size: 1.52rem;
-        letter-spacing: -.02em;
-        line-height: 1.15;
+        font-size: 1.58rem;
+        letter-spacing: -.015em;
+        line-height: 1.12;
+        color: #0f172a;
     }
 
     .ft-kpi-icon {
-        width: 42px;
-        height: 42px;
+        width: 40px;
+        height: 40px;
         border-radius: 12px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.12);
     }
 
     .ft-loading .placeholder {
@@ -522,18 +531,20 @@
         padding: 1rem;
         text-align: center;
         color: #6b7280;
-        background: #fafafa;
+        background: #f9fafb;
     }
 
     .ft-pills .nav-link {
         border-radius: 10px;
         color: #475569;
         font-weight: 600;
+        transition: all .18s ease;
     }
 
     .ft-pills .nav-link.active {
-        background: #0369a1;
+        background: #4f46e5;
         color: #fff;
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.28);
     }
 
     .ft-list {
@@ -565,11 +576,11 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: .86rem;
+        font-size: .85rem;
         padding: .45rem .6rem;
         border-radius: 10px;
         background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
     }
 
     .ft-focus-list {
@@ -581,7 +592,7 @@
         border-radius: 12px;
         border: 1px solid #e2e8f0;
         padding: .65rem .72rem;
-        background: #fff;
+        background: rgba(255, 255, 255, 0.92);
     }
 
     .ft-focus-item.tone-success {
@@ -615,7 +626,7 @@
         align-items: center;
         gap: .7rem;
         border-radius: 12px;
-        border: 1px solid #e5edf7;
+        border: 1px solid #e5e7eb;
         background: #fff;
         padding: .65rem .7rem;
         transition: all .16s ease;
@@ -623,8 +634,8 @@
     }
 
     .ft-row:hover {
-        background: #f8fbff;
-        border-color: #bfdaf6;
+        background: #f8fafc;
+        border-color: #cbd5e1;
     }
 
     .ft-row-icon {
@@ -634,8 +645,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: #e6f1ff;
-        color: #0369a1;
+        background: rgba(99, 102, 241, 0.1);
+        color: #4338ca;
         flex: 0 0 auto;
     }
 
@@ -658,14 +669,14 @@
 
     .ft-action i {
         font-size: 1.06rem;
-        color: #0369a1;
+        color: #4f46e5;
     }
 
     .ft-action:hover {
         transform: translateY(-2px);
-        border-color: #bae6fd;
-        background: #f0f9ff;
-        color: #0c4a6e;
+        border-color: #c7d2fe;
+        background: #eef2ff;
+        color: #312e81;
     }
 
     .ft-reveal {
@@ -685,8 +696,8 @@
 
     [data-theme="dark"] .ft-page {
         background:
-            radial-gradient(circle at 10% 10%, rgba(2, 132, 199, 0.2), transparent 42%),
-            radial-gradient(circle at 90% 0%, rgba(16, 185, 129, 0.15), transparent 36%),
+            radial-gradient(circle at 12% 8%, rgba(99, 102, 241, 0.18), transparent 38%),
+            radial-gradient(circle at 88% 0%, rgba(14, 165, 233, 0.12), transparent 40%),
             #0b1220;
     }
 
@@ -696,8 +707,8 @@
     [data-theme="dark"] .ft-row,
     [data-theme="dark"] .ft-action,
     [data-theme="dark"] .ft-dropdown {
-        background: #111827;
-        border-color: #1f2937;
+        background: rgba(15, 23, 42, 0.92);
+        border-color: #1f2a3a;
         color: #e5e7eb;
     }
 
@@ -713,16 +724,16 @@
     }
 
     [data-theme="dark"] .ft-chip {
-        background: #0f172a;
-        border-color: #26364b;
+        background: #0b1626;
+        border-color: #223248;
         color: #dbeafe;
     }
 
     [data-theme="dark"] .ft-row:hover,
     [data-theme="dark"] .ft-action:hover,
     [data-theme="dark"] .ft-dropdown-row:hover {
-        background: #0b1626;
-        border-color: #233349;
+        background: #0f1b2e;
+        border-color: #2a3a53;
     }
 
     [data-theme="dark"] .ft-pills .nav-link {

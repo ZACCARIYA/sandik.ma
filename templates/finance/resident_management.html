@@ -210,21 +210,6 @@
         <div class="col-12 col-xl-4">
             <section class="card-modern mb-4 sp-fade-up">
                 <div class="card-body-modern">
-                    <h6 class="mb-3"><i class="fas fa-chart-pie me-2 text-primary"></i>Distribution des statuts</h6>
-                    <div class="chart-wrapper" style="min-height: 220px;">
-                        <canvas id="residentStatusChart"></canvas>
-                    </div>
-                    <div class="row g-2 mt-3">
-                        <div class="col-6"><div class="small text-muted">A jour</div><div class="fw-semibold">{{ status_breakdown.up_to_date }}</div></div>
-                        <div class="col-6"><div class="small text-muted">En attente</div><div class="fw-semibold">{{ status_breakdown.pending }}</div></div>
-                        <div class="col-6"><div class="small text-muted">En retard</div><div class="fw-semibold">{{ status_breakdown.overdue }}</div></div>
-                        <div class="col-6"><div class="small text-muted">Critique</div><div class="fw-semibold text-danger">{{ status_breakdown.critical }}</div></div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="card-modern mb-4 sp-fade-up">
-                <div class="card-body-modern">
                     <h6 class="mb-3"><i class="fas fa-triangle-exclamation me-2 text-danger"></i>Top débiteurs</h6>
                     {% if top_debtors %}
                     <div class="d-grid gap-3">
@@ -238,7 +223,7 @@
                                 <div class="fw-semibold text-danger">{{ debtor.balance|floatformat:2 }} DH</div>
                             </div>
                             <div class="progress" style="height:8px;">
-                                <div class="progress-bar bg-danger" style="width: {{ debtor.progress|floatformat:0 }}%;"></div>
+                                <div class="progress-bar bg-danger" style="width: {{ debtor.progress|floatformat:0 }}"></div>
                             </div>
                         </div>
                         {% endfor %}
@@ -309,43 +294,4 @@
     }
 }
 </style>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const statusData = {{ status_chart_json|safe }};
-    const canvas = document.getElementById('residentStatusChart');
-
-    if (!canvas || !statusData.length) return;
-
-    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const textColor = dark ? '#94a3b8' : '#64748b';
-
-    new Chart(canvas, {
-        type: 'doughnut',
-        data: {
-            labels: statusData.map(item => item.label),
-            datasets: [{
-                data: statusData.map(item => item.value),
-                backgroundColor: ['#16a34a', '#d97706', '#f59e0b', '#dc2626'],
-                borderWidth: 2,
-                borderColor: dark ? '#0f172a' : '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '62%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: textColor, usePointStyle: true, padding: 12 }
-                }
-            }
-        }
-    });
-});
-</script>
 {% endblock %}

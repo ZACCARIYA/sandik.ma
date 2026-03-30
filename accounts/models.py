@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 import os
 
 
@@ -19,6 +20,8 @@ class User(AbstractUser):
     created_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, 
                                  related_name='created_residents', 
                                  help_text="Utilisateur qui a créé ce compte")
+    email_verified = models.BooleanField(default=False, help_text="Adresse email vérifiée")
+    email_verified_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = []
@@ -44,6 +47,18 @@ class User(AbstractUser):
         """Validate the user data"""
         super().clean()
         
+        # Check email uniqueness manually for MongoDB
+        if self.email:
+            existing_email = User.objects.filter(email=self.email).exclude(pk=self.pk)
+            if existing_email.exists():
+                raise ValidationError({'email': f'Un utilisateur avec l\'email {self.email} existe déjà.'})
+
+        # Check username uniqueness manually for MongoDB
+        if self.username:
+            existing_username = User.objects.filter(username=self.username).exclude(pk=self.pk)
+            if existing_username.exists():
+                raise ValidationError({'username': f'Le nom d\'utilisateur {self.username} est déjà pris.'})
+        
         # Check apartment uniqueness for residents
         if self.role == self.Roles.RESIDENT and self.apartment:
             existing_resident = User.objects.filter(
@@ -62,6 +77,12 @@ class User(AbstractUser):
         
         # Validate before saving
         self.clean()
+        
+        # Normalize verification fields
+        if self.email_verified and self.email_verified_at is None:
+            self.email_verified_at = timezone.now()
+        if not self.email_verified:
+            self.email_verified_at = None
         
         super().save(*args, **kwargs)
 

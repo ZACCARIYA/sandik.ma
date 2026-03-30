@@ -1,6 +1,6 @@
 """Business logic for syndic dashboard analytics."""
 
-from datetime import datetime
+from datetime import datetime, timedelta, time
 import json
 from decimal import Decimal
 
@@ -54,6 +54,7 @@ def status_category_from_balance(balance):
 
 def build_syndic_dashboard_context(request):
     """Build all dashboard KPIs, charts, and operational insights."""
+    tz = timezone.get_current_timezone()
     today = timezone.now().date()
     period = request.GET.get("period", "6m")
     resident_filter = request.GET.get("resident", "").strip()
@@ -65,19 +66,19 @@ def build_syndic_dashboard_context(request):
         date_to = today
 
     if period == "30d":
-        default_from = today - timezone.timedelta(days=30)
+        default_from = today - timedelta(days=30)
         chart_months = 3
     elif period == "90d":
-        default_from = today - timezone.timedelta(days=90)
+        default_from = today - timedelta(days=90)
         chart_months = 6
     elif period == "12m":
-        default_from = today - timezone.timedelta(days=365)
+        default_from = today - timedelta(days=365)
         chart_months = 12
     elif period == "all":
         default_from = None
         chart_months = 12
     else:
-        default_from = today - timezone.timedelta(days=180)
+        default_from = today - timedelta(days=180)
         chart_months = 6
 
     if not date_from:
@@ -175,28 +176,33 @@ def build_syndic_dashboard_context(request):
         reports_qs = reports_qs.filter(resident_id=resident_filter)
 
     if date_from:
-        documents_qs = documents_qs.filter(created_at__date__gte=date_from)
+        start_dt = timezone.make_aware(datetime.combine(date_from, time.min), tz)
+        documents_qs = documents_qs.filter(created_at__gte=start_dt)
+        reports_qs = reports_qs.filter(created_at__gte=start_dt)
         payments_qs = payments_qs.filter(payment_date__gte=date_from)
         expenses_qs = expenses_qs.filter(date_depense__gte=date_from)
-        reports_qs = reports_qs.filter(created_at__date__gte=date_from)
 
     if date_to:
-        documents_qs = documents_qs.filter(created_at__date__lte=date_to)
+        end_dt = timezone.make_aware(datetime.combine(date_to + timedelta(days=1), time.min), tz)
+        documents_qs = documents_qs.filter(created_at__lt=end_dt)
+        reports_qs = reports_qs.filter(created_at__lt=end_dt)
         payments_qs = payments_qs.filter(payment_date__lte=date_to)
         expenses_qs = expenses_qs.filter(date_depense__lte=date_to)
-        reports_qs = reports_qs.filter(created_at__date__lte=date_to)
 
     current_month = today.replace(day=1)
-    documents_this_month = documents_qs.filter(created_at__date__gte=current_month).count()
+    current_month_start = timezone.make_aware(datetime.combine(current_month, time.min), tz)
+    documents_this_month = documents_qs.filter(created_at__gte=current_month_start).count()
     payments_this_month = payments_qs.filter(payment_date__gte=current_month).aggregate(total=Sum("amount"))["total"] or 0
     expenses_this_month = expenses_qs.filter(date_depense__gte=current_month).aggregate(total=Sum("montant"))["total"] or 0
 
-    recent_residents_qs = User.objects.filter(role="RESIDENT", date_joined__date__gte=current_month)
+    recent_residents_qs = User.objects.filter(
+        role="RESIDENT", date_joined__gte=current_month_start
+    )
     if resident_filter.isdigit():
         recent_residents_qs = recent_residents_qs.filter(id=resident_filter)
     recent_residents = recent_residents_qs.count()
 
-    overdue_cutoff = today - timezone.timedelta(days=30)
+    overdue_cutoff = today - timedelta(days=30)
     overdue_count = documents_qs.filter(is_paid=False, date__lt=overdue_cutoff).count()
 
     unread_notifications = Notification.objects.filter(
@@ -228,7 +234,7 @@ def build_syndic_dashboard_context(request):
     monthly_trend = []
     for i in range(chart_months - 1, -1, -1):
         month_start = shift_month(today, i)
-        month_end = shift_month(today, i - 1) if i > 0 else (today + timezone.timedelta(days=1))
+        month_end = shift_month(today, i - 1) if i > 0 else (today + timedelta(days=1))
 
         month_payments = payments_qs.filter(
             payment_date__gte=month_start,
@@ -264,7 +270,7 @@ def build_syndic_dashboard_context(request):
         resident_user = resident_record["resident"]
         top_debtors.append(
             {
-                "id": resident_user.id,
+				"id": str(resident_user.id),
                 "name": resident_user.get_full_name() or resident_user.username,
                 "apartment": resident_user.apartment or "",
                 "balance": float(resident_record["balance"]),
