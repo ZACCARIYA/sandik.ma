@@ -12,6 +12,7 @@ urlpatterns = [
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
     path('profile/', views.UserProfileView.as_view(), name='user_profile'),
     path('settings/', views.SettingsView.as_view(), name='settings'),
+    path('email-check/', views.EmailCheckView.as_view(), name='email_check'),
     
     # Dashboards
     path('syndic-dashboard/', views.SyndicDashboardView.as_view(), name='syndic_dashboard'),

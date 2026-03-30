@@ -1680,7 +1680,12 @@ class CustomLoginView(TemplateView):
                 messages.success(request, f"Bienvenue, {user.username} !")
                 return redirect('finance:home')
             else:
-                messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
+                # Check if user exists but is inactive
+                inactive_user = User.objects.filter(username=username, is_active=False).first()
+                if inactive_user:
+                    messages.warning(request, "Votre compte n'est pas encore activé. Veuillez vérifier votre boîte de réception pour le lien de vérification.")
+                else:
+                    messages.error(request, "Nom d'utilisateur ou mot de passe incorrect.")
         else:
             messages.error(request, "Veuillez remplir tous les champs.")
         
@@ -1747,7 +1752,7 @@ class RegisterView(TemplateView):
             try:
                 user = form.save(commit=False)
                 user.role = 'RESIDENT'
-                user.is_active = True
+                user.is_active = False  # Account starts inactive
                 user.set_password(form.cleaned_data['password1'])
                 
                 # Validate before saving
@@ -1757,8 +1762,12 @@ class RegisterView(TemplateView):
                 # Create resident status
                 ResidentStatus.objects.create(resident=user)
                 
-                messages.success(request, f"Compte créé avec succès ! Vous pouvez maintenant vous connecter.")
-                return redirect('finance:login')
+                # Send verification email
+                from accounts.views import send_verification_email
+                send_verification_email(request, user)
+                
+                messages.success(request, f"Compte créé avec succès ! Un email de vérification vous a été envoyé.")
+                return redirect(reverse('finance:email_check') + f"?email={user.email}")
                 
             except ValidationError as e:
                 for field, errors in e.message_dict.items():
@@ -1802,6 +1811,16 @@ class RegisterView(TemplateView):
             
             context['form'] = UserRegistrationForm()
         
+        return context
+
+
+class EmailCheckView(TemplateView):
+    """Page shown after registration to prompt user to check their email."""
+    template_name = 'finance/email_check.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['email'] = self.request.GET.get('email', '')
         return context
 
 

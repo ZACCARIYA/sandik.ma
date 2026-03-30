@@ -1,0 +1,43 @@
+{% extends 'emails/base.html' %}
+
+{% block content %}
+<h2 class="greeting">Bonjour {{ user_name }} 👋</h2>
+
+<p class="intro-text">
+    Merci de vous être inscrit sur <strong>SyndicPro</strong>. Pour activer votre compte et accéder à votre espace
+    résident, veuillez confirmer votre adresse email.
+</p>
+
+<div class="cta-section">
+    <a href="{{ verify_url }}" class="cta-button" style="color: #ffffff;">
+        ✅ Vérifier mon adresse email
+    </a>
+</div>
+
+<div class="info-section">
+    <div class="info-item">
+        <span class="info-icon">⏳</span>
+        <span class="info-label">Expiration</span>
+        <span class="info-value">Ce lien est valide pendant <strong>3 jours</strong></span>
+    </div>
+    <div class="info-item">
+        <span class="info-icon">🔒</span>
+        <span class="info-label">Sécurité</span>
+        <span class="info-value">Ce lien est à usage unique et personnel</span>
+    </div>
+    <div class="info-item">
+        <span class="info-icon">👤</span>
+        <span class="info-label">Compte</span>
+        <span class="info-value">{{ user_email }}</span>
+    </div>
+</div>
+
+<p style="font-size: 14px; color: #6b7280; line-height: 1.7; margin-top: 32px;">
+    Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :<br>
+    <a href="{{ verify_url }}" style="color: #667eea; word-break: break-all;">{{ verify_url }}</a>
+</p>
+
+<p style="font-size: 13px; color: #9ca3af; margin-top: 24px;">
+    Si vous n'avez pas créé de compte sur SyndicPro, vous pouvez ignorer cet email en toute sécurité.
+</p>
+{% endblock %}
