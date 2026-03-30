@@ -1,2 +1,1 @@
-release: python manage.py migrate --noinput
-web: gunicorn syndic.wsgi --log-file -
+web: python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn syndic.wsgi --log-file -
