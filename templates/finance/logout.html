@@ -1,27 +1,216 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Déconnexion - Syndic{% endblock %}
+{% block title %}Déconnexion - SyndicPro{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow text-center">
-            <div class="card-body p-5">
-                <i class="fas fa-sign-out-alt fa-4x text-success mb-4"></i>
-                <h3 class="mb-3">Déconnexion réussie</h3>
-                <p class="text-muted mb-4">
-                    Vous avez été déconnecté avec succès du système de gestion du syndic.
-                </p>
-                <div class="d-grid gap-2">
-                    <a href="{% url 'finance:login' %}" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt me-1"></i>Se reconnecter
-                    </a>
-                    <a href="{% url 'finance:home' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-home me-1"></i>Retour à l'accueil
-                    </a>
-                </div>
+<section class="auth-logout-page">
+    <span class="auth-orb auth-orb-one" aria-hidden="true"></span>
+    <span class="auth-orb auth-orb-two" aria-hidden="true"></span>
+
+    <div class="container-fluid px-3 px-md-4">
+        <div class="row justify-content-center align-items-center auth-logout-grid">
+            <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+                <section class="auth-form-card text-center">
+                    <div class="auth-logout-icon-wrap">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <h2>Déconnexion réussie</h2>
+                    <p class="auth-logout-msg">
+                        Vous avez été déconnecté avec succès du système de gestion du syndic.
+                    </p>
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'finance:login' %}" class="btn auth-submit-btn w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Se reconnecter
+                        </a>
+                        <a href="{% url 'finance:home' %}" class="btn auth-outline-btn w-100">
+                            <i class="fas fa-home me-2"></i>Retour à l'accueil
+                        </a>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
-</div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-logout-page {
+        position: relative;
+        min-height: calc(100vh - var(--navbar-height, 60px));
+        display: flex;
+        align-items: center;
+        padding: 2.5rem 0 2rem;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 12% 15%, rgba(37, 99, 235, 0.20), transparent 36%),
+            radial-gradient(circle at 88% 0%, rgba(14, 165, 233, 0.22), transparent 34%),
+            linear-gradient(160deg, #f4f8ff 0%, #eef5ff 48%, #f8fbff 100%);
+    }
+
+    .auth-logout-grid {
+        position: relative;
+        z-index: 1;
+        min-height: calc(100vh - var(--navbar-height, 60px) - 4.5rem);
+    }
+
+    .auth-orb {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(1px);
+        pointer-events: none;
+    }
+
+    .auth-orb-one {
+        width: 280px;
+        height: 280px;
+        background: rgba(37, 99, 235, 0.18);
+        top: 5%;
+        left: -90px;
+    }
+
+    .auth-orb-two {
+        width: 220px;
+        height: 220px;
+        background: rgba(14, 165, 233, 0.16);
+        bottom: 4%;
+        right: -60px;
+    }
+
+    .auth-form-card {
+        border-radius: 24px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.10);
+        background: rgba(255, 255, 255, 0.94);
+        padding: 2.5rem 2rem;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .auth-form-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 24px 55px rgba(15, 23, 42, 0.13);
+    }
+
+    .auth-logout-icon-wrap {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.18) 100%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .auth-logout-icon-wrap i {
+        font-size: 2rem;
+        color: #059669;
+    }
+
+    .auth-form-card h2 {
+        margin: 0 0 0.5rem;
+        font-size: 1.65rem;
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .auth-logout-msg {
+        color: #64748b;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .auth-submit-btn {
+        height: 48px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 650;
+        font-size: 0.98rem;
+        background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%);
+        color: #fff;
+        box-shadow: 0 10px 22px rgba(29, 78, 216, 0.28);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 28px rgba(29, 78, 216, 0.33);
+        filter: brightness(1.02);
+        color: #fff;
+    }
+
+    .auth-outline-btn {
+        height: 48px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.98rem;
+        background: transparent;
+        color: #475569;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-outline-btn:hover {
+        border-color: #94a3b8;
+        background: rgba(241, 245, 249, 0.6);
+        color: #1e293b;
+        transform: translateY(-1px);
+    }
+
+    /* Dark mode */
+    [data-theme="dark"] .auth-logout-page {
+        background:
+            radial-gradient(circle at 12% 15%, rgba(37, 99, 235, 0.22), transparent 36%),
+            radial-gradient(circle at 88% 0%, rgba(14, 165, 233, 0.2), transparent 34%),
+            linear-gradient(170deg, #0b1220 0%, #0f172a 50%, #0b1220 100%);
+    }
+
+    [data-theme="dark"] .auth-form-card {
+        background: rgba(15, 23, 42, 0.9);
+        border-color: rgba(71, 85, 105, 0.5);
+    }
+
+    [data-theme="dark"] .auth-form-card h2 {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .auth-logout-msg {
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] .auth-outline-btn {
+        border-color: #475569;
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] .auth-outline-btn:hover {
+        border-color: #64748b;
+        background: rgba(30, 41, 59, 0.6);
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .auth-logout-icon-wrap {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.22) 100%);
+    }
+
+    @media (max-width: 575.98px) {
+        .auth-form-card {
+            padding: 1.5rem 1.25rem;
+            border-radius: 18px;
+        }
+
+        .auth-form-card h2 {
+            font-size: 1.45rem;
+        }
+    }
+</style>
 {% endblock %}
